@@ -1,8 +1,10 @@
 import { useAuthStore } from '@/shared/stores/authStore'
 import type { Role } from '@/shared/types/auth'
 
+const EMPTY_ROLES: Role[] = []
+
 export function useRole() {
-  const roles = useAuthStore((state) => state.user?.roles ?? [])
+  const roles = useAuthStore((state) => state.user?.roles ?? EMPTY_ROLES)
 
   return {
     roles,
