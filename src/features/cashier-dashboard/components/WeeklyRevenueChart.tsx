@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { DailyRevenueDto } from '@/shared/types/dashboard'
+import type { DailyRevenueDto } from '@/shared/types/cashier-dashboard'
 
 interface WeeklyRevenueChartProps {
   days: DailyRevenueDto[]

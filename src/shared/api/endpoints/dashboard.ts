@@ -1,5 +1,5 @@
 import { apiClient } from '@/shared/api/client'
-import type { CashierDashboardResponse, WeeklyRevenueResponse } from '@/shared/types/dashboard'
+import type { CashierDashboardResponse, WeeklyRevenueResponse } from '@/shared/types/cashier-dashboard'
 
 export function getCashierDashboard(locationId: string) {
   return apiClient

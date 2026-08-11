@@ -1,17 +1,17 @@
-import { useState, type FormEvent } from 'react'
-import { Plus } from 'lucide-react'
+import { useState } from 'react'
+import { ChevronDown } from 'lucide-react'
 import { toast } from 'sonner'
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAuthStore } from '@/shared/stores/authStore'
 import { CashierHeader } from '@/shared/components/CashierHeader'
 import { CashierSidebar } from '@/shared/components/CashierSidebar'
 import type { OrderItem, Product } from '../types'
-import { OrderItemsTable } from '../components/OrderItemsTable'
-import { ProductDropdown } from '../components/ProductDropdown'
-import { MOCK_PRODUCTS } from '../data/mockProducts'
-
+import { ProductCatalog } from '../components/ProductCatalog'
+import { SelectedItemsPanel } from '../components/SelectedItemsPanel'
+import { useProducts } from '../hooks/useProducts'
+import { useCategories } from '../hooks/useCategories'
+import { useCreateOrder } from '../hooks/useCreateOrder'
 
 const FORM_INPUT_CLASSNAME =
   'h-11 rounded-none border-zinc-200 bg-white text-zinc-900 placeholder:text-zinc-400 focus-visible:border-zinc-400 focus-visible:ring-zinc-200'
@@ -20,39 +20,37 @@ export function NewOrderPage() {
   const user = useAuthStore((state) => state.user)
   const logout = useAuthStore((state) => state.logout)
 
-  const locationName = user?.locationIds[0] ?? '—'
+  const locationId = user?.locationIds[0]
+  const locationName = locationId ?? '—'
+
+  const [categoryId, setCategoryId] = useState('')
+
+  const { data: categories = [] } = useCategories(locationId)
+  const { data: products = [], isLoading, isError } = useProducts(locationId, categoryId || undefined)
+  const createOrder = useCreateOrder()
 
   const [customerName, setCustomerName] = useState('')
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
-  const [quantity, setQuantity] = useState(1)
   const [items, setItems] = useState<OrderItem[]>([])
 
   const isValid = customerName.trim().length > 0 && items.length > 0
 
-  function handleAddItem() {
-    if (!selectedProduct || quantity < 1) return
-
+  function handleAddItem(product: Product) {
     setItems((current) => {
-      const existing = current.find((item) => item.id === selectedProduct.id)
+      const existing = current.find((item) => item.id === product.id)
       if (existing) {
         return current.map((item) =>
-          item.id === selectedProduct.id ? { ...item, quantity: item.quantity + quantity } : item,
+          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item,
         )
       }
-      return [...current, { ...selectedProduct, quantity }]
+      return [...current, { ...product, quantity: 1 }]
     })
-
-    setSelectedProduct(null)
-    setQuantity(1)
   }
 
   function handleRemoveItem(productId: string) {
     setItems((current) => current.filter((item) => item.id !== productId))
   }
 
-  function handleSubmit(event: FormEvent) {
-    event.preventDefault()
-
+  function handleSubmit() {
     if (!customerName.trim()) {
       toast.error('Müşteri adını giriniz.')
       return
@@ -61,12 +59,29 @@ export function NewOrderPage() {
       toast.error('En az bir ürün ekleyin.')
       return
     }
+    if (!locationId) {
+      toast.error('Şube bilgisi bulunamadı.')
+      return
+    }
 
-    toast.success(`${customerName} için sipariş oluşturuldu.`)
-    setCustomerName('')
-    setItems([])
-    setSelectedProduct(null)
-    setQuantity(1)
+    createOrder.mutate(
+      {
+        locationId,
+        customerName: customerName.trim(),
+        items: items.map((item) => ({ productId: item.id, quantity: item.quantity })),
+        requestedAs: 'CASHIER',
+      },
+      {
+        onSuccess: () => {
+          toast.success(`${customerName} için sipariş oluşturuldu.`)
+          setCustomerName('')
+          setItems([])
+        },
+        onError: () => {
+          toast.error('Sipariş oluşturulamadı. Lütfen tekrar deneyin.')
+        },
+      },
+    )
   }
 
   return (
@@ -81,9 +96,9 @@ export function NewOrderPage() {
       <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
         <CashierHeader title="Yeni Sipariş" locationName={locationName} />
 
-        <main className="flex flex-1 justify-center p-6">
-          <form onSubmit={handleSubmit} className="w-full max-w-2xl space-y-6">
-            <div className="space-y-1.5">
+        <main className="flex min-h-0 flex-1 flex-col gap-4 p-4">
+          <div className="flex items-end gap-3">
+            <div className="max-w-sm flex-1 space-y-1.5">
               <Label htmlFor="customerName" className="text-zinc-700">
                 Müşteri
               </Label>
@@ -96,45 +111,50 @@ export function NewOrderPage() {
               />
             </div>
 
-            <div className="space-y-1.5">
-              <Label className="text-zinc-700">Ürünler</Label>
-              <div className="flex items-center gap-2">
-                <ProductDropdown
-                  products={MOCK_PRODUCTS}
-                  selectedProduct={selectedProduct}
-                  onSelect={setSelectedProduct}
-                />
-
-                <Input
-                  type="number"
-                  min={1}
-                  value={quantity}
-                  onChange={(event) => setQuantity(Math.max(1, Number(event.target.value)))}
-                  className={`${FORM_INPUT_CLASSNAME} w-20 text-center`}
-                />
-
-                <button
-                  type="button"
-                  onClick={handleAddItem}
-                  disabled={!selectedProduct}
-                  aria-label="Ürünü sipariş listesine ekle"
-                  className="flex size-11 shrink-0 items-center justify-center bg-[#133458] text-white transition-colors hover:bg-[#0f2843] disabled:pointer-events-none disabled:opacity-40"
+            <div className="w-48 space-y-1.5">
+              <Label htmlFor="categoryFilter" className="text-zinc-700">
+                Kategori
+              </Label>
+              <div className="relative">
+                <select
+                  id="categoryFilter"
+                  value={categoryId}
+                  onChange={(event) => setCategoryId(event.target.value)}
+                  className={`${FORM_INPUT_CLASSNAME} w-full appearance-none border pr-9 pl-3 text-sm outline-none`}
                 >
-                  <Plus className="size-5" />
-                </button>
+                  <option value="">Tümü</option>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-zinc-400" />
               </div>
             </div>
+          </div>
 
-            <OrderItemsTable items={items} onRemove={handleRemoveItem} />
+          <div className="flex min-h-0 flex-1 gap-4">
+            {isLoading ? (
+              <div className="flex flex-1 items-center justify-center text-sm text-zinc-400">
+                Ürünler yükleniyor...
+              </div>
+            ) : isError ? (
+              <div className="flex flex-1 items-center justify-center text-sm text-red-500">
+                Ürünler yüklenemedi.
+              </div>
+            ) : (
+              <ProductCatalog products={products} onAdd={handleAddItem} />
+            )}
 
-            <Button
-              type="submit"
-              disabled={!isValid}
-              className="h-12 w-full rounded-none bg-[#133458] text-base text-white hover:bg-[#0f2843]"
-            >
-              Sipariş Oluştur
-            </Button>
-          </form>
+            <SelectedItemsPanel
+              items={items}
+              onRemove={handleRemoveItem}
+              onSubmit={handleSubmit}
+              isSubmitDisabled={!isValid}
+              isSubmitting={createOrder.isPending}
+            />
+          </div>
         </main>
       </div>
     </div>

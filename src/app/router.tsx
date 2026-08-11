@@ -8,8 +8,8 @@ import { KioskLayout } from '@/app/layout/KioskLayout'
 import { LoginPage } from '@/features/auth/pages/LoginPage'
 import { ChangePasswordPage } from '@/features/auth/pages/ChangePasswordPage'
 import { CashierHomePage } from '@/features/cashier-dashboard/pages/CashierHomePage'
-import { NewOrderPage } from '@/features/pos/pages/NewOrderPage'
 import type { Role } from '@/shared/types/auth'
+import { NewOrderPage } from '@/features/cashier-pos/pages/NewOrderPage'
 
 const EMPTY_ROLES: Role[] = []
 
