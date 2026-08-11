@@ -69,9 +69,9 @@ apiClient.interceptors.response.use(
     isRefreshing = true
     try {
       const { data } = await apiClient.post<RefreshResponse>('/api/auth/refresh')
-      useAuthStore.getState().setSession(data.accessToken, data.user)
-      resolveQueue(data.accessToken)
-      originalRequest.headers.set('Authorization', `Bearer ${data.accessToken}`)
+      useAuthStore.getState().setSession(data.token, data.user)
+      resolveQueue(data.token)
+      originalRequest.headers.set('Authorization', `Bearer ${data.token}`)
       return apiClient(originalRequest)
     } catch (refreshError) {
       resolveQueue(null)

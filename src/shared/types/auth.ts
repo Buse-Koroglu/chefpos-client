@@ -25,11 +25,20 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
-  accessToken: string
+  token: string
+  expiresAt: string
   user: UserResponseDto
 }
 
-export interface RefreshResponse {
-  accessToken: string
-  user: UserResponseDto
+export type RefreshResponse = LoginResponse
+
+export interface ChangePasswordRequest {
+  newPassword: string
+}
+
+export interface ApiProblemDetails {
+  status: number
+  title: string
+  detail: string
+  instance?: string
 }

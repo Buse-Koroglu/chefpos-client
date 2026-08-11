@@ -12,7 +12,7 @@ function App() {
   useEffect(() => {
     authApi
       .refresh()
-      .then(({ accessToken, user }) => setSession(accessToken, user))
+      .then(({ token, user }) => setSession(token, user))
       .catch(() => {
         // Geçerli bir refresh cookie yok — kullanıcı /login'e düşecek.
       })

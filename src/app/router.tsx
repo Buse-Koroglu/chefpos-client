@@ -1,14 +1,32 @@
 import type { ReactNode } from 'react'
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { useAuthStore } from '@/shared/stores/authStore'
 import { useRole } from '@/shared/hooks/useRole'
-import { findRouteConfig } from '@/routes-config/permissions'
-import {  AppLayout } from '@/app/layout/AppLayout'
+import { findRouteConfig, getDefaultRouteForRoles } from '@/routes-config/permissions'
+import { AppLayout } from '@/app/layout/AppLayout'
 import { KioskLayout } from '@/app/layout/KioskLayout'
+import { LoginPage } from '@/features/auth/pages/LoginPage'
+import { ChangePasswordPage } from '@/features/auth/pages/ChangePasswordPage'
+import type { Role } from '@/shared/types/auth'
+
+const EMPTY_ROLES: Role[] = []
 
 function RequireAuth({ children }: { children: ReactNode }) {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
+  const isFirstLogin = useAuthStore((state) => state.isFirstLogin)
+  const location = useLocation()
+
   if (!isAuthenticated) return <Navigate to="/login" replace />
+  if (isFirstLogin && location.pathname !== '/app/change-password') {
+    return <Navigate to="/app/change-password" replace />
+  }
+  return <>{children}</>
+}
+
+function RequireGuest({ children }: { children: ReactNode }) {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
+  const roles = useAuthStore((state) => state.user?.roles ?? EMPTY_ROLES)
+  if (isAuthenticated) return <Navigate to={getDefaultRouteForRoles(roles)} replace />
   return <>{children}</>
 }
 
@@ -29,7 +47,22 @@ export function AppRouter() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/login" element={<Placeholder label="Login — Faz 1" />} />
+        <Route
+          path="/login"
+          element={
+            <RequireGuest>
+              <LoginPage />
+            </RequireGuest>
+          }
+        />
+        <Route
+          path="/app/change-password"
+          element={
+            <RequireAuth>
+              <ChangePasswordPage />
+            </RequireAuth>
+          }
+        />
         <Route path="/403" element={<Placeholder label="403 — Bu sayfaya erişim yetkiniz yok" />} />
         <Route path="*" element={<Placeholder label="404 — Sayfa bulunamadı" />} />
 
@@ -118,10 +151,6 @@ export function AppRouter() {
                 <Placeholder label="Şubeler — Faz 4" />
               </RequireRole>
             }
-          />
-          <Route
-            path="change-password"
-            element={<Placeholder label="Şifre Değiştir — backend endpoint bekleniyor" />}
           />
         </Route>
       </Routes>

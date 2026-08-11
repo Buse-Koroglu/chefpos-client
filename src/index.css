@@ -117,6 +117,16 @@
     --sidebar-ring: oklch(0.556 0 0);
 }
 
+.theme-auth {
+    --primary: oklch(0.32 0.08 258);
+    --primary-foreground: oklch(0.985 0 0);
+    --ring: oklch(0.32 0.08 258 / 50%);
+    --radius: 0.3rem;
+    --auth-brand: oklch(0.22 0.06 258);
+    --auth-brand-foreground: oklch(0.94 0.01 258);
+    --auth-brand-accent: oklch(0.55 0.1 250);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
