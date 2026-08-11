@@ -32,6 +32,18 @@ export interface LoginResponse {
 
 export type RefreshResponse = LoginResponse
 
+export interface RawUserResponseDto extends Omit<UserResponseDto, 'roles'> {
+  roles: number[]
+}
+
+export interface RawLoginResponse extends Omit<LoginResponse, 'user'> {
+  user: RawUserResponseDto
+}
+
+export function mapUserResponse(raw: RawUserResponseDto): UserResponseDto {
+  return { ...raw, roles: raw.roles.map((code) => ROLES[code]) }
+}
+
 export interface ChangePasswordRequest {
   newPassword: string
 }

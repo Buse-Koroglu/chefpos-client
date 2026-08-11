@@ -9,6 +9,7 @@ export interface RouteConfig {
 
 export const APP_ROUTES: RouteConfig[] = [
   { path: '/app/dashboard', label: 'Panel', allowedRoles: ['ADMIN'], showInSidebar: true },
+  { path: '/app/home', label: 'Ana Sayfa', allowedRoles: ['CASHIER'], showInSidebar: false },
   { path: '/app/pos', label: 'Sipariş Al', allowedRoles: ['CASHIER', 'WAITER'], showInSidebar: true },
   { path: '/app/orders/:id', label: 'Sipariş Detay', allowedRoles: ['CASHIER', 'WAITER', 'ADMIN'], showInSidebar: false },
   { path: '/app/products', label: 'Ürünler', allowedRoles: ['ADMIN'], showInSidebar: true },
@@ -26,7 +27,7 @@ export function findRouteConfig(path: string): RouteConfig | undefined {
 
 const DEFAULT_ROUTE_BY_ROLE: Array<{ role: Role; path: string }> = [
   { role: 'ADMIN', path: '/app/dashboard' },
-  { role: 'CASHIER', path: '/app/pos' },
+  { role: 'CASHIER', path: '/app/home' },
   { role: 'WAITER', path: '/app/pos' },
   { role: 'STOCK_MANAGER', path: '/app/stock-requests' },
   { role: 'INVENTORY_STAFF', path: '/app/stock-requests' },

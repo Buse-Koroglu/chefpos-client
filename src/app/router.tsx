@@ -7,6 +7,8 @@ import { AppLayout } from '@/app/layout/AppLayout'
 import { KioskLayout } from '@/app/layout/KioskLayout'
 import { LoginPage } from '@/features/auth/pages/LoginPage'
 import { ChangePasswordPage } from '@/features/auth/pages/ChangePasswordPage'
+import { CashierHomePage } from '@/features/cashier-dashboard/pages/CashierHomePage'
+import { NewOrderPage } from '@/features/pos/pages/NewOrderPage'
 import type { Role } from '@/shared/types/auth'
 
 const EMPTY_ROLES: Role[] = []
@@ -63,6 +65,27 @@ export function AppRouter() {
             </RequireAuth>
           }
         />
+        <Route
+          path="/app/home"
+          element={
+            <RequireAuth>
+              <RequireRole path="/app/home">
+                <CashierHomePage />
+              </RequireRole>
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/app/pos"
+          element={
+            <RequireAuth>
+              <RequireRole path="/app/pos">
+                <NewOrderPage />
+              </RequireRole>
+            </RequireAuth>
+          }
+        />
+
         <Route path="/403" element={<Placeholder label="403 — Bu sayfaya erişim yetkiniz yok" />} />
         <Route path="*" element={<Placeholder label="404 — Sayfa bulunamadı" />} />
 
@@ -85,14 +108,6 @@ export function AppRouter() {
             element={
               <RequireRole path="/app/dashboard">
                 <Placeholder label="Dashboard — Faz 6" />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="pos"
-            element={
-              <RequireRole path="/app/pos">
-                <Placeholder label="POS — Faz 1" />
               </RequireRole>
             }
           />
