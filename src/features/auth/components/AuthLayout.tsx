@@ -26,7 +26,6 @@ export function AuthLayout({ title, description, children }: AuthLayoutProps) {
         © {new Date().getFullYear()} ChefPos
       </div>
 
-      {/* Keskin köşeli (rounded-none), koyu transparan kart */}
       <div className="relative z-10 w-full max-w-md rounded-none border border-white/20 bg-black/50 p-8 shadow-2xl backdrop-blur-xl">
         <div className="mb-6 space-y-1">
           <h2 className="text-2xl font-semibold text-white">{title}</h2>

@@ -1,7 +1,8 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios'
 import { toast } from 'sonner'
 import { useAuthStore } from '@/shared/stores/authStore'
-import type { RefreshResponse } from '@/shared/types/auth'
+import { mapUserResponse } from '@/shared/types/auth'
+import type { RawLoginResponse } from '@/shared/types/auth'
 
 const AUTH_PATHS = ['/api/auth/login', '/api/auth/refresh', '/api/auth/logout']
 
@@ -68,8 +69,8 @@ apiClient.interceptors.response.use(
 
     isRefreshing = true
     try {
-      const { data } = await apiClient.post<RefreshResponse>('/api/auth/refresh')
-      useAuthStore.getState().setSession(data.token, data.user)
+      const { data } = await apiClient.post<RawLoginResponse>('/api/auth/refresh')
+      useAuthStore.getState().setSession(data.token, mapUserResponse(data.user))
       resolveQueue(data.token)
       originalRequest.headers.set('Authorization', `Bearer ${data.token}`)
       return apiClient(originalRequest)
