@@ -43,51 +43,52 @@ export function LoginPage() {
   return (
     <AuthLayout title="Giriş yap" description="Devam etmek için personel bilgilerinizi girin.">
       <form className="space-y-4" onSubmit={handleSubmit}>
-        <div className="space-y-1.5">
-          <Label htmlFor="personalId">Personel No</Label>
-          <Input
-            id="personalId"
-            name="personalId"
-            inputMode="numeric"
-            autoComplete="username"
-            maxLength={11}
-            placeholder="11 haneli personel numaranız"
-            value={personalId}
-            onChange={(event) => setPersonalId(event.target.value.replace(/\D/g, ''))}
-            required
-          />
-        </div>
+  <div className="space-y-1.5">
+    <Label htmlFor="personalId" className="text-zinc-200">Personel No</Label>
+    <Input
+      id="personalId"
+      name="personalId"
+      inputMode="numeric"
+      autoComplete="username"
+      maxLength={11}
+      placeholder="11 haneli personel numaranız"
+      value={personalId}
+      onChange={(event) => setPersonalId(event.target.value.replace(/\D/g, ''))}
+      className="rounded-none border-white/20 bg-black/30 text-white placeholder:text-zinc-400 focus-visible:ring-white/30"
+      required
+    />
+  </div>
 
-        <div className="space-y-1.5">
-          <Label htmlFor="password">Şifre</Label>
-          <div className="relative">
-            <Input
-              id="password"
-              name="password"
-              type={showPassword ? 'text' : 'password'}
-              autoComplete="current-password"
-              placeholder="Şifreniz"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              className="pr-9"
-              required
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword((value) => !value)}
-              className="absolute inset-y-0 right-0 flex w-9 items-center justify-center text-muted-foreground hover:text-foreground"
-              tabIndex={-1}
-            >
-              {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-            </button>
-          </div>
-        </div>
+  <div className="space-y-1.5">
+    <Label htmlFor="password" className="text-zinc-200">Şifre</Label>
+    <div className="relative">
+      <Input
+        id="password"
+        name="password"
+        type={showPassword ? 'text' : 'password'}
+        autoComplete="current-password"
+        placeholder="Şifreniz"
+        value={password}
+        onChange={(event) => setPassword(event.target.value)}
+        className="rounded-none border-white/20 bg-black/30 text-white pr-9 placeholder:text-zinc-400 focus-visible:ring-white/30"
+        required
+      />
+      <button
+        type="button"
+        onClick={() => setShowPassword((value) => !value)}
+        className="absolute inset-y-0 right-1 my-auto flex h-7 w-7 items-center justify-center rounded-none bg-black/40 text-white/70 transition-colors hover:bg-black/60 hover:text-white"
+        tabIndex={-1}
+      >
+        {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+      </button>
+    </div>
+  </div>
 
-        <Button type="submit" className="w-full" disabled={!isValid || isSubmitting}>
-          {isSubmitting ? <Loader2 className="size-4 animate-spin" /> : null}
-          Giriş yap
-        </Button>
-      </form>
+  <Button type="submit" className="w-full rounded-none" disabled={!isValid || isSubmitting}>
+    {isSubmitting ? <Loader2 className="size-4 animate-spin" /> : null}
+    Giriş yap
+  </Button>
+</form>
     </AuthLayout>
   )
 }
