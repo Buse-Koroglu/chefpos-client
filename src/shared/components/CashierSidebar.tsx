@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react'
-import { ChefHat, History, Home, ListOrdered, LogOut, ShoppingCart } from 'lucide-react'
+import { History, Home, ListOrdered, LogOut, ShoppingCart } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 
@@ -12,8 +12,8 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { label: 'Ana Sayfa', icon: Home, to: '/app/home' },
   { label: 'Yeni Sipariş', icon: ShoppingCart, to: '/app/pos' },
-  { label: 'Bekleyen Siparişler', icon: ListOrdered },
-  { label: 'Geçmiş Siparişler', icon: History },
+  { label: 'Bekleyen Siparişler', icon: ListOrdered, to: '/app/pending-orders' },
+  { label: 'Geçmiş Siparişler', icon: History, to: '/app/order-history' },
 ]
 
 interface CashierSidebarProps {
@@ -27,7 +27,7 @@ export function CashierSidebar({ locationName, userName, userRole, onLogout }: C
   return (
     <aside className="flex h-screen w-64 shrink-0 flex-col border-r border-zinc-200 bg-zinc-100">
       <div className="flex items-center gap-2 border-b border-zinc-200 px-5 py-5">
-        <ChefHat className="size-5 text-zinc-900" />
+        <img src="/logo.png" alt="ChefPos" className="size-8 shrink-0 object-contain" />
         <span className="text-base font-semibold tracking-tight text-zinc-900">ChefPos</span>
       </div>
 

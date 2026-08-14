@@ -50,7 +50,7 @@ export function WeeklyRevenueChart({ days, isLoading, isError }: WeeklyRevenueCh
   const hovered = entries.find((entry) => entry.date === hoveredDay)
 
   return (
-    <div className="flex h-full flex-col border border-zinc-200 bg-white p-5">
+    <div className="flex h-full flex-col border-2 border-zinc-300 bg-white p-5">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-semibold text-zinc-700">Haftalık Ciro Grafiği</h2>
         <span className="min-w-24 text-right text-sm tabular-nums text-zinc-500">

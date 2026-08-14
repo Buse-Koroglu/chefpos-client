@@ -14,7 +14,6 @@ function App() {
       .refresh()
       .then(({ token, user }) => setSession(token, user))
       .catch(() => {
-        // Geçerli bir refresh cookie yok — kullanıcı /login'e düşecek.
       })
       .finally(() => setIsBootstrapping(false))
   }, [setSession])

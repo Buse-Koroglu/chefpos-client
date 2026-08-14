@@ -10,6 +10,8 @@ import { ChangePasswordPage } from '@/features/auth/pages/ChangePasswordPage'
 import { CashierHomePage } from '@/features/cashier-dashboard/pages/CashierHomePage'
 import type { Role } from '@/shared/types/auth'
 import { NewOrderPage } from '@/features/cashier-pos/pages/NewOrderPage'
+import { PendingOrdersPage } from '@/features/cashier-pending-orders/pages/PendingOrdersPage'
+import { PastOrdersPage } from '@/features/cashier-past-orders/pages/PastOrdersPage'
 
 const EMPTY_ROLES: Role[] = []
 
@@ -85,6 +87,26 @@ export function AppRouter() {
             </RequireAuth>
           }
         />
+        <Route
+          path="/app/pending-orders"
+          element={
+            <RequireAuth>
+              <RequireRole path="/app/pending-orders">
+                <PendingOrdersPage />
+              </RequireRole>
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/app/order-history"
+          element={
+            <RequireAuth>
+              <RequireRole path="/app/past-orders">
+                <PastOrdersPage />
+              </RequireRole>
+            </RequireAuth>
+          }
+        />
 
         <Route path="/403" element={<Placeholder label="403 — Bu sayfaya erişim yetkiniz yok" />} />
         <Route path="*" element={<Placeholder label="404 — Sayfa bulunamadı" />} />
@@ -116,6 +138,14 @@ export function AppRouter() {
             element={
               <RequireRole path="/app/orders/:id">
                 <Placeholder label="Sipariş Detay — Faz 1" />
+              </RequireRole>
+            }
+          />
+          <Route
+            path="kitchen-orders"
+            element={
+              <RequireRole path="/app/kitchen-orders">
+                <Placeholder label="Mutfak Siparişleri — Faz 1" />
               </RequireRole>
             }
           />

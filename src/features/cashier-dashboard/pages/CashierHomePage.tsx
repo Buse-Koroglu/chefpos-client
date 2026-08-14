@@ -1,7 +1,9 @@
 import { Clock3, Flame, ListOrdered, ReceiptTurkishLira, ShoppingCart } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/shared/stores/authStore'
 import { CashierHeader } from '@/shared/components/CashierHeader'
 import { CashierSidebar } from '@/shared/components/CashierSidebar'
+import { usePendingOrdersCount } from '@/shared/hooks/usePendingOrdersCount'
 import { DashInfoCard } from '@/features/cashier-dashboard/components/DashInfoCard'
 import { DashNavigationCard } from '@/features/cashier-dashboard/components/DashNavigationCard'
 import { WeeklyRevenueChart } from '@/features/cashier-dashboard/components/WeeklyRevenueChart'
@@ -16,6 +18,7 @@ const currencyFormatter = new Intl.NumberFormat('tr-TR', {
 export function CashierHomePage() {
   const user = useAuthStore((state) => state.user)
   const logout = useAuthStore((state) => state.logout)
+  const navigate = useNavigate()
 
   const locationId = user?.locationIds[0]
   const locationName = locationId ?? '—'
@@ -26,8 +29,12 @@ export function CashierHomePage() {
     isLoading: isWeeklyRevenueLoading,
     isError: isWeeklyRevenueError,
   } = useWeeklyRevenue(locationId)
+  const { total: pendingOrdersCount, isLoading: isPendingOrdersCountLoading } = usePendingOrdersCount(
+    locationId,
+    'PREPARING',
+  )
 
-  const pendingOrdersValue = isLoading ? '…' : isError ? '—' : String(dashboard?.pendingOrdersCount ?? 0)
+  const pendingOrdersValue = isPendingOrdersCountLoading ? '…' : String(pendingOrdersCount)
   const todayRevenueValue = isLoading
     ? '…'
     : isError
@@ -58,12 +65,14 @@ export function CashierHomePage() {
               description="Bekleyen ve geçmiş siparişleri incele"
               actionLabel="Siparişleri Gör"
               icon={ListOrdered}
+              onClick={() => navigate('/app/pending-orders')}
             />
             <DashNavigationCard
               title="Yeni Sipariş"
               description="Masaya veya paket için sipariş oluştur"
               actionLabel="Yeni Sipariş Al"
               icon={ShoppingCart}
+              onClick={() => navigate('/app/pos')}
             />
           </div>
 

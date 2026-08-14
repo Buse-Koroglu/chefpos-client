@@ -11,9 +11,12 @@ export const APP_ROUTES: RouteConfig[] = [
   { path: '/app/dashboard', label: 'Panel', allowedRoles: ['ADMIN'], showInSidebar: true },
   { path: '/app/home', label: 'Ana Sayfa', allowedRoles: ['CASHIER'], showInSidebar: false },
   { path: '/app/pos', label: 'Sipariş Al', allowedRoles: ['CASHIER', 'WAITER'], showInSidebar: true },
+  { path: '/app/pending-orders', label: 'Bekleyen Siparişler', allowedRoles: ['CASHIER', 'WAITER'], showInSidebar: true },
+  { path: '/app/past-orders', label: 'Geçmiş Siparişler', allowedRoles: ['CASHIER', 'WAITER'], showInSidebar: true },
   { path: '/app/orders/:id', label: 'Sipariş Detay', allowedRoles: ['CASHIER', 'WAITER', 'ADMIN'], showInSidebar: false },
   { path: '/app/products', label: 'Ürünler', allowedRoles: ['ADMIN'], showInSidebar: true },
   { path: '/app/categories', label: 'Kategoriler', allowedRoles: ['ADMIN'], showInSidebar: true },
+  { path: '/app/kitchen-orders', label: 'Mutfak Siparişleri', allowedRoles: ['ADMIN', 'KITCHEN'], showInSidebar: true },
   { path: '/app/ingredients', label: 'Hammaddeler', allowedRoles: ['ADMIN', 'STOCK_MANAGER', 'INVENTORY_STAFF'], showInSidebar: true },
   { path: '/app/stock-requests', label: 'Stok Talepleri', allowedRoles: ['ADMIN', 'STOCK_MANAGER', 'INVENTORY_STAFF'], showInSidebar: true },
   { path: '/app/users', label: 'Kullanıcılar', allowedRoles: ['ADMIN'], showInSidebar: true },
@@ -31,6 +34,7 @@ const DEFAULT_ROUTE_BY_ROLE: Array<{ role: Role; path: string }> = [
   { role: 'WAITER', path: '/app/pos' },
   { role: 'STOCK_MANAGER', path: '/app/stock-requests' },
   { role: 'INVENTORY_STAFF', path: '/app/stock-requests' },
+  { role: 'KITCHEN', path: '/app/kitchen-orders' },
 ]
 
 export function getDefaultRouteForRoles(roles: Role[]): string {
