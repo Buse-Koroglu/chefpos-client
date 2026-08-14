@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react'
-import { ChefHat } from 'lucide-react'
 
 interface AuthLayoutProps {
   title: string
@@ -15,10 +14,10 @@ export function AuthLayout({ title, description, children }: AuthLayoutProps) {
       />
       
       <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/40" />
+      <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-black/40" />
 
       <div className="absolute left-6 top-6 flex items-center gap-2 text-sm font-medium tracking-wide text-white drop-shadow-md md:left-10 md:top-10">
-        <ChefHat className="size-5" />
+        <img src="/logo.png" alt="ChefPos" className="size-10 shrink-0 object-contain" />
         ChefPos
       </div>
 

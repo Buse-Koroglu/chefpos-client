@@ -4,6 +4,7 @@ export const ROLES = [
   'WAITER',
   'STOCK_MANAGER',
   'INVENTORY_STAFF',
+  'KITCHEN'
 ] as const
 
 export type Role = (typeof ROLES)[number]
