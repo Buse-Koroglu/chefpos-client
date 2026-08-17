@@ -8,6 +8,8 @@ import { KioskLayout } from '@/app/layout/KioskLayout'
 import { LoginPage } from '@/features/auth/pages/LoginPage'
 import { ChangePasswordPage } from '@/features/auth/pages/ChangePasswordPage'
 import { CashierHomePage } from '@/features/cashier-dashboard/pages/CashierHomePage'
+import { AdminHomePage } from '@/features/admin-dashboard/pages/AdminHomePage'
+import { StaffListPage } from '@/features/admin-staff/pages/StaffListPage'
 import type { Role } from '@/shared/types/auth'
 import { NewOrderPage } from '@/features/cashier-pos/pages/NewOrderPage'
 import { PendingOrdersPage } from '@/features/cashier-pending-orders/pages/PendingOrdersPage'
@@ -78,6 +80,26 @@ export function AppRouter() {
           }
         />
         <Route
+          path="/app/dashboard"
+          element={
+            <RequireAuth>
+              <RequireRole path="/app/dashboard">
+                <AdminHomePage />
+              </RequireRole>
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/app/users"
+          element={
+            <RequireAuth>
+              <RequireRole path="/app/users">
+                <StaffListPage />
+              </RequireRole>
+            </RequireAuth>
+          }
+        />
+        <Route
           path="/app/pos"
           element={
             <RequireAuth>
@@ -124,15 +146,6 @@ export function AppRouter() {
           }
         >
           <Route index element={<Navigate to="dashboard" replace />} />
-
-          <Route
-            path="dashboard"
-            element={
-              <RequireRole path="/app/dashboard">
-                <Placeholder label="Dashboard — Faz 6" />
-              </RequireRole>
-            }
-          />
           <Route
             path="orders/:id"
             element={
@@ -178,14 +191,6 @@ export function AppRouter() {
             element={
               <RequireRole path="/app/stock-requests">
                 <Placeholder label="Stok Talepleri — Faz 3" />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="users"
-            element={
-              <RequireRole path="/app/users">
-                <Placeholder label="Kullanıcılar — Faz 4" />
               </RequireRole>
             }
           />
