@@ -1,0 +1,2 @@
+export const CATEGORIES_PAGE_SIZE = 20
+export const CATEGORIES_SEARCH_DEBOUNCE_MS = 400

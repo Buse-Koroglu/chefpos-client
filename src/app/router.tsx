@@ -10,6 +10,9 @@ import { ChangePasswordPage } from '@/features/auth/pages/ChangePasswordPage'
 import { CashierHomePage } from '@/features/cashier-dashboard/pages/CashierHomePage'
 import { AdminHomePage } from '@/features/admin-dashboard/pages/AdminHomePage'
 import { StaffListPage } from '@/features/admin-staff/pages/StaffListPage'
+import { LocationsListPage } from '@/features/admin-locations/pages/LocationsListPage'
+import { CategoriesListPage } from '@/features/admin-categories/pages/CategoriesListPage'
+import { IngredientsListPage } from '@/features/admin-ingredients/pages/IngredientsListPage'
 import type { Role } from '@/shared/types/auth'
 import { NewOrderPage } from '@/features/cashier-pos/pages/NewOrderPage'
 import { PendingOrdersPage } from '@/features/cashier-pending-orders/pages/PendingOrdersPage'
@@ -100,6 +103,36 @@ export function AppRouter() {
           }
         />
         <Route
+          path="/app/locations"
+          element={
+            <RequireAuth>
+              <RequireRole path="/app/locations">
+                <LocationsListPage />
+              </RequireRole>
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/app/categories"
+          element={
+            <RequireAuth>
+              <RequireRole path="/app/categories">
+                <CategoriesListPage />
+              </RequireRole>
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/app/ingredients"
+          element={
+            <RequireAuth>
+              <RequireRole path="/app/ingredients">
+                <IngredientsListPage />
+              </RequireRole>
+            </RequireAuth>
+          }
+        />
+        <Route
           path="/app/pos"
           element={
             <RequireAuth>
@@ -171,34 +204,10 @@ export function AppRouter() {
             }
           />
           <Route
-            path="categories"
-            element={
-              <RequireRole path="/app/categories">
-                <Placeholder label="Kategoriler — Faz 2" />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="ingredients"
-            element={
-              <RequireRole path="/app/ingredients">
-                <Placeholder label="Hammaddeler — Faz 3" />
-              </RequireRole>
-            }
-          />
-          <Route
             path="stock-requests"
             element={
               <RequireRole path="/app/stock-requests">
                 <Placeholder label="Stok Talepleri — Faz 3" />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="locations"
-            element={
-              <RequireRole path="/app/locations">
-                <Placeholder label="Şubeler — Faz 4" />
               </RequireRole>
             }
           />

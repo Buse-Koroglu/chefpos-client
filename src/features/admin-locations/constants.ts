@@ -1,0 +1,2 @@
+export const LOCATIONS_PAGE_SIZE = 20
+export const LOCATIONS_SEARCH_DEBOUNCE_MS = 400

@@ -196,7 +196,7 @@ function StaffFormStep({ locations, isSubmitting, submitError, onCancel, onSubmi
         </Button>
         <Button
           type="button"
-          className="h-11 flex-1 rounded-none bg-zinc-900 text-sm text-white hover:bg-zinc-800"
+          className="h-11 flex-1 rounded-none bg-[#133458] text-sm text-white hover:bg-[#0f2843]"
           onClick={handleSubmit}
           disabled={isSubmitting}
         >
