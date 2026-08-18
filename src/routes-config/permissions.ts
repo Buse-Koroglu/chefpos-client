@@ -16,6 +16,7 @@ export const APP_ROUTES: RouteConfig[] = [
   { path: '/app/orders/:id', label: 'Sipariş Detay', allowedRoles: ['CASHIER', 'WAITER', 'ADMIN'], showInSidebar: false },
   { path: '/app/waiter-orders', label: 'Sipariş Al', allowedRoles: ['WAITER'], showInSidebar: true },
   { path: '/app/products', label: 'Ürünler', allowedRoles: ['ADMIN'], showInSidebar: true },
+  { path: '/app/tables', label: 'Masalar', allowedRoles: ['ADMIN'], showInSidebar: true },
   { path: '/app/categories', label: 'Kategoriler', allowedRoles: ['ADMIN'], showInSidebar: true },
   { path: '/app/kitchen-orders', label: 'Mutfak Siparişleri', allowedRoles: ['ADMIN', 'KITCHEN'], showInSidebar: true },
   { path: '/app/ingredients', label: 'Hammaddeler', allowedRoles: ['ADMIN', 'STOCK_MANAGER', 'INVENTORY_STAFF'], showInSidebar: true },
