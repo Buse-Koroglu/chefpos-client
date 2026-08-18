@@ -2,7 +2,8 @@ import { useState } from 'react'
 import axios from 'axios'
 import { RefreshCw, Search } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { useAuthStore } from '@/shared/stores/authStore'
+import { useLocationStore } from '@/shared/stores/locationStore'
+import { useLocations } from '@/shared/hooks/useLocations'
 import { CashierHeader } from '@/shared/components/CashierHeader'
 import { CashierSidebar } from '@/shared/components/CashierSidebar'
 import { Pagination } from '@/shared/components/Pagination'
@@ -28,11 +29,9 @@ function getErrorMessage(error: unknown): string {
 }
 
 export function PastOrdersPage() {
-  const user = useAuthStore((state) => state.user)
-  const logout = useAuthStore((state) => state.logout)
-
-  const locationId = user?.locationIds[0]
-  const locationName = locationId ?? '—'
+  const locationId = useLocationStore((state) => state.selectedLocationId) ?? undefined
+  const { data: locations = [] } = useLocations()
+  const locationName = locations.find((location) => location.id === locationId)?.name ?? '—'
 
   const [filter, setFilter] = useState<OrderHistoryFilter>('PAID')
   const [pageNumber, setPageNumber] = useState(1)
@@ -61,12 +60,7 @@ export function PastOrdersPage() {
 
   return (
     <div className="flex h-screen bg-zinc-50">
-      <CashierSidebar
-        locationName={locationName}
-        userName={`${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim()}
-        userRole="Kasiyer"
-        onLogout={logout}
-      />
+      <CashierSidebar />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
         <CashierHeader title="Geçmiş Siparişler" locationName={locationName} />

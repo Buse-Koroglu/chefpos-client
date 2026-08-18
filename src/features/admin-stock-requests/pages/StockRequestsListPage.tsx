@@ -1,11 +1,12 @@
 import { useMemo, useState } from 'react'
 import axios from 'axios'
 import { useAuthStore } from '@/shared/stores/authStore'
+import { useActiveRoleStore } from '@/shared/stores/activeRoleStore'
+import { useLocationStore } from '@/shared/stores/locationStore'
 import { useLocations } from '@/shared/hooks/useLocations'
 import { useDebouncedValue } from '@/shared/hooks/useDebouncedValue'
 import { AdminSidebar } from '@/shared/components/AdminSidebar'
 import { AdminHeader } from '@/shared/components/AdminHeader'
-import { ROLE_LABELS } from '@/features/admin-staff/constants'
 import { StockRequestsSearchInput } from '@/features/admin-stock-requests/components/StockRequestsSearchInput'
 import { StockRequestsFiltersBar } from '@/features/admin-stock-requests/components/StockRequestsFiltersBar'
 import { StockRequestsTable } from '@/features/admin-stock-requests/components/StockRequestsTable'
@@ -27,7 +28,12 @@ function getStockRequestsErrorMessage(error: unknown): string {
 
 export function StockRequestsListPage() {
   const user = useAuthStore((state) => state.user)
-  const logout = useAuthStore((state) => state.logout)
+  const activeRole = useActiveRoleStore((state) => state.activeRole)
+  const sidebarLocationId = useLocationStore((state) => state.selectedLocationId)
+
+  const roles = user?.roles ?? []
+  const currentRole = activeRole && roles.includes(activeRole) ? activeRole : roles[0]
+  const isAdminView = !currentRole || currentRole === 'ADMIN'
 
   const [searchInput, setSearchInput] = useState('')
   const [locationId, setLocationId] = useState('ALL')
@@ -38,9 +44,11 @@ export function StockRequestsListPage() {
   const { data: locations = [] } = useLocations()
   const searchTerm = useDebouncedValue(searchInput, STOCK_REQUESTS_SEARCH_DEBOUNCE_MS)
 
+  const effectiveLocationId = isAdminView ? locationId : (sidebarLocationId ?? 'ALL')
+
   const { data, isLoading, isFetching, isError, error } = usePagedStockRequestsAdmin(
     searchTerm,
-    locationId,
+    effectiveLocationId,
     status,
     pageNumber,
   )
@@ -67,11 +75,7 @@ export function StockRequestsListPage() {
 
   return (
     <div className="flex h-screen bg-zinc-50">
-      <AdminSidebar
-        userName={`${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim()}
-        userRole={user?.roles[0] ? ROLE_LABELS[user.roles[0]] : 'Kullanıcı'}
-        onLogout={logout}
-      />
+      <AdminSidebar />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
         <AdminHeader
@@ -83,6 +87,7 @@ export function StockRequestsListPage() {
               locations={locations}
               onLocationChange={handleLocationChange}
               onStatusChange={handleStatusChange}
+              hideLocationFilter={!isAdminView}
             />
           }
         />

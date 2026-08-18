@@ -9,6 +9,15 @@ export const ROLES = [
 
 export type Role = (typeof ROLES)[number]
 
+export const ROLE_LABELS: Record<Role, string> = {
+  ADMIN: 'Yönetici',
+  CASHIER: 'Kasiyer',
+  WAITER: 'Garson',
+  STOCK_MANAGER: 'Stok Yöneticisi',
+  INVENTORY_STAFF: 'Depo Görevlisi',
+  KITCHEN: 'Mutfak',
+}
+
 export interface UserResponseDto {
   id: string
   personalId: string

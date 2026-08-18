@@ -217,6 +217,14 @@ export function AppRouter() {
               </RequireRole>
             }
           />
+          <Route
+            path="waiter-orders"
+            element={
+              <RequireRole path="/app/waiter-orders">
+                <Placeholder label="Garson Sipariş Alma — Faz 1" />
+              </RequireRole>
+            }
+          />
         </Route>
       </Routes>
     </BrowserRouter>

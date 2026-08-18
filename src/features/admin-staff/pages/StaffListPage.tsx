@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react'
 import axios from 'axios'
 import { Plus } from 'lucide-react'
-import { useAuthStore } from '@/shared/stores/authStore'
 import { useLocations } from '@/shared/hooks/useLocations'
 import { useDebouncedValue } from '@/shared/hooks/useDebouncedValue'
 import { AdminSidebar } from '@/shared/components/AdminSidebar'
@@ -29,9 +28,6 @@ function getUsersErrorMessage(error: unknown): string {
 }
 
 export function StaffListPage() {
-  const user = useAuthStore((state) => state.user)
-  const logout = useAuthStore((state) => state.logout)
-
   const [searchInput, setSearchInput] = useState('')
   const [filters, setFilters] = useState<StaffFilters>(INITIAL_FILTERS)
   const [pageNumber, setPageNumber] = useState(1)
@@ -57,11 +53,7 @@ export function StaffListPage() {
 
   return (
     <div className="flex h-screen bg-zinc-50">
-      <AdminSidebar
-        userName={`${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim()}
-        userRole="Yönetici"
-        onLogout={logout}
-      />
+      <AdminSidebar />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
         <AdminHeader

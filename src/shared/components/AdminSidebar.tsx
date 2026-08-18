@@ -1,7 +1,8 @@
 import type { LucideIcon } from 'lucide-react'
-import { Boxes, ClipboardList, Home, Layers, LogOut, MapPin, UtensilsCrossed, Users } from 'lucide-react'
+import { Boxes, ClipboardList, Home, Layers, MapPin, UtensilsCrossed, Users } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 import { cn } from '@/lib/utils'
+import { SidebarUserCard } from './SidebarUserCard'
 
 interface NavItem {
   label: string
@@ -19,13 +20,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Stok Talepleri', icon: ClipboardList, to: '/app/stock-requests' },
 ]
 
-interface AdminSidebarProps {
-  userName: string
-  userRole: string
-  onLogout: () => void
-}
-
-export function AdminSidebar({ userName, userRole, onLogout }: AdminSidebarProps) {
+export function AdminSidebar() {
   return (
     <aside className="flex h-screen w-64 shrink-0 flex-col border-r border-zinc-200 bg-zinc-100">
       <div className="flex items-center gap-2 border-b border-zinc-200 px-5 py-5">
@@ -53,23 +48,7 @@ export function AdminSidebar({ userName, userRole, onLogout }: AdminSidebarProps
         ))}
       </nav>
 
-      <div className="flex flex-col gap-3 border-t border-zinc-200 px-3 py-4">
-        <div className="border border-zinc-200 bg-white px-3 py-2.5">
-          <p className="truncate text-sm font-medium text-zinc-900">{userName}</p>
-          <p className="mt-0.5 flex items-center gap-1.5 text-xs text-zinc-500">
-            <span className="size-1.5 shrink-0 rounded-full bg-blue-500" /> {userRole}
-          </p>
-        </div>
-
-        <button
-          type="button"
-          onClick={onLogout}
-          className="flex items-center gap-2.5 px-3 py-2 text-sm font-medium text-zinc-500 transition-colors hover:bg-zinc-200/60 hover:text-zinc-900"
-        >
-          <LogOut className="size-4" />
-          Çıkış Yap
-        </button>
-      </div>
+      <SidebarUserCard />
     </aside>
   )
 }

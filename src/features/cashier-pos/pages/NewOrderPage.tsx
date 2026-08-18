@@ -3,7 +3,8 @@ import { ChevronDown } from 'lucide-react'
 import { toast } from 'sonner'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { useAuthStore } from '@/shared/stores/authStore'
+import { useLocationStore } from '@/shared/stores/locationStore'
+import { useLocations } from '@/shared/hooks/useLocations'
 import { CashierHeader } from '@/shared/components/CashierHeader'
 import { CashierSidebar } from '@/shared/components/CashierSidebar'
 import type { OrderItem, Product } from '../types'
@@ -17,11 +18,9 @@ const FORM_INPUT_CLASSNAME =
   'h-11 rounded-none border-zinc-200 bg-white text-zinc-900 placeholder:text-zinc-400 focus-visible:border-zinc-400 focus-visible:ring-zinc-200'
 
 export function NewOrderPage() {
-  const user = useAuthStore((state) => state.user)
-  const logout = useAuthStore((state) => state.logout)
-
-  const locationId = user?.locationIds[0]
-  const locationName = locationId ?? '—'
+  const locationId = useLocationStore((state) => state.selectedLocationId) ?? undefined
+  const { data: locations = [] } = useLocations()
+  const locationName = locations.find((location) => location.id === locationId)?.name ?? '—'
 
   const [categoryId, setCategoryId] = useState('')
 
@@ -86,12 +85,7 @@ export function NewOrderPage() {
 
   return (
     <div className="flex h-screen bg-zinc-50">
-      <CashierSidebar
-        locationName={locationName}
-        userName={`${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim()}
-        userRole="Kasiyer"
-        onLogout={logout}
-      />
+      <CashierSidebar />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
         <CashierHeader title="Yeni Sipariş" locationName={locationName} />

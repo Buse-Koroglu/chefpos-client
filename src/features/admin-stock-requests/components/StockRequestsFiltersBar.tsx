@@ -11,6 +11,7 @@ interface StockRequestsFiltersBarProps {
   locations: LocationDto[]
   onLocationChange: (locationId: string) => void
   onStatusChange: (status: StockRequestStatusFilter) => void
+  hideLocationFilter?: boolean
 }
 
 export function StockRequestsFiltersBar({
@@ -19,21 +20,24 @@ export function StockRequestsFiltersBar({
   locations,
   onLocationChange,
   onStatusChange,
+  hideLocationFilter,
 }: StockRequestsFiltersBarProps) {
   return (
     <div className="flex items-center gap-2">
-      <select
-        value={locationId}
-        onChange={(event) => onLocationChange(event.target.value)}
-        className={SELECT_CLASSNAME}
-      >
-        <option value="ALL">Tüm Yerleşkeler</option>
-        {locations.map((location) => (
-          <option key={location.id} value={location.id}>
-            {location.name}
-          </option>
-        ))}
-      </select>
+      {!hideLocationFilter && (
+        <select
+          value={locationId}
+          onChange={(event) => onLocationChange(event.target.value)}
+          className={SELECT_CLASSNAME}
+        >
+          <option value="ALL">Tüm Yerleşkeler</option>
+          {locations.map((location) => (
+            <option key={location.id} value={location.id}>
+              {location.name}
+            </option>
+          ))}
+        </select>
+      )}
 
       <select
         value={status}

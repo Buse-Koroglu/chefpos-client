@@ -1,7 +1,8 @@
 import type { LucideIcon } from 'lucide-react'
-import { History, Home, ListOrdered, LogOut, ShoppingCart } from 'lucide-react'
+import { History, Home, ListOrdered, ShoppingCart } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 import { cn } from '@/lib/utils'
+import { SidebarUserCard } from './SidebarUserCard'
 
 interface NavItem {
   label: string
@@ -16,14 +17,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Geçmiş Siparişler', icon: History, to: '/app/order-history' },
 ]
 
-interface CashierSidebarProps {
-  locationName: string
-  userName: string
-  userRole: string
-  onLogout: () => void
-}
-
-export function CashierSidebar({ locationName, userName, userRole, onLogout }: CashierSidebarProps) {
+export function CashierSidebar() {
   return (
     <aside className="flex h-screen w-64 shrink-0 flex-col border-r border-zinc-200 bg-zinc-100">
       <div className="flex items-center gap-2 border-b border-zinc-200 px-5 py-5">
@@ -61,25 +55,7 @@ export function CashierSidebar({ locationName, userName, userRole, onLogout }: C
         )}
       </nav>
 
-      <div className="flex flex-col gap-3 border-t border-zinc-200 px-3 py-4">
-        <p className="px-2 text-xs text-zinc-500">{locationName}</p>
-
-        <div className="border border-zinc-200 bg-white px-3 py-2.5">
-          <p className="truncate text-sm font-medium text-zinc-900">{userName}</p>
-          <p className="mt-0.5 flex items-center gap-1.5 text-xs text-zinc-500">
-            <span className="size-1.5 shrink-0 rounded-full bg-green-500" /> {userRole}
-          </p>
-        </div>
-
-        <button
-          type="button"
-          onClick={onLogout}
-          className="flex items-center gap-2.5 px-3 py-2 text-sm font-medium text-zinc-500 transition-colors hover:bg-zinc-200/60 hover:text-zinc-900"
-        >
-          <LogOut className="size-4" />
-          Çıkış Yap
-        </button>
-      </div>
+      <SidebarUserCard />
     </aside>
   )
 }
