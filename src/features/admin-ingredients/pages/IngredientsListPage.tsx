@@ -2,6 +2,8 @@ import { useMemo, useState } from 'react'
 import axios from 'axios'
 import { Plus } from 'lucide-react'
 import { useAuthStore } from '@/shared/stores/authStore'
+import { useActiveRoleStore } from '@/shared/stores/activeRoleStore'
+import { useLocationStore } from '@/shared/stores/locationStore'
 import { useLocations } from '@/shared/hooks/useLocations'
 import { useDebouncedValue } from '@/shared/hooks/useDebouncedValue'
 import { AdminSidebar } from '@/shared/components/AdminSidebar'
@@ -28,7 +30,12 @@ function getIngredientsErrorMessage(error: unknown): string {
 
 export function IngredientsListPage() {
   const user = useAuthStore((state) => state.user)
-  const logout = useAuthStore((state) => state.logout)
+  const activeRole = useActiveRoleStore((state) => state.activeRole)
+  const sidebarLocationId = useLocationStore((state) => state.selectedLocationId)
+
+  const roles = user?.roles ?? []
+  const currentRole = activeRole && roles.includes(activeRole) ? activeRole : roles[0]
+  const isAdminView = !currentRole || currentRole === 'ADMIN'
 
   const [searchInput, setSearchInput] = useState('')
   const [locationId, setLocationId] = useState('ALL')
@@ -40,9 +47,11 @@ export function IngredientsListPage() {
   const { data: locations = [] } = useLocations()
   const searchTerm = useDebouncedValue(searchInput, INGREDIENTS_SEARCH_DEBOUNCE_MS)
 
+  const effectiveLocationId = isAdminView ? locationId : (sidebarLocationId ?? 'ALL')
+
   const { data, isLoading, isFetching, isError, error } = usePagedIngredientsAdmin(
     searchTerm,
-    locationId,
+    effectiveLocationId,
     status,
     pageNumber,
   )
@@ -69,11 +78,7 @@ export function IngredientsListPage() {
 
   return (
     <div className="flex h-screen bg-zinc-50">
-      <AdminSidebar
-        userName={`${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim()}
-        userRole="Yönetici"
-        onLogout={logout}
-      />
+      <AdminSidebar />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
         <AdminHeader
@@ -86,6 +91,7 @@ export function IngredientsListPage() {
                 locations={locations}
                 onLocationChange={handleLocationChange}
                 onStatusChange={handleStatusChange}
+                hideLocationFilter={!isAdminView}
               />
               <button
                 type="button"

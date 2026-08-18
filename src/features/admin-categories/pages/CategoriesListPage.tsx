@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react'
 import axios from 'axios'
 import { Plus } from 'lucide-react'
-import { useAuthStore } from '@/shared/stores/authStore'
 import { useLocations } from '@/shared/hooks/useLocations'
 import { useDebouncedValue } from '@/shared/hooks/useDebouncedValue'
 import { AdminSidebar } from '@/shared/components/AdminSidebar'
@@ -27,9 +26,6 @@ function getCategoriesErrorMessage(error: unknown): string {
 }
 
 export function CategoriesListPage() {
-  const user = useAuthStore((state) => state.user)
-  const logout = useAuthStore((state) => state.logout)
-
   const [searchInput, setSearchInput] = useState('')
   const [locationId, setLocationId] = useState('ALL')
   const [status, setStatus] = useState<CategoryStatusFilter>('ALL')
@@ -69,11 +65,7 @@ export function CategoriesListPage() {
 
   return (
     <div className="flex h-screen bg-zinc-50">
-      <AdminSidebar
-        userName={`${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim()}
-        userRole="Yönetici"
-        onLogout={logout}
-      />
+      <AdminSidebar />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
         <AdminHeader

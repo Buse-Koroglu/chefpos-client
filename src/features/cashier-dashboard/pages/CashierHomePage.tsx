@@ -1,6 +1,7 @@
 import { Clock3, Flame, ListOrdered, ReceiptTurkishLira, ShoppingCart } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import { useAuthStore } from '@/shared/stores/authStore'
+import { useLocationStore } from '@/shared/stores/locationStore'
+import { useLocations } from '@/shared/hooks/useLocations'
 import { CashierHeader } from '@/shared/components/CashierHeader'
 import { CashierSidebar } from '@/shared/components/CashierSidebar'
 import { usePendingOrdersCount } from '@/shared/hooks/usePendingOrdersCount'
@@ -16,12 +17,11 @@ const currencyFormatter = new Intl.NumberFormat('tr-TR', {
 })
 
 export function CashierHomePage() {
-  const user = useAuthStore((state) => state.user)
-  const logout = useAuthStore((state) => state.logout)
   const navigate = useNavigate()
 
-  const locationId = user?.locationIds[0]
-  const locationName = locationId ?? '—'
+  const locationId = useLocationStore((state) => state.selectedLocationId) ?? undefined
+  const { data: locations = [] } = useLocations()
+  const locationName = locations.find((location) => location.id === locationId)?.name ?? '—'
 
   const { data: dashboard, isLoading, isError } = useCashierDashboard(locationId)
   const {
@@ -48,12 +48,7 @@ export function CashierHomePage() {
 
   return (
     <div className="flex h-screen bg-zinc-50">
-      <CashierSidebar
-        locationName={locationName}
-        userName={`${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim()}
-        userRole="Kasiyer"
-        onLogout={logout}
-      />
+      <CashierSidebar />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
         <CashierHeader title="Genel Bakış" locationName={locationName} />

@@ -1,6 +1,8 @@
 import { create } from 'zustand'
 import * as authApi from '@/shared/api/endpoints/auth'
 import type { UserResponseDto } from '@/shared/types/auth'
+import { useActiveRoleStore } from '@/shared/stores/activeRoleStore'
+import { useLocationStore } from '@/shared/stores/locationStore'
 
 interface AuthState {
   accessToken: string | null
@@ -36,6 +38,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   logout: () => {
     set({ accessToken: null, user: null, isAuthenticated: false, isFirstLogin: false })
+    useActiveRoleStore.getState().reset()
+    useLocationStore.getState().reset()
     authApi.logout().catch(() => {
     })
   },

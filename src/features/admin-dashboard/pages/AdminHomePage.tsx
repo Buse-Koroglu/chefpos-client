@@ -2,7 +2,6 @@ import { useEffect } from 'react'
 import axios from 'axios'
 import { Award, RefreshCw, Users } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { useAuthStore } from '@/shared/stores/authStore'
 import { useLocationStore } from '@/shared/stores/locationStore'
 import { AdminSidebar } from '@/shared/components/AdminSidebar'
 import { AdminHeader } from '@/shared/components/AdminHeader'
@@ -24,8 +23,6 @@ function getSummaryErrorMessage(error: unknown): string {
 }
 
 export function AdminHomePage() {
-  const user = useAuthStore((state) => state.user)
-  const logout = useAuthStore((state) => state.logout)
   const selectedLocationId = useLocationStore((state) => state.selectedLocationId)
   const setSelectedLocationId = useLocationStore((state) => state.setSelectedLocationId)
 
@@ -51,11 +48,7 @@ export function AdminHomePage() {
 
   return (
     <div className="flex h-screen bg-zinc-50">
-      <AdminSidebar
-        userName={`${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim()}
-        userRole="Yönetici"
-        onLogout={logout}
-      />
+      <AdminSidebar />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
         <AdminHeader
