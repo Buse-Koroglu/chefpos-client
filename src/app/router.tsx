@@ -14,6 +14,7 @@ import { LocationsListPage } from '@/features/admin-locations/pages/LocationsLis
 import { CategoriesListPage } from '@/features/admin-categories/pages/CategoriesListPage'
 import { IngredientsListPage } from '@/features/admin-ingredients/pages/IngredientsListPage'
 import { ProductsListPage } from '@/features/admin-products/pages/ProductsListPage'
+import { TablesListPage } from '@/features/admin-tables/pages/TablesListPage'
 import { StockRequestsListPage } from '@/features/admin-stock-requests/pages/StockRequestsListPage'
 import type { Role } from '@/shared/types/auth'
 import { NewOrderPage } from '@/features/cashier-pos/pages/NewOrderPage'
@@ -140,6 +141,16 @@ export function AppRouter() {
             <RequireAuth>
               <RequireRole path="/app/products">
                 <ProductsListPage />
+              </RequireRole>
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/app/tables"
+          element={
+            <RequireAuth>
+              <RequireRole path="/app/tables">
+                <TablesListPage />
               </RequireRole>
             </RequireAuth>
           }
