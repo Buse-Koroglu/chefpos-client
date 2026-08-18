@@ -13,6 +13,7 @@ import { StaffListPage } from '@/features/admin-staff/pages/StaffListPage'
 import { LocationsListPage } from '@/features/admin-locations/pages/LocationsListPage'
 import { CategoriesListPage } from '@/features/admin-categories/pages/CategoriesListPage'
 import { IngredientsListPage } from '@/features/admin-ingredients/pages/IngredientsListPage'
+import { ProductsListPage } from '@/features/admin-products/pages/ProductsListPage'
 import type { Role } from '@/shared/types/auth'
 import { NewOrderPage } from '@/features/cashier-pos/pages/NewOrderPage'
 import { PendingOrdersPage } from '@/features/cashier-pending-orders/pages/PendingOrdersPage'
@@ -133,6 +134,16 @@ export function AppRouter() {
           }
         />
         <Route
+          path="/app/products"
+          element={
+            <RequireAuth>
+              <RequireRole path="/app/products">
+                <ProductsListPage />
+              </RequireRole>
+            </RequireAuth>
+          }
+        />
+        <Route
           path="/app/pos"
           element={
             <RequireAuth>
@@ -192,14 +203,6 @@ export function AppRouter() {
             element={
               <RequireRole path="/app/kitchen-orders">
                 <Placeholder label="Mutfak Siparişleri — Faz 1" />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="products"
-            element={
-              <RequireRole path="/app/products">
-                <Placeholder label="Ürünler — Faz 2" />
               </RequireRole>
             }
           />

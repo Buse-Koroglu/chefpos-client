@@ -12,3 +12,4 @@ export const ROLE_LABELS: Record<Role, string> = {
 export const ROLE_OPTIONS: Role[] = ['ADMIN', 'CASHIER', 'WAITER', 'STOCK_MANAGER', 'INVENTORY_STAFF', 'KITCHEN']
 
 export const STAFF_PAGE_SIZE = 20
+export const STAFF_SEARCH_DEBOUNCE_MS = 400

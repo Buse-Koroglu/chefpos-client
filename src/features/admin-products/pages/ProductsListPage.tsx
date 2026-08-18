@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import axios from 'axios'
 import { Plus } from 'lucide-react'
 import { useAuthStore } from '@/shared/stores/authStore'
@@ -6,51 +6,49 @@ import { useLocations } from '@/shared/hooks/useLocations'
 import { useDebouncedValue } from '@/shared/hooks/useDebouncedValue'
 import { AdminSidebar } from '@/shared/components/AdminSidebar'
 import { AdminHeader } from '@/shared/components/AdminHeader'
-import { IngredientsSearchInput } from '@/features/admin-ingredients/components/IngredientsSearchInput'
-import { IngredientsFiltersBar } from '@/features/admin-ingredients/components/IngredientsFiltersBar'
-import { IngredientsTable } from '@/features/admin-ingredients/components/IngredientsTable'
-import { IngredientsPagination } from '@/features/admin-ingredients/components/IngredientsPagination'
-import { IngredientEditPopup } from '@/features/admin-ingredients/components/IngredientEditPopup'
-import { AddIngredientPopup } from '@/features/admin-ingredients/components/AddIngredientPopup'
-import { usePagedIngredientsAdmin } from '@/features/admin-ingredients/hooks/usePagedIngredientsAdmin'
-import { INGREDIENTS_SEARCH_DEBOUNCE_MS } from '@/features/admin-ingredients/constants'
-import type { IngredientStatusFilter } from '@/features/admin-ingredients/types'
+import { ProductsSearchInput } from '@/features/admin-products/components/ProductsSearchInput'
+import { ProductsFiltersBar } from '@/features/admin-products/components/ProductsFiltersBar'
+import { ProductsTable } from '@/features/admin-products/components/ProductsTable'
+import { ProductsPagination } from '@/features/admin-products/components/ProductsPagination'
+import { ProductEditPopup } from '@/features/admin-products/components/ProductEditPopup'
+import { AddProductPopup } from '@/features/admin-products/components/AddProductPopup'
+import { usePagedProductsAdmin } from '@/features/admin-products/hooks/usePagedProductsAdmin'
+import { useActiveCategories } from '@/features/admin-products/hooks/useActiveCategories'
+import { PRODUCTS_SEARCH_DEBOUNCE_MS } from '@/features/admin-products/constants'
+import type { ProductStatusFilter } from '@/features/admin-products/types'
 
-function getIngredientsErrorMessage(error: unknown): string {
+function getProductsErrorMessage(error: unknown): string {
   if (axios.isAxiosError(error)) {
     const status = error.response?.status
     if (status === 401 || status === 403) {
       return 'Bu verileri görüntülemek için yönetici yetkisine sahip olmalısınız.'
     }
   }
-  return 'Ham madde listesi yüklenemedi. Lütfen tekrar deneyin.'
+  return 'Ürün listesi yüklenemedi. Lütfen tekrar deneyin.'
 }
 
-export function IngredientsListPage() {
+export function ProductsListPage() {
   const user = useAuthStore((state) => state.user)
   const logout = useAuthStore((state) => state.logout)
 
   const [searchInput, setSearchInput] = useState('')
   const [locationId, setLocationId] = useState('ALL')
-  const [status, setStatus] = useState<IngredientStatusFilter>('ALL')
+  const [status, setStatus] = useState<ProductStatusFilter>('ALL')
   const [pageNumber, setPageNumber] = useState(1)
-  const [selectedIngredientId, setSelectedIngredientId] = useState<string | null>(null)
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(null)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
 
   const { data: locations = [] } = useLocations()
-  const searchTerm = useDebouncedValue(searchInput, INGREDIENTS_SEARCH_DEBOUNCE_MS)
+  const { data: categories = [] } = useActiveCategories()
+  const searchTerm = useDebouncedValue(searchInput, PRODUCTS_SEARCH_DEBOUNCE_MS)
 
-  const { data, isLoading, isFetching, isError, error } = usePagedIngredientsAdmin(
+  const { data, isLoading, isFetching, isError, error } = usePagedProductsAdmin(
     searchTerm,
     locationId,
     status,
     pageNumber,
   )
-  const items = useMemo(() => data?.items ?? [], [data])
-  const selectedIngredient = useMemo(
-    () => items.find((ingredient) => ingredient.id === selectedIngredientId) ?? null,
-    [items, selectedIngredientId],
-  )
+  const items = data?.items ?? []
 
   function handleSearchChange(value: string) {
     setSearchInput(value)
@@ -62,7 +60,7 @@ export function IngredientsListPage() {
     setPageNumber(1)
   }
 
-  function handleStatusChange(value: IngredientStatusFilter) {
+  function handleStatusChange(value: ProductStatusFilter) {
     setStatus(value)
     setPageNumber(1)
   }
@@ -77,10 +75,10 @@ export function IngredientsListPage() {
 
       <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
         <AdminHeader
-          title="Ham Maddeler"
+          title="Ürünler"
           actions={
             <div className="flex items-center gap-3">
-              <IngredientsFiltersBar
+              <ProductsFiltersBar
                 locationId={locationId}
                 status={status}
                 locations={locations}
@@ -93,7 +91,7 @@ export function IngredientsListPage() {
                 className="flex items-center gap-1.5 bg-[#133458] px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-[#0f2843]"
               >
                 <Plus className="size-4" />
-                Yeni Ham Madde Ekle
+                Yeni Ürün Ekle
               </button>
             </div>
           }
@@ -102,19 +100,19 @@ export function IngredientsListPage() {
         <main className="flex flex-1 flex-col gap-4 p-6">
           {isError && (
             <div className="border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-              {getIngredientsErrorMessage(error)}
+              {getProductsErrorMessage(error)}
             </div>
           )}
 
-          <IngredientsSearchInput value={searchInput} onChange={handleSearchChange} />
+          <ProductsSearchInput value={searchInput} onChange={handleSearchChange} />
 
           <div className="flex flex-1 flex-col">
-            <IngredientsTable
-              ingredients={items}
-              onSelect={setSelectedIngredientId}
+            <ProductsTable
+              products={items}
+              onSelect={setSelectedProductId}
               isLoading={isLoading || (isFetching && items.length === 0)}
             />
-            <IngredientsPagination
+            <ProductsPagination
               pageNumber={data?.pageNumber ?? pageNumber}
               totalPages={data?.totalPages ?? 1}
               totalCount={data?.totalCount ?? 0}
@@ -124,8 +122,13 @@ export function IngredientsListPage() {
         </main>
       </div>
 
-      <IngredientEditPopup ingredient={selectedIngredient} onClose={() => setSelectedIngredientId(null)} />
-      <AddIngredientPopup open={isAddModalOpen} locations={locations} onClose={() => setIsAddModalOpen(false)} />
+      <ProductEditPopup
+        productId={selectedProductId}
+        locations={locations}
+        categories={categories}
+        onClose={() => setSelectedProductId(null)}
+      />
+      <AddProductPopup open={isAddModalOpen} locations={locations} onClose={() => setIsAddModalOpen(false)} />
     </div>
   )
 }

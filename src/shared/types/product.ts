@@ -1,4 +1,4 @@
-export type StockUnit = 'KG' | 'LT';
+import type { StockUnit } from './ingredient'
 
 export interface GetProductsQueryParams {
   locationId: string;
@@ -14,6 +14,11 @@ export interface ProductItemResponse {
   quantityPerServing: number;
 }
 
+export interface ProductLocationRecipe {
+  locationId: string;
+  ingredients: ProductItemResponse[];
+}
+
 export interface ProductResponse {
   id: string;
   name: string;
@@ -21,7 +26,57 @@ export interface ProductResponse {
   description?: string | null;
   imageUrl?: string | null;
   isActive: boolean;
-  locationId: string;
   categoryId: string;
-  ingredients: ProductItemResponse[];
+  locationIds: string[];
+  locations: ProductLocationRecipe[];
+}
+
+export interface ProductAdminResponseDto {
+  id: string;
+  name: string;
+  price: number;
+  imageUrl?: string | null;
+  isActive: boolean;
+  categoryId: string;
+  categoryName: string;
+  locationIds: string[];
+  locationNames: string[];
+}
+
+export interface GetProductsPagedQueryParams {
+  searchTerm?: string;
+  locationId?: string;
+  categoryId?: string;
+  isActive?: boolean;
+  pageNumber?: number;
+  pageSize?: number;
+}
+
+export interface CreateProductRequest {
+  name: string;
+  price: number;
+  categoryId: string;
+  locationIds: string[];
+  description?: string | null;
+  imageUrl?: string | null;
+}
+
+export interface UpdateProductRequest {
+  name: string;
+  description?: string | null;
+  imageUrl?: string | null;
+}
+
+export interface AddProductIngredientRequest {
+  locationId: string;
+  ingredientId: string;
+  quantityPerServing: number;
+}
+
+export interface PagedResult<T> {
+  items: T[];
+  totalCount: number;
+  pageNumber: number;
+  pageSize: number;
+  totalPages: number;
 }

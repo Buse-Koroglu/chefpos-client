@@ -2,8 +2,11 @@ import { apiClient } from '@/shared/api/client'
 import { STOCK_UNITS } from '@/shared/types/ingredient'
 import type {
   CreateIngredientRequest,
+  GetIngredientsPagedQueryParams,
   GetIngredientsQueryParams,
+  IngredientAdminResponseDto,
   IngredientResponseDto,
+  PagedResult,
   UpdateIngredientRequest,
 } from '@/shared/types/ingredient'
 
@@ -19,6 +22,10 @@ interface RawIngredientPayload {
   locationId: string
 }
 
+interface RawIngredientAdminPayload extends RawIngredientPayload {
+  locationName: string
+}
+
 function normalizeIngredient(raw: RawIngredientPayload): IngredientResponseDto {
   return { ...raw, unit: STOCK_UNITS[raw.unit] }
 }
@@ -27,6 +34,15 @@ export function getIngredients(params: GetIngredientsQueryParams) {
   return apiClient
     .get<RawIngredientPayload[]>('/api/ingredients', { params })
     .then((res) => res.data.map(normalizeIngredient))
+}
+
+export function getIngredientsPaged(params: GetIngredientsPagedQueryParams) {
+  return apiClient
+    .get<PagedResult<RawIngredientAdminPayload>>('/api/ingredients/paged', { params })
+    .then((res) => ({
+      ...res.data,
+      items: res.data.items.map((raw): IngredientAdminResponseDto => ({ ...normalizeIngredient(raw), locationName: raw.locationName })),
+    }))
 }
 
 export function createIngredient(payload: CreateIngredientRequest) {

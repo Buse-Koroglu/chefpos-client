@@ -24,6 +24,26 @@ export interface GetIngredientsQueryParams {
   includeInactive?: boolean
 }
 
+export interface IngredientAdminResponseDto extends IngredientResponseDto {
+  locationName: string
+}
+
+export interface GetIngredientsPagedQueryParams {
+  searchTerm?: string
+  locationId?: string
+  isActive?: boolean
+  pageNumber?: number
+  pageSize?: number
+}
+
+export interface PagedResult<T> {
+  items: T[]
+  totalCount: number
+  pageNumber: number
+  pageSize: number
+  totalPages: number
+}
+
 export interface CreateIngredientRequest {
   name: string
   unit: StockUnit
