@@ -3,15 +3,17 @@ import axios from 'axios'
 import { Plus } from 'lucide-react'
 import { useAuthStore } from '@/shared/stores/authStore'
 import { useLocations } from '@/shared/hooks/useLocations'
+import { useDebouncedValue } from '@/shared/hooks/useDebouncedValue'
 import { AdminSidebar } from '@/shared/components/AdminSidebar'
 import { AdminHeader } from '@/shared/components/AdminHeader'
+import { StaffSearchInput } from '@/features/admin-staff/components/StaffSearchInput'
 import { StaffFiltersBar } from '@/features/admin-staff/components/StaffFiltersBar'
 import { StaffTable } from '@/features/admin-staff/components/StaffTable'
 import { StaffPagination } from '@/features/admin-staff/components/StaffPagination'
 import { StaffEditPopup } from '@/features/admin-staff/components/StaffEditPopup'
 import { AddStaffPopup } from '@/features/admin-staff/components/AddStaffPopup'
-import { useAllUsers } from '@/features/admin-staff/hooks/useAllUsers'
-import { useFilteredStaff } from '@/features/admin-staff/hooks/useFilteredStaff'
+import { usePagedStaffAdmin } from '@/features/admin-staff/hooks/usePagedStaffAdmin'
+import { STAFF_SEARCH_DEBOUNCE_MS } from '@/features/admin-staff/constants'
 import type { RoleFilter, StaffFilters, StatusFilter } from '@/features/admin-staff/types'
 
 const INITIAL_FILTERS: StaffFilters = { role: 'ALL', status: 'ALL', locationId: 'ALL' }
@@ -30,6 +32,7 @@ export function StaffListPage() {
   const user = useAuthStore((state) => state.user)
   const logout = useAuthStore((state) => state.logout)
 
+  const [searchInput, setSearchInput] = useState('')
   const [filters, setFilters] = useState<StaffFilters>(INITIAL_FILTERS)
   const [pageNumber, setPageNumber] = useState(1)
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null)
@@ -38,12 +41,14 @@ export function StaffListPage() {
   const { data: locations = [] } = useLocations()
   const locationsById = useMemo(() => new Map(locations.map((location) => [location.id, location.name])), [locations])
 
-  const { data: allUsers, isLoading, isError, error } = useAllUsers()
-  const { items, totalCount, totalPages, pageNumber: currentPage } = useFilteredStaff(
-    allUsers ?? [],
-    filters,
-    pageNumber,
-  )
+  const searchTerm = useDebouncedValue(searchInput, STAFF_SEARCH_DEBOUNCE_MS)
+  const { data, isLoading, isFetching, isError, error } = usePagedStaffAdmin(searchTerm, filters, pageNumber)
+  const items = useMemo(() => data?.items ?? [], [data])
+
+  function handleSearchChange(value: string) {
+    setSearchInput(value)
+    setPageNumber(1)
+  }
 
   function updateFilters(patch: Partial<StaffFilters>) {
     setFilters((prev) => ({ ...prev, ...patch }))
@@ -91,12 +96,19 @@ export function StaffListPage() {
             </div>
           )}
 
+          <StaffSearchInput value={searchInput} onChange={handleSearchChange} />
+
           <div className="flex flex-1 flex-col">
-            <StaffTable staff={items} locationsById={locationsById} onSelect={setSelectedUserId} isLoading={isLoading} />
+            <StaffTable
+              staff={items}
+              locationsById={locationsById}
+              onSelect={setSelectedUserId}
+              isLoading={isLoading || (isFetching && items.length === 0)}
+            />
             <StaffPagination
-              pageNumber={currentPage}
-              totalPages={totalPages}
-              totalCount={totalCount}
+              pageNumber={data?.pageNumber ?? pageNumber}
+              totalPages={data?.totalPages ?? 1}
+              totalCount={data?.totalCount ?? 0}
               onPageChange={setPageNumber}
             />
           </div>

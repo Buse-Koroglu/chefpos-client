@@ -47,7 +47,7 @@ export function StaffTable({ staff, locationsById, onSelect, isLoading }: StaffT
   if (staff.length === 0) {
     return (
       <div className="flex flex-1 items-center justify-center border border-zinc-200 bg-white py-16 text-sm text-zinc-500">
-        Filtrelere uygun personel bulunamadı.
+        Aradığınız kriterlere uygun sonuç bulunamadı.
       </div>
     )
   }

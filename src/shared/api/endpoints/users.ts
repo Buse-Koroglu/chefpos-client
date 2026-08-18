@@ -28,6 +28,7 @@ function normalizeUser(raw: RawUserPayload): UserResponseDto {
 }
 
 export interface GetUsersQueryParams {
+  searchTerm?: string
   role?: Role
   isActive?: boolean
   locationId?: string
@@ -38,16 +39,30 @@ export interface GetUsersQueryParams {
 export interface GetUsersResult {
   items: UserResponseDto[]
   totalCount: number
+  pageNumber: number
+  pageSize: number
+  totalPages: number
 }
 
 export function getUsers(params: GetUsersQueryParams): Promise<GetUsersResult> {
+  const pageNumber = params.pageNumber ?? 1
+  const pageSize = params.pageSize ?? 20
+
   return apiClient
-    .get<RawUserPayload[] | { items: RawUserPayload[]; totalCount?: number }>('/api/users', { params })
+    .get<
+      | RawUserPayload[]
+      | { items: RawUserPayload[]; totalCount?: number; pageNumber?: number; pageSize?: number; totalPages?: number }
+    >('/api/users', { params })
     .then((res) => {
       const data = res.data
       const items = (Array.isArray(data) ? data : data.items).map(normalizeUser)
       const totalCount = Array.isArray(data) ? items.length : (data.totalCount ?? items.length)
-      return { items, totalCount }
+      const resolvedPageNumber = Array.isArray(data) ? pageNumber : (data.pageNumber ?? pageNumber)
+      const resolvedPageSize = Array.isArray(data) ? pageSize : (data.pageSize ?? pageSize)
+      const totalPages = Array.isArray(data)
+        ? Math.max(1, Math.ceil(totalCount / resolvedPageSize))
+        : (data.totalPages ?? Math.max(1, Math.ceil(totalCount / resolvedPageSize)))
+      return { items, totalCount, pageNumber: resolvedPageNumber, pageSize: resolvedPageSize, totalPages }
     })
 }
 

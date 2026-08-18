@@ -1,25 +1,26 @@
-import type { CategoryAdminResponseDto } from '@/shared/types/category'
+import type { ProductAdminResponseDto } from '@/shared/types/product'
 import { Skeleton } from '@/shared/components/Skeleton'
-import { CategoryIcon } from './CategoryIcon'
-import { CategoryLocationChips } from './CategoryLocationChips'
-import { CategoryStatusBadge } from './CategoryStatusBadge'
+import { ProductImagePreview } from './ProductImagePreview'
+import { ProductLocationChips } from './ProductLocationChips'
+import { ProductStatusBadge } from './ProductStatusBadge'
 
-interface CategoriesTableProps {
-  categories: CategoryAdminResponseDto[]
-  onSelect: (categoryId: string) => void
+interface ProductsTableProps {
+  products: ProductAdminResponseDto[]
+  onSelect: (productId: string) => void
   isLoading?: boolean
 }
 
 const TABLE_HEAD = (
   <tr className="border-b border-zinc-200 bg-zinc-50 text-xs font-semibold tracking-wide text-zinc-500 uppercase">
+    <th className="px-4 py-3">Ürün</th>
     <th className="px-4 py-3">Kategori</th>
     <th className="px-4 py-3">Yerleşke</th>
-    <th className="px-4 py-3">Ürün Sayısı</th>
+    <th className="px-4 py-3">Fiyat</th>
     <th className="px-4 py-3">Durum</th>
   </tr>
 )
 
-export function CategoriesTable({ categories, onSelect, isLoading }: CategoriesTableProps) {
+export function ProductsTable({ products, onSelect, isLoading }: ProductsTableProps) {
   if (isLoading) {
     return (
       <div className="overflow-x-auto border border-zinc-200 bg-white">
@@ -28,7 +29,7 @@ export function CategoriesTable({ categories, onSelect, isLoading }: CategoriesT
           <tbody>
             {Array.from({ length: 6 }).map((_, index) => (
               <tr key={index} className="border-b border-zinc-100 last:border-b-0">
-                {Array.from({ length: 4 }).map((__, cellIndex) => (
+                {Array.from({ length: 5 }).map((__, cellIndex) => (
                   <td key={cellIndex} className="px-4 py-3">
                     <Skeleton className="h-4 w-24" />
                   </td>
@@ -41,7 +42,7 @@ export function CategoriesTable({ categories, onSelect, isLoading }: CategoriesT
     )
   }
 
-  if (categories.length === 0) {
+  if (products.length === 0) {
     return (
       <div className="flex flex-1 items-center justify-center border border-zinc-200 bg-white py-16 text-sm text-zinc-500">
         Aradığınız kriterlere uygun sonuç bulunamadı.
@@ -54,24 +55,25 @@ export function CategoriesTable({ categories, onSelect, isLoading }: CategoriesT
       <table className="w-full text-left text-sm">
         <thead>{TABLE_HEAD}</thead>
         <tbody>
-          {categories.map((category) => (
+          {products.map((product) => (
             <tr
-              key={category.id}
-              onClick={() => onSelect(category.id)}
+              key={product.id}
+              onClick={() => onSelect(product.id)}
               className="cursor-pointer border-b border-zinc-100 transition-colors last:border-b-0 hover:bg-zinc-100/80"
             >
-              <td className="px-4 py-3 font-medium text-zinc-900">
-                <span className="flex items-center gap-2">
-                  <CategoryIcon icon={category.icon} />
-                  {category.name}
-                </span>
-              </td>
               <td className="px-4 py-3">
-                <CategoryLocationChips locationNames={category.locationNames} />
+                <div className="flex items-center gap-2.5">
+                  <ProductImagePreview imageUrl={product.imageUrl} />
+                  <span className="font-medium text-zinc-900">{product.name}</span>
+                </div>
               </td>
-              <td className="px-4 py-3 tabular-nums text-zinc-500">{category.productCount}</td>
+              <td className="px-4 py-3 text-zinc-600">{product.categoryName}</td>
               <td className="px-4 py-3">
-                <CategoryStatusBadge isActive={category.isActive} />
+                <ProductLocationChips locationNames={product.locationNames} />
+              </td>
+              <td className="px-4 py-3 tabular-nums text-zinc-700">{product.price.toFixed(2)} ₺</td>
+              <td className="px-4 py-3">
+                <ProductStatusBadge isActive={product.isActive} />
               </td>
             </tr>
           ))}

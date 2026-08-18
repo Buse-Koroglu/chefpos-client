@@ -41,7 +41,7 @@ export function LocationsTable({ locations, onSelect, isLoading }: LocationsTabl
   if (locations.length === 0) {
     return (
       <div className="flex flex-1 items-center justify-center border border-zinc-200 bg-white py-16 text-sm text-zinc-500">
-        Arama kriterlerine uygun yerleşke bulunamadı.
+        Aradığınız kriterlere uygun sonuç bulunamadı.
       </div>
     )
   }
