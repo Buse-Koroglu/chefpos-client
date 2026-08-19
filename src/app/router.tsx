@@ -20,6 +20,7 @@ import type { Role } from '@/shared/types/auth'
 import { NewOrderPage } from '@/features/cashier-pos/pages/NewOrderPage'
 import { PendingOrdersPage } from '@/features/cashier-pending-orders/pages/PendingOrdersPage'
 import { PastOrdersPage } from '@/features/cashier-past-orders/pages/PastOrdersPage'
+import { WaiterOrderPage } from '@/features/waiter-pos/pages/WaiterOrderPage'
 
 const EMPTY_ROLES: Role[] = []
 
@@ -196,6 +197,17 @@ export function AppRouter() {
           }
         />
 
+        <Route
+          path="/app/waiter-orders"
+          element={
+            <RequireAuth>
+              <RequireRole path="/app/waiter-orders">
+                <WaiterOrderPage />
+              </RequireRole>
+            </RequireAuth>
+          }
+        />
+
         <Route path="/403" element={<Placeholder label="403 — Bu sayfaya erişim yetkiniz yok" />} />
         <Route path="*" element={<Placeholder label="404 — Sayfa bulunamadı" />} />
 
@@ -225,14 +237,6 @@ export function AppRouter() {
             element={
               <RequireRole path="/app/kitchen-orders">
                 <Placeholder label="Mutfak Siparişleri — Faz 1" />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="waiter-orders"
-            element={
-              <RequireRole path="/app/waiter-orders">
-                <Placeholder label="Garson Sipariş Alma — Faz 1" />
               </RequireRole>
             }
           />

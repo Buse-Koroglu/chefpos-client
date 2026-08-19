@@ -29,3 +29,8 @@ export interface PagedResult<T> {
   pageSize: number
   totalPages: number
 }
+
+export interface GetTablesByLocationQueryParams {
+  locationId: string
+  includeInactive?: boolean
+}
