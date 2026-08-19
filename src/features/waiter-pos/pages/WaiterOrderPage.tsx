@@ -24,6 +24,7 @@ export function WaiterOrderPage() {
   const [cartOpen, setCartOpen] = useState(false)
   const [tableId, setTableId] = useState<string | null>(null)
   const [categoryId, setCategoryId] = useState('')
+  const [customerName, setCustomerName] = useState('')
   const [searchInput, setSearchInput] = useState('')
   const debouncedSearch = useDebouncedValue(searchInput, 400)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -44,6 +45,7 @@ export function WaiterOrderPage() {
     setLastSyncedLocationId(locationId)
     setTableId(null)
     setCategoryId('')
+    setCustomerName('')
     clear()
   }
 
@@ -57,7 +59,7 @@ export function WaiterOrderPage() {
       {
         locationId,
         tableId,
-        customerName: null,
+        customerName: customerName.trim() || null,
         items: items.map((i) => ({ productId: i.productId, quantity: i.quantity })),
         requestedAs: 'WAITER',
       },
@@ -66,6 +68,7 @@ export function WaiterOrderPage() {
           toast.success('Sipariş oluşturuldu.')
           clear()
           setCartOpen(false)
+          setCustomerName('')
         },
         onError: () => toast.error('Sipariş oluşturulamadı.'),
       },
@@ -76,7 +79,32 @@ export function WaiterOrderPage() {
     <div className="mx-auto flex h-screen max-w-md flex-col bg-zinc-50">
  <WaiterHeader locationName={locationName} onMenuClick={() => setMenuOpen(true)} />
       <div className="border-b border-zinc-200 bg-white p-3">
-        <TableSelector tables={tables} selectedTableId={tableId} onSelect={setTableId} />
+        <TableSelector
+          tables={tables}
+          selectedTableId={tableId}
+          onSelect={setTableId}
+        />
+
+        <div className="mt-3">
+          <label
+            htmlFor="customer-name"
+            className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-zinc-500"
+          >
+            Müşteri Adı
+          </label>
+
+          <input
+            id="customer-name"
+            type="text"
+            value={customerName}
+            onChange={(event) =>
+              setCustomerName(event.target.value)
+            }
+            placeholder="Örn. Ahmet Yılmaz"
+            maxLength={100}
+            className="h-11 w-full border border-zinc-300 bg-white px-3 text-sm text-zinc-900 outline-none placeholder:text-zinc-400 focus:border-zinc-900"
+          />
+        </div>
       </div>
 
       <div className="border-b border-zinc-200 bg-white px-3 pb-3">

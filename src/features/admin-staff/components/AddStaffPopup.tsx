@@ -124,7 +124,7 @@ function StaffFormStep({ locations, isSubmitting, submitError, onCancel, onSubmi
         </div>
 
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-zinc-600">Personel No / TC</label>
+          <label className="mb-1.5 block text-xs font-medium text-zinc-600">Personel No</label>
           <input
             value={personalId}
             onChange={(event) => setPersonalId(event.target.value.replace(/\D/g, '').slice(0, 11))}
