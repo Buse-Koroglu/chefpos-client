@@ -5,6 +5,7 @@ import type {
   PagedResult,
   TableResponseDto,
   UpdateTableRequest,
+  GetTablesByLocationQueryParams
 } from '@/shared/types/table'
 
 export function getTablesPaged(params: GetTablesPagedQueryParams) {
@@ -25,4 +26,8 @@ export function activateTable(id: string) {
 
 export function deactivateTable(id: string) {
   return apiClient.post<TableResponseDto>(`/api/tables/${id}/deactivate`).then((res) => res.data)
+}
+
+export function getTablesByLocation(params: GetTablesByLocationQueryParams) {
+  return apiClient.get<TableResponseDto[]>('/api/tables', { params }).then((res) => res.data)
 }

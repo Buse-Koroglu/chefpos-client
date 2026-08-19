@@ -18,6 +18,7 @@ export interface CreateOrderItem {
 
 export interface CreateOrderRequest {
   locationId: string;
+  tableId?: string | null;  
   customerName?: string | null;
   items: CreateOrderItem[];
   requestedAs: Role;
