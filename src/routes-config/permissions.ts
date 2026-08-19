@@ -21,6 +21,7 @@ export const APP_ROUTES: RouteConfig[] = [
   { path: '/app/kitchen-orders', label: 'Mutfak Siparişleri', allowedRoles: ['ADMIN', 'KITCHEN'], showInSidebar: true },
   { path: '/app/ingredients', label: 'Hammaddeler', allowedRoles: ['ADMIN', 'STOCK_MANAGER', 'INVENTORY_STAFF'], showInSidebar: true },
   { path: '/app/stock-requests', label: 'Stok Talepleri', allowedRoles: ['ADMIN', 'STOCK_MANAGER', 'INVENTORY_STAFF'], showInSidebar: true },
+  { path: '/app/inventory', label: 'Stok Görevlisi Ana Sayfa', allowedRoles: ['INVENTORY_STAFF'],showInSidebar:true},
   { path: '/app/users', label: 'Kullanıcılar', allowedRoles: ['ADMIN'], showInSidebar: true },
   { path: '/app/locations', label: 'Şubeler', allowedRoles: ['ADMIN'], showInSidebar: true },
   { path: '/app/change-password', label: 'Şifre Değiştir', allowedRoles: 'ANY', showInSidebar: false },
@@ -35,7 +36,7 @@ const DEFAULT_ROUTE_BY_ROLE: Array<{ role: Role; path: string }> = [
   { role: 'CASHIER', path: '/app/home' },
   { role: 'WAITER', path: '/app/waiter-orders' },
   { role: 'STOCK_MANAGER', path: '/app/stock-requests' },
-  { role: 'INVENTORY_STAFF', path: '/app/stock-requests' },
+  { role: 'INVENTORY_STAFF', path: '/app/inventory' },
   { role: 'KITCHEN', path: '/app/kitchen-orders' },
 ]
 
