@@ -41,6 +41,7 @@ export interface GetOrdersQueryParams {
   status?: OrderStatus;
   paymentStatus?: PaymentStatus;
   type?: OrderType;
+  searchTerm?: string;
   pageNumber?: number;
   pageSize?: number;
 }

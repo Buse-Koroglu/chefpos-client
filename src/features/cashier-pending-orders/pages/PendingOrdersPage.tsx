@@ -21,7 +21,7 @@ const FORM_INPUT_CLASSNAME =
   'h-10 w-full rounded-none border border-zinc-200 bg-white pl-9 pr-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
 
 const TABS: Array<{ value: PendingOrdersTab; label: string }> = [
-  { value: 'PREPARING', label: 'Hazırlanan Siparişler' },
+  { value: 'PREPARING', label: 'Bekleyen Siparişler' },
   { value: 'AWAITING_PAYMENT', label: 'Ödeme Bekleyen Siparişler' },
 ]
 
@@ -53,7 +53,10 @@ export function PendingOrdersPage() {
   const cancelOrder = useCancelOrder()
   const makePaidOrder = useMakePaidOrder()
 
-  const orders = (data?.items ?? []).filter((order) => order.type !== 'WAITER')
+  const orders = (data?.items ?? []).filter(
+  (order) =>
+    tab === 'AWAITING_PAYMENT' ||
+    order.type !== 'WAITER')
   const normalizedQuery = query.trim().toLocaleLowerCase('tr-TR')
   const filteredOrders = normalizedQuery
     ? orders.filter(
