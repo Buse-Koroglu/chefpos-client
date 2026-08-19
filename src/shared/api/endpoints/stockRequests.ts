@@ -6,6 +6,7 @@ import type {
   GetStockRequestsPagedQueryParams,
   PagedResult,
   RejectStockRequestRequest,
+  StockRequestStatus,
 } from '@/shared/types/stockRequest'
 
 interface RawStockRequestPayload {
@@ -26,6 +27,19 @@ interface RawStockRequestPayload {
   decidedAt?: string | null
 }
 
+export interface StockRequestResponse {
+  id: string
+  ingredientId: string
+  ingredientName: string
+  locationId: string
+  requestedByUserId: string
+  requestedQuantity: number
+  status: StockRequestStatus
+  decidedByUserId: string | null
+  rejectionReason: string | null
+  decidedAt: string | null
+}
+
 function normalizeStockRequest(raw: RawStockRequestPayload): AdminStockRequestResponseDto {
   return { ...raw, unit: STOCK_UNITS[raw.unit], status: STOCK_REQUEST_STATUSES[raw.status] }
 }
@@ -44,4 +58,20 @@ export function rejectStockRequest(id: string, payload: RejectStockRequestReques
   return apiClient
     .post<RawStockRequestPayload>(`/api/stock-requests/${id}/reject`, payload)
     .then((res) => normalizeStockRequest(res.data))
+}
+
+export interface CreateStockRequestRequest {
+  ingredientId: string
+  requestedQuantity: number
+}
+
+export async function createStockRequest(
+  request: CreateStockRequestRequest,
+) {
+  const response = await apiClient.post<StockRequestResponse>(
+    '/api/stock-requests',
+    request,
+  )
+
+  return response.data
 }

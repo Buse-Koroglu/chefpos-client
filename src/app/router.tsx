@@ -22,6 +22,7 @@ import { PendingOrdersPage } from '@/features/cashier-pending-orders/pages/Pendi
 import { PastOrdersPage } from '@/features/cashier-past-orders/pages/PastOrdersPage'
 import { WaiterOrderPage } from '@/features/waiter-pos/pages/WaiterOrderPage'
 import { PreparingOrdersPage } from '@/features/kitchen-preparing-orders/pages/PreparingOrdersPage'
+import { InventoryDashboardPage } from '@/features/inventory-dashboard/pages/InventoryDashboardPage'
 
 const EMPTY_ROLES: Role[] = []
 
@@ -220,6 +221,17 @@ export function AppRouter() {
           }
         />
 
+        <Route
+          path="/app/inventory"
+          element={
+            <RequireAuth>
+              <RequireRole path="/app/inventory">
+                <InventoryDashboardPage />
+              </RequireRole>
+            </RequireAuth>
+          }
+        />
+
         <Route path="/403" element={<Placeholder label="403 — Bu sayfaya erişim yetkiniz yok" />} />
         <Route path="*" element={<Placeholder label="404 — Sayfa bulunamadı" />} />
 
@@ -236,14 +248,7 @@ export function AppRouter() {
           }
         >
           <Route index element={<Navigate to="dashboard" replace />} />
-          <Route
-            path="orders/:id"
-            element={
-              <RequireRole path="/app/orders/:id">
-                <Placeholder label="Sipariş Detay — Faz 1" />
-              </RequireRole>
-            }
-          />
+
         </Route>
       </Routes>
     </BrowserRouter>
