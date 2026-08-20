@@ -23,6 +23,7 @@ import { PastOrdersPage } from '@/features/cashier-past-orders/pages/PastOrdersP
 import { WaiterOrderPage } from '@/features/waiter-pos/pages/WaiterOrderPage'
 import { PreparingOrdersPage } from '@/features/kitchen-preparing-orders/pages/PreparingOrdersPage'
 import { InventoryDashboardPage } from '@/features/inventory-dashboard/pages/InventoryDashboardPage'
+import { MyStockRequestsPage } from '@/features/inventory-my-stock-requests/pages/MyStockRequestsPage'
 
 const EMPTY_ROLES: Role[] = []
 
@@ -227,6 +228,17 @@ export function AppRouter() {
             <RequireAuth>
               <RequireRole path="/app/inventory">
                 <InventoryDashboardPage />
+              </RequireRole>
+            </RequireAuth>
+          }
+        />
+
+          <Route
+          path="/app/inventory/stock-requests"
+          element={
+            <RequireAuth>
+              <RequireRole path="/app/inventory/stock-requests">
+                <MyStockRequestsPage />
               </RequireRole>
             </RequireAuth>
           }
