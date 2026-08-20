@@ -87,13 +87,13 @@ export function InventoryDashboardPage() {
 
             <div className="flex flex-col gap-4 sm:flex-row">
               <DashNavigationCard
-                title="Stok Talepleri"
-                description="Stok taleplerini görüntüle"
+                title="Stok Taleplerim"
+                description="Stok taleplerimi görüntüle"
                 actionLabel="Talepleri Gör"
                 icon={ClipboardList}
                 onClick={() =>
                   navigate(
-                    '/inventory/stock-requests',
+                    '/app/inventory/stock-requests',
                   )
                 }
               />

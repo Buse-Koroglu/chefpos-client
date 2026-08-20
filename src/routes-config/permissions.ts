@@ -22,6 +22,7 @@ export const APP_ROUTES: RouteConfig[] = [
   { path: '/app/ingredients', label: 'Hammaddeler', allowedRoles: ['ADMIN', 'STOCK_MANAGER', 'INVENTORY_STAFF'], showInSidebar: true },
   { path: '/app/stock-requests', label: 'Stok Talepleri', allowedRoles: ['ADMIN', 'STOCK_MANAGER', 'INVENTORY_STAFF'], showInSidebar: true },
   { path: '/app/inventory', label: 'Stok Görevlisi Ana Sayfa', allowedRoles: ['INVENTORY_STAFF'],showInSidebar:true},
+  { path: '/app/inventory/stock-requests', label: 'Stok Taleplerim', allowedRoles: ['INVENTORY_STAFF'], showInSidebar: true },
   { path: '/app/users', label: 'Kullanıcılar', allowedRoles: ['ADMIN'], showInSidebar: true },
   { path: '/app/locations', label: 'Şubeler', allowedRoles: ['ADMIN'], showInSidebar: true },
   { path: '/app/change-password', label: 'Şifre Değiştir', allowedRoles: 'ANY', showInSidebar: false },

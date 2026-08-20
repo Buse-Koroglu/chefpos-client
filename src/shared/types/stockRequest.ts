@@ -32,6 +32,8 @@ export interface GetStockRequestsPagedQueryParams {
   searchTerm?: string
   locationId?: string
   status?: StockRequestStatus
+  onlyMyRequests?: boolean
+  onlyHistory?: boolean
   pageNumber?: number
   pageSize?: number
 }
