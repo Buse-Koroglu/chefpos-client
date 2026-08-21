@@ -2,7 +2,7 @@ import { useState } from 'react'
 import axios from 'axios'
 import { useQueryClient } from '@tanstack/react-query'
 import { Dialog } from '@base-ui/react/dialog'
-import { AlertTriangle, X } from 'lucide-react'
+import { AlertTriangle, Eye, EyeOff, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -57,6 +57,7 @@ function StaffEditForm({ staff, locations, onClose }: StaffEditFormProps) {
   const [isActive, setIsActive] = useState(staff.isActive)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [saveErrors, setSaveErrors] = useState<string[]>([])
+  const [showPersonalId, setShowPersonalId] = useState(false)
 
   function toggleRole(role: Role) {
     setRoles((prev) => (prev.includes(role) ? prev.filter((value) => value !== role) : [...prev, role]))
@@ -167,12 +168,32 @@ function StaffEditForm({ staff, locations, onClose }: StaffEditFormProps) {
             </ul>
           </div>
         )}
-
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-zinc-600">Personel ID</label>
-          <input value={staff.personalId} readOnly className={cn(FIELD_CLASSNAME, 'bg-zinc-50 text-zinc-500')} />
-        </div>
+          <label className="mb-1.5 block text-xs font-medium text-zinc-600">
+            Personel ID
+          </label>
 
+          <div className="flex h-10 w-full items-center border border-zinc-200 bg-zinc-50">
+            <span className="flex-1 px-3 text-sm tabular-nums text-zinc-500">
+              {showPersonalId
+                ? staff.personalId
+                : `${staff.personalId.slice(0, 2)}*******${staff.personalId.slice(-2)}`}
+            </span>
+
+            <button
+              type="button"
+              onClick={() => setShowPersonalId((prev) => !prev)}
+              className="flex h-full w-10 items-center justify-center border-l border-zinc-200 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700"
+              aria-label={showPersonalId ? 'Personel ID\'yi gizle' : 'Personel ID\'yi göster'}
+            >
+              {showPersonalId ? (
+                <EyeOff className="size-4" />
+              ) : (
+                <Eye className="size-4" />
+              )}
+            </button>
+          </div>
+        </div>
         <div>
           <label className="mb-1.5 block text-xs font-medium text-zinc-600">Ad Soyad</label>
           <input
