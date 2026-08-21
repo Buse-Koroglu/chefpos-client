@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import axios from 'axios'
 import { useQueryClient } from '@tanstack/react-query'
 import { Dialog } from '@base-ui/react/dialog'
-import { AlertTriangle, X } from 'lucide-react'
+import { AlertTriangle, Eye, EyeOff, X, ChevronDown, Check } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -23,8 +23,6 @@ import { useUserDetail } from '@/features/admin-staff/hooks/useUserDetail'
 const FIELD_CLASSNAME =
   'h-10 w-full rounded-none border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
 
-const TOGGLE_CHIP_CLASSNAME = 'border px-2.5 py-1 text-xs font-medium transition-colors'
-
 function getDetailErrorMessage(error: unknown): string {
   if (axios.isAxiosError(error)) {
     const status = error.response?.status
@@ -39,6 +37,112 @@ function updateUserInCache(queryClient: ReturnType<typeof useQueryClient>, user:
   queryClient.setQueryData(['users', 'detail', user.id], user)
   queryClient.setQueriesData<UserResponseDto[]>({ queryKey: ['users'], exact: false }, (old) =>
     Array.isArray(old) ? old.map((member) => (member.id === user.id ? user : member)) : old,
+  )
+}
+
+interface MultiSelectDropdownProps<T extends string> {
+  label: string
+  placeholder: string
+  options: { id: T; label: string }[]
+  selectedIds: T[]
+  onToggle: (id: T) => void
+  disabled?: boolean
+}
+
+function MultiSelectDropdown<T extends string>({
+  label,
+  placeholder,
+  options,
+  selectedIds,
+  onToggle,
+  disabled,
+}: MultiSelectDropdownProps<T>) {
+  const [isOpen, setIsOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  return (
+    <div className="relative space-y-1.5" ref={dropdownRef}>
+      <label className="block text-xs font-medium text-zinc-600">{label}</label>
+
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => setIsOpen((prev) => !prev)}
+        className={cn(
+          FIELD_CLASSNAME,
+          'flex items-center justify-between text-left cursor-pointer transition-all',
+          isOpen && 'border-[#133458] ring-1 ring-[#133458]',
+          disabled && 'opacity-60 cursor-not-allowed bg-zinc-50'
+        )}
+      >
+        <span className="truncate text-zinc-600">
+          {selectedIds.length === 0 ? placeholder : `${selectedIds.length} öğe seçildi`}
+        </span>
+        <ChevronDown
+          className={cn('size-4 text-zinc-400 transition-transform duration-200', isOpen && 'rotate-180')}
+        />
+      </button>
+
+      {isOpen && (
+        <div className="absolute z-50 mt-1 max-h-56 w-full overflow-y-auto border border-zinc-200 bg-white shadow-lg">
+          <div className="p-1 space-y-0.5">
+            {options.map((option) => {
+              const isSelected = selectedIds.includes(option.id)
+              return (
+                <button
+                  key={option.id}
+                  type="button"
+                  onClick={() => onToggle(option.id)}
+                  className={cn(
+                    'flex w-full items-center justify-between px-3 py-2 text-xs font-medium transition-colors text-left',
+                    isSelected
+                      ? 'bg-[#133458]/10 text-[#133458]'
+                      : 'text-zinc-700 hover:bg-zinc-100'
+                  )}
+                >
+                  <span className="truncate">{option.label}</span>
+                  {isSelected && <Check className="size-3.5 text-[#133458] shrink-0 ml-2" />}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {selectedIds.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 pt-1">
+          {selectedIds.map((id) => {
+            const opt = options.find((o) => o.id === id)
+            return (
+              <span
+                key={id}
+                className="inline-flex items-center gap-1 border border-[#133458] bg-[#133458] px-2 py-0.5 text-xs font-medium text-white"
+              >
+                {opt?.label ?? id}
+                <button
+                  type="button"
+                  onClick={() => onToggle(id)}
+                  disabled={disabled}
+                  className="hover:opacity-75 focus:outline-none"
+                >
+                  <X className="size-3" />
+                </button>
+              </span>
+            )
+          })}
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -57,6 +161,7 @@ function StaffEditForm({ staff, locations, onClose }: StaffEditFormProps) {
   const [isActive, setIsActive] = useState(staff.isActive)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [saveErrors, setSaveErrors] = useState<string[]>([])
+  const [showPersonalId, setShowPersonalId] = useState(false)
 
   function toggleRole(role: Role) {
     setRoles((prev) => (prev.includes(role) ? prev.filter((value) => value !== role) : [...prev, role]))
@@ -145,6 +250,9 @@ function StaffEditForm({ staff, locations, onClose }: StaffEditFormProps) {
     locationIds.some((id) => !baseline.locationIds.includes(id)) ||
     isActive !== baseline.isActive
 
+  const roleOptions = ROLE_OPTIONS.map((r) => ({ id: r, label: ROLE_LABELS[r] }))
+  const locationOptions = locations.map((loc) => ({ id: loc.id, label: loc.name }))
+
   return (
     <>
       <div className="flex items-center justify-between border-b border-zinc-200 px-5 py-4">
@@ -170,7 +278,22 @@ function StaffEditForm({ staff, locations, onClose }: StaffEditFormProps) {
 
         <div>
           <label className="mb-1.5 block text-xs font-medium text-zinc-600">Personel ID</label>
-          <input value={staff.personalId} readOnly className={cn(FIELD_CLASSNAME, 'bg-zinc-50 text-zinc-500')} />
+          <div className="flex h-10 w-full items-center border border-zinc-200 bg-zinc-50">
+            <span className="flex-1 px-3 text-sm tabular-nums text-zinc-500">
+              {showPersonalId
+                ? staff.personalId
+                : `${staff.personalId.slice(0, 2)}*******${staff.personalId.slice(-2)}`}
+            </span>
+
+            <button
+              type="button"
+              onClick={() => setShowPersonalId((prev) => !prev)}
+              className="flex h-full w-10 items-center justify-center border-l border-zinc-200 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700"
+              aria-label={showPersonalId ? "Personel ID'yi gizle" : "Personel ID'yi göster"}
+            >
+              {showPersonalId ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+            </button>
+          </div>
         </div>
 
         <div>
@@ -182,52 +305,23 @@ function StaffEditForm({ staff, locations, onClose }: StaffEditFormProps) {
           />
         </div>
 
-        <div>
-          <label className="mb-1.5 block text-xs font-medium text-zinc-600">Görev</label>
-          <div className="flex flex-wrap gap-2">
-            {ROLE_OPTIONS.map((role) => (
-              <button
-                key={role}
-                type="button"
-                onClick={() => toggleRole(role)}
-                disabled={isSubmitting}
-                className={cn(
-                  TOGGLE_CHIP_CLASSNAME,
-                  roles.includes(role)
-                    ? 'border-[#133458] bg-[#133458] text-white'
-                    : 'border-zinc-200 text-zinc-600 hover:border-zinc-300',
-                )}
-              >
-                {ROLE_LABELS[role]}
-              </button>
-            ))}
-          </div>
-        </div>
+        <MultiSelectDropdown
+          label="Görev"
+          placeholder="Görev seçiniz..."
+          options={roleOptions}
+          selectedIds={roles}
+          onToggle={toggleRole}
+          disabled={isSubmitting}
+        />
 
-        <div>
-          <label className="mb-1.5 block text-xs font-medium text-zinc-600">Lokasyon</label>
-          <div className="flex flex-wrap gap-2">
-            {locations.map((location) => {
-              const isSelected = locationIds.includes(location.id)
-              return (
-                <button
-                  key={location.id}
-                  type="button"
-                  onClick={() => toggleLocation(location.id)}
-                  disabled={isSubmitting}
-                  className={cn(
-                    TOGGLE_CHIP_CLASSNAME,
-                    isSelected
-                      ? 'border-[#133458] bg-[#133458] text-white'
-                      : 'border-zinc-200 text-zinc-600 hover:border-zinc-300',
-                  )}
-                >
-                  {location.name}
-                </button>
-              )
-            })}
-          </div>
-        </div>
+        <MultiSelectDropdown
+          label="Lokasyon"
+          placeholder="Lokasyon seçiniz..."
+          options={locationOptions}
+          selectedIds={locationIds}
+          onToggle={toggleLocation}
+          disabled={isSubmitting}
+        />
 
         <div>
           <label className="mb-1.5 block text-xs font-medium text-zinc-600">Durum</label>

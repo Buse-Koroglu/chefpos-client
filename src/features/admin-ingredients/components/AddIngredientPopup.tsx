@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import axios from 'axios'
 import { useQueryClient } from '@tanstack/react-query'
 import { Dialog } from '@base-ui/react/dialog'
-import { X } from 'lucide-react'
+import { Check, ChevronDown, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -13,8 +13,6 @@ import { createIngredient } from '@/shared/api/endpoints/ingredients'
 
 const FIELD_CLASSNAME =
   'h-10 w-full rounded-none border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
-
-const TOGGLE_CHIP_CLASSNAME = 'border px-2.5 py-1 text-xs font-medium transition-colors'
 
 interface FormErrors {
   name?: string
@@ -50,6 +48,113 @@ function getCreateErrorMessage(error: unknown): string {
     if (status === 401 || status === 403) return 'Bu işlem için yönetici yetkisine sahip olmalısınız.'
   }
   return 'Ham madde oluşturulamadı. Lütfen tekrar deneyin.'
+}
+
+interface MultiSelectDropdownProps {
+  label: string
+  placeholder: string
+  options: { id: string; label: string }[]
+  selectedIds: string[]
+  onToggle: (id: string) => void
+  disabled?: boolean
+  hasError?: boolean
+}
+
+function MultiSelectDropdown({
+  label,
+  placeholder,
+  options,
+  selectedIds,
+  onToggle,
+  disabled,
+  hasError,
+}: MultiSelectDropdownProps) {
+  const [isOpen, setIsOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  return (
+    <div className="relative space-y-1.5" ref={dropdownRef}>
+      <label className="block text-xs font-medium text-zinc-600">{label}</label>
+
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => setIsOpen((prev) => !prev)}
+        className={cn(
+          FIELD_CLASSNAME,
+          'flex items-center justify-between text-left cursor-pointer transition-all',
+          hasError && 'border-red-300',
+          isOpen && 'border-[#133458] ring-1 ring-[#133458]',
+          disabled && 'opacity-60 cursor-not-allowed bg-zinc-50',
+        )}
+      >
+        <span className="truncate text-zinc-600">
+          {selectedIds.length === 0 ? placeholder : `${selectedIds.length} yerleşke seçildi`}
+        </span>
+        <ChevronDown
+          className={cn('size-4 text-zinc-400 transition-transform duration-200', isOpen && 'rotate-180')}
+        />
+      </button>
+
+      {isOpen && (
+        <div className="absolute z-50 mt-1 max-h-56 w-full overflow-y-auto border border-zinc-200 bg-white shadow-lg">
+          <div className="p-1 space-y-0.5">
+            {options.map((option) => {
+              const isSelected = selectedIds.includes(option.id)
+              return (
+                <button
+                  key={option.id}
+                  type="button"
+                  onClick={() => onToggle(option.id)}
+                  className={cn(
+                    'flex w-full items-center justify-between px-3 py-2 text-xs font-medium transition-colors text-left',
+                    isSelected ? 'bg-[#133458]/10 text-[#133458]' : 'text-zinc-700 hover:bg-zinc-100',
+                  )}
+                >
+                  <span className="truncate">{option.label}</span>
+                  {isSelected && <Check className="size-3.5 text-[#133458] shrink-0 ml-2" />}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {selectedIds.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 pt-1">
+          {selectedIds.map((id) => {
+            const opt = options.find((o) => o.id === id)
+            return (
+              <span
+                key={id}
+                className="inline-flex items-center gap-1 border border-[#133458] bg-[#133458] px-2 py-0.5 text-xs font-medium text-white"
+              >
+                {opt?.label ?? id}
+                <button
+                  type="button"
+                  onClick={() => onToggle(id)}
+                  disabled={disabled}
+                  className="hover:opacity-75 focus:outline-none"
+                >
+                  <X className="size-3" />
+                </button>
+              </span>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
 }
 
 interface AddIngredientPopupProps {
@@ -119,6 +224,8 @@ export function AddIngredientPopup({ open, locations, onClose }: AddIngredientPo
       setIsSubmitting(false)
     }
   }
+
+  const locationOptions = locations.map((loc) => ({ id: loc.id, label: loc.name }))
 
   return (
     <Dialog.Root open={open} onOpenChange={(nextOpen) => !nextOpen && handleClose()}>
@@ -206,25 +313,17 @@ export function AddIngredientPopup({ open, locations, onClose }: AddIngredientPo
               </div>
             </div>
 
+            {/* Yerleşkeler Multi-Select Dropdown */}
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-zinc-600">Yerleşkeler</label>
-              <div className="flex flex-wrap gap-2">
-                {locations.map((location) => (
-                  <button
-                    key={location.id}
-                    type="button"
-                    onClick={() => toggleLocation(location.id)}
-                    className={cn(
-                      TOGGLE_CHIP_CLASSNAME,
-                      locationIds.includes(location.id)
-                        ? 'border-[#133458] bg-[#133458] text-white'
-                        : 'border-zinc-200 text-zinc-600 hover:border-zinc-300',
-                    )}
-                  >
-                    {location.name}
-                  </button>
-                ))}
-              </div>
+              <MultiSelectDropdown
+                label="Yerleşkeler"
+                placeholder="Yerleşke seçiniz..."
+                options={locationOptions}
+                selectedIds={locationIds}
+                onToggle={toggleLocation}
+                disabled={isSubmitting}
+                hasError={Boolean(errors.locationIds)}
+              />
               {errors.locationIds && <p className="mt-1 text-xs text-red-600">{errors.locationIds}</p>}
               <p className="mt-1.5 text-xs text-zinc-400">
                 Seçilen her yerleşke için aynı bilgilerle ayrı bir ham madde kaydı oluşturulur.

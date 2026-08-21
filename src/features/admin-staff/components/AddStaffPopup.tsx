@@ -1,8 +1,8 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useRef, useEffect } from 'react'
 import axios from 'axios'
 import { useQueryClient } from '@tanstack/react-query'
 import { Dialog } from '@base-ui/react/dialog'
-import { AlertTriangle, Check, Copy, RotateCcw, X } from 'lucide-react'
+import { AlertTriangle, Check, ChevronDown, Copy, RotateCcw, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -14,7 +14,117 @@ import { ROLE_LABELS, ROLE_OPTIONS } from '@/features/admin-staff/constants'
 const FIELD_CLASSNAME =
   'h-10 w-full rounded-none border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
 
-const TOGGLE_CHIP_CLASSNAME = 'border px-2.5 py-1 text-xs font-medium transition-colors'
+interface MultiSelectDropdownProps<T extends string> {
+  label: string
+  placeholder: string
+  itemLabelSingular?: string
+  options: { id: T; label: string }[]
+  selectedIds: T[]
+  onToggle: (id: T) => void
+  disabled?: boolean
+  hasError?: boolean
+}
+
+function MultiSelectDropdown<T extends string>({
+  label,
+  placeholder,
+  itemLabelSingular = 'öğe',
+  options,
+  selectedIds,
+  onToggle,
+  disabled,
+  hasError,
+}: MultiSelectDropdownProps<T>) {
+  const [isOpen, setIsOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  return (
+    <div className="relative space-y-1.5" ref={dropdownRef}>
+      <label className="block text-xs font-medium text-zinc-600">{label}</label>
+
+      {/* Tetikleyici Buton */}
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => setIsOpen((prev) => !prev)}
+        className={cn(
+          FIELD_CLASSNAME,
+          'flex items-center justify-between text-left cursor-pointer transition-all',
+          hasError && 'border-red-300',
+          isOpen && 'border-[#133458] ring-1 ring-[#133458]',
+          disabled && 'opacity-60 cursor-not-allowed bg-zinc-50',
+        )}
+      >
+        <span className="truncate text-zinc-600">
+          {selectedIds.length === 0 ? placeholder : `${selectedIds.length} ${itemLabelSingular} seçildi`}
+        </span>
+        <ChevronDown
+          className={cn('size-4 text-zinc-400 transition-transform duration-200', isOpen && 'rotate-180')}
+        />
+      </button>
+
+      {/* Açılır Liste */}
+      {isOpen && (
+        <div className="absolute z-50 mt-1 max-h-56 w-full overflow-y-auto border border-zinc-200 bg-white shadow-lg">
+          <div className="p-1 space-y-0.5">
+            {options.map((option) => {
+              const isSelected = selectedIds.includes(option.id)
+              return (
+                <button
+                  key={option.id}
+                  type="button"
+                  onClick={() => onToggle(option.id)}
+                  className={cn(
+                    'flex w-full items-center justify-between px-3 py-2 text-xs font-medium transition-colors text-left',
+                    isSelected ? 'bg-[#133458]/10 text-[#133458]' : 'text-zinc-700 hover:bg-zinc-100',
+                  )}
+                >
+                  <span className="truncate">{option.label}</span>
+                  {isSelected && <Check className="size-3.5 text-[#133458] shrink-0 ml-2" />}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Seçili Rozetler (Chips) */}
+      {selectedIds.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 pt-1">
+          {selectedIds.map((id) => {
+            const opt = options.find((o) => o.id === id)
+            return (
+              <span
+                key={id}
+                className="inline-flex items-center gap-1 border border-[#133458] bg-[#133458] px-2 py-0.5 text-xs font-medium text-white"
+              >
+                {opt?.label ?? id}
+                <button
+                  type="button"
+                  onClick={() => onToggle(id)}
+                  disabled={disabled}
+                  className="hover:opacity-75 focus:outline-none"
+                >
+                  <X className="size-3" />
+                </button>
+              </span>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
 
 interface FormErrors {
   firstName?: string
@@ -86,6 +196,9 @@ function StaffFormStep({ locations, isSubmitting, submitError, onCancel, onSubmi
     onSubmit({ firstName, lastName, personalId, roles, locationIds })
   }
 
+  const roleOptions = ROLE_OPTIONS.map((r) => ({ id: r, label: ROLE_LABELS[r] }))
+  const locationOptions = locations.map((loc) => ({ id: loc.id, label: loc.name }))
+
   return (
     <>
       <div className="flex items-center justify-between border-b border-zinc-200 px-5 py-4">
@@ -104,7 +217,7 @@ function StaffFormStep({ locations, isSubmitting, submitError, onCancel, onSubmi
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-zinc-600">Ad</label>
+            <label className="mb-1.5 block text-xs font-medium text-zinc-600">Ad *</label>
             <input
               value={firstName}
               onChange={(event) => setFirstName(event.target.value)}
@@ -113,7 +226,7 @@ function StaffFormStep({ locations, isSubmitting, submitError, onCancel, onSubmi
             {errors.firstName && <p className="mt-1 text-xs text-red-600">{errors.firstName}</p>}
           </div>
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-zinc-600">Soyad</label>
+            <label className="mb-1.5 block text-xs font-medium text-zinc-600">Soyad *</label>
             <input
               value={lastName}
               onChange={(event) => setLastName(event.target.value)}
@@ -124,7 +237,7 @@ function StaffFormStep({ locations, isSubmitting, submitError, onCancel, onSubmi
         </div>
 
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-zinc-600">Personel No</label>
+          <label className="mb-1.5 block text-xs font-medium text-zinc-600">Personel No *</label>
           <input
             value={personalId}
             onChange={(event) => setPersonalId(event.target.value.replace(/\D/g, '').slice(0, 11))}
@@ -136,48 +249,31 @@ function StaffFormStep({ locations, isSubmitting, submitError, onCancel, onSubmi
         </div>
 
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-zinc-600">Rol</label>
-          <div className="flex flex-wrap gap-2">
-            {ROLE_OPTIONS.map((role) => (
-              <button
-                key={role}
-                type="button"
-                onClick={() => toggleRole(role)}
-                className={cn(
-                  TOGGLE_CHIP_CLASSNAME,
-                  roles.includes(role)
-                    ? 'border-[#133458] bg-[#133458] text-white'
-                    : 'border-zinc-200 text-zinc-600 hover:border-zinc-300',
-                )}
-              >
-                {ROLE_LABELS[role]}
-              </button>
-            ))}
-          </div>
+          <MultiSelectDropdown
+            label="Görev *"
+            placeholder="Görev seçiniz..."
+            itemLabelSingular="görev"
+            options={roleOptions}
+            selectedIds={roles}
+            onToggle={toggleRole}
+            disabled={isSubmitting}
+            hasError={Boolean(errors.roles)}
+          />
           {errors.roles && <p className="mt-1 text-xs text-red-600">{errors.roles}</p>}
         </div>
 
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-zinc-600">Lokasyonlar</label>
-          <div className="flex flex-wrap gap-2">
-            {locations.map((location) => (
-              <button
-                key={location.id}
-                type="button"
-                onClick={() => toggleLocation(location.id)}
-                className={cn(
-                  TOGGLE_CHIP_CLASSNAME,
-                  locationIds.includes(location.id)
-                    ? 'border-[#133458] bg-[#133458] text-white'
-                    : 'border-zinc-200 text-zinc-600 hover:border-zinc-300',
-                )}
-              >
-                {location.name}
-              </button>
-            ))}
-          </div>
+          <MultiSelectDropdown
+            label="Lokasyonlar"
+            placeholder="Lokasyon seçiniz..."
+            itemLabelSingular="lokasyon"
+            options={locationOptions}
+            selectedIds={locationIds}
+            onToggle={toggleLocation}
+            disabled={isSubmitting}
+          />
           {locationIds.length === 0 && (
-            <p className="mt-1 text-xs text-amber-600">
+            <p className="mt-1.5 text-xs text-amber-600">
               Lokasyonsuz personel hiçbir yere erişemez, en az bir lokasyon seçmeniz önerilir.
             </p>
           )}

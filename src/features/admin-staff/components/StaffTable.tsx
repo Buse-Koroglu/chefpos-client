@@ -73,7 +73,9 @@ export function StaffTable({ staff, locationsById, onSelect, isLoading }: StaffT
                   )}
                 </span>
               </td>
-              <td className="px-4 py-3 tabular-nums text-zinc-500">{member.personalId}</td>
+            <td className="px-4 py-3 tabular-nums text-zinc-500">
+              {`${member.personalId.slice(0, 2)}*******${member.personalId.slice(-2)}`}
+            </td>
               <td className="px-4 py-3">
                 <div className="flex flex-wrap gap-1">
                   {member.roles.map((role) => (

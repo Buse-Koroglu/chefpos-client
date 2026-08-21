@@ -100,7 +100,7 @@ export function WaiterOrderPage() {
             onChange={(event) =>
               setCustomerName(event.target.value)
             }
-            placeholder="Örn. Ahmet Yılmaz"
+            placeholder="Örn. Buse Köroğlu"
             maxLength={100}
             className="h-11 w-full border border-zinc-300 bg-white px-3 text-sm text-zinc-900 outline-none placeholder:text-zinc-400 focus:border-zinc-900"
           />
