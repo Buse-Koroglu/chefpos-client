@@ -25,6 +25,9 @@ interface RawStockRequestPayload {
   decidedByUserName?: string | null
   rejectionReason?: string | null
   decidedAt?: string | null
+  approvedUnitPrice?: number | null
+  ingredientLatestUnitPrice: number | null
+  ingredientWeightedAverageUnitPrice: number
 }
 
 export interface StockRequestResponse {
@@ -50,8 +53,14 @@ export function getStockRequestsPaged(params: GetStockRequestsPagedQueryParams) 
     .then((res) => ({ ...res.data, items: res.data.items.map(normalizeStockRequest) }))
 }
 
-export function approveStockRequest(id: string) {
-  return apiClient.post<RawStockRequestPayload>(`/api/stock-requests/${id}/approve`).then((res) => normalizeStockRequest(res.data))
+export interface ApproveStockRequestRequest {
+  unitPrice: number
+}
+
+export function approveStockRequest(id: string, payload: ApproveStockRequestRequest) {
+  return apiClient
+    .post<RawStockRequestPayload>(`/api/stock-requests/${id}/approve`, payload)
+    .then((res) => normalizeStockRequest(res.data))
 }
 
 export function rejectStockRequest(id: string, payload: RejectStockRequestRequest) {

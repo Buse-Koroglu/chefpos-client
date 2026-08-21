@@ -1,7 +1,7 @@
 import type { LucideIcon } from 'lucide-react'
 import {
-  ClipboardList,
-  History,
+  Archive,
+  Clock3,
   Home,
   Wheat,
 } from 'lucide-react'
@@ -18,13 +18,13 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { label: 'Ana Sayfa', icon: Home, to: '/app/inventory', end: true },
-  { label: 'Stok Taleplerim', icon: ClipboardList, to: '/app/inventory/stock-requests' },
-  { label: 'Stok Hareketleri', icon: History, to: '/app/inventory/stock-movements' },
-  { label: 'Ham Maddeler', icon: Wheat, to: '/app/inventory/ingredients' },
+  { label: 'Genel Bakış', icon: Home, to: '/app/stock-manager', end: true },
+  { label: 'Bekleyen Stok Talepleri', icon: Clock3, to: '/app/stock-manager/pending-requests' },
+  { label: 'Geçmiş Stok Talepleri', icon: Archive, to: '/app/stock-manager/past-requests' },
+  { label: 'Ham Maddeler', icon: Wheat, to: '/app/stock-manager/ingredients' },
 ]
 
-export function InventorySidebar() {
+export function StockManagerSidebar() {
   return (
     <aside className="flex h-screen w-64 shrink-0 flex-col border-r border-zinc-200 bg-zinc-100">
       <div className="flex items-center gap-2 border-b border-zinc-200 px-5 py-5">

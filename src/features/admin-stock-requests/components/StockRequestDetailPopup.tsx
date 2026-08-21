@@ -19,6 +19,10 @@ const FIELD_CLASSNAME =
 const TEXTAREA_CLASSNAME =
   'w-full rounded-none border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
 
+function formatUnitPrice(value: number): string {
+  return value.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+}
+
 function InfoField({ label, value }: { label: string; value: string }) {
   return (
     <div>
@@ -40,6 +44,8 @@ function StockRequestDetailForm({ stockRequest, onClose }: StockRequestDetailFor
 
   const [isRejecting, setIsRejecting] = useState(false)
   const [rejectionReason, setRejectionReason] = useState('')
+  const [isApproving, setIsApproving] = useState(false)
+  const [unitPrice, setUnitPrice] = useState('')
 
   function invalidateAndClose(message: string) {
     queryClient.invalidateQueries({ queryKey: ['stockRequests'], exact: false })
@@ -48,7 +54,7 @@ function StockRequestDetailForm({ stockRequest, onClose }: StockRequestDetailFor
   }
 
   const approveMutation = useMutation({
-    mutationFn: () => approveStockRequest(stockRequest.id),
+    mutationFn: () => approveStockRequest(stockRequest.id, { unitPrice: Number(unitPrice) }),
     onSuccess: () => invalidateAndClose('Stok talebi onaylandı.'),
     onError: (error) => toast.error(getApiErrorMessage(error, 'Stok talebi onaylanamadı.')),
   })
@@ -93,6 +99,17 @@ function StockRequestDetailForm({ stockRequest, onClose }: StockRequestDetailFor
           <InfoField label="Talep Tarihi" value={formatStockRequestDateTime(stockRequest.createdAt)} />
         </div>
 
+        <div className="grid grid-cols-2 gap-3">
+          <InfoField
+            label={stockRequest.status === 'APPROVED' ? 'Onay Anındaki Birim Fiyat' : 'Güncel Ham Madde Fiyatı'}
+            value={formatUnitPrice(
+              stockRequest.status === 'APPROVED' && stockRequest.approvedUnitPrice != null
+                ? stockRequest.approvedUnitPrice
+                : stockRequest.ingredientWeightedAverageUnitPrice,
+            )}
+          />
+        </div>
+
         {stockRequest.status !== 'PENDING' && (
           <div className="space-y-3 border border-zinc-200 bg-zinc-50 p-3">
             <p className="text-xs font-semibold tracking-wide text-zinc-500 uppercase">İşlem Bilgisi</p>
@@ -119,6 +136,22 @@ function StockRequestDetailForm({ stockRequest, onClose }: StockRequestDetailFor
               placeholder="Reddetme sebebini yazın..."
               disabled={isSubmitting}
               className={TEXTAREA_CLASSNAME}
+            />
+          </div>
+        )}
+
+        {canDecide && isApproving && (
+          <div>
+            <label className="mb-1.5 block text-xs font-medium text-zinc-600">Birim Fiyat</label>
+            <input
+              value={unitPrice}
+              onChange={(event) => setUnitPrice(event.target.value)}
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder="0.00"
+              disabled={isSubmitting}
+              className="h-10 w-full rounded-none border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400"
             />
           </div>
         )}
@@ -149,6 +182,29 @@ function StockRequestDetailForm({ stockRequest, onClose }: StockRequestDetailFor
                 {rejectMutation.isPending ? 'Reddediliyor...' : 'Reddi Onayla'}
               </Button>
             </>
+          ) : isApproving ? (
+            <>
+              <Button
+                type="button"
+                variant="outline"
+                className="h-11 flex-1 rounded-none text-sm"
+                onClick={() => {
+                  setIsApproving(false)
+                  setUnitPrice('')
+                }}
+                disabled={isSubmitting}
+              >
+                Vazgeç
+              </Button>
+              <Button
+                type="button"
+                className={cn('h-11 flex-1 rounded-none bg-[#133458] text-sm text-white hover:bg-[#0f2843]')}
+                onClick={() => approveMutation.mutate()}
+                disabled={isSubmitting || unitPrice.trim() === '' || Number(unitPrice) < 0}
+              >
+                {approveMutation.isPending ? 'Onaylanıyor...' : 'Onayı Tamamla'}
+              </Button>
+            </>
           ) : (
             <>
               <Button
@@ -162,10 +218,10 @@ function StockRequestDetailForm({ stockRequest, onClose }: StockRequestDetailFor
               <Button
                 type="button"
                 className={cn('h-11 flex-1 rounded-none bg-[#133458] text-sm text-white hover:bg-[#0f2843]')}
-                onClick={() => approveMutation.mutate()}
+                onClick={() => setIsApproving(true)}
                 disabled={isSubmitting}
               >
-                {approveMutation.isPending ? 'Onaylanıyor...' : 'Talebi Onayla'}
+                Talebi Onayla
               </Button>
             </>
           )}

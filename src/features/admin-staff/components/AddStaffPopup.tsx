@@ -8,8 +8,11 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import type { Role, UserResponseDto } from '@/shared/types/auth'
 import type { LocationDto } from '@/shared/types/location'
-import { assignLocationAccess, createUser } from '@/shared/api/endpoints/users'
+import { assignLocationAccess, createUser, getStockManagerByLocation } from '@/shared/api/endpoints/users'
+import { getApiErrorMessage } from '@/shared/api/apiError'
+import { InfoDialog } from '@/shared/components/InfoDialog'
 import { ROLE_LABELS, ROLE_OPTIONS } from '@/features/admin-staff/constants'
+import { isStockManagerConflict } from '@/features/admin-staff/utils'
 
 const FIELD_CLASSNAME =
   'h-10 w-full rounded-none border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
@@ -408,6 +411,7 @@ export function AddStaffPopup({ open, locations, onClose }: AddStaffPopupProps) 
   const [generatedPassword, setGeneratedPassword] = useState<string | null>(null)
   const [failedLocationIds, setFailedLocationIds] = useState<string[]>([])
   const [retryingLocationId, setRetryingLocationId] = useState<string | null>(null)
+  const [stockManagerConflictMessage, setStockManagerConflictMessage] = useState<string | null>(null)
 
   function reset() {
     setStep('form')
@@ -417,6 +421,7 @@ export function AddStaffPopup({ open, locations, onClose }: AddStaffPopupProps) 
     setGeneratedPassword(null)
     setFailedLocationIds([])
     setRetryingLocationId(null)
+    setStockManagerConflictMessage(null)
   }
 
   function handleClose() {
@@ -434,6 +439,22 @@ export function AddStaffPopup({ open, locations, onClose }: AddStaffPopupProps) 
     setIsSubmitting(true)
     setSubmitError(null)
 
+    if (data.roles.includes('STOCK_MANAGER') && data.locationIds.length > 0) {
+      const existingManagers = await Promise.all(
+        data.locationIds.map((locationId) => getStockManagerByLocation(locationId)),
+      )
+      const conflictIndex = existingManagers.findIndex((manager) => manager !== null)
+      if (conflictIndex !== -1) {
+        const manager = existingManagers[conflictIndex]!
+        const locationName = locationsById.get(data.locationIds[conflictIndex]) ?? ''
+        setStockManagerConflictMessage(
+          `${locationName} yerleşkesinde zaten bir Stok Yöneticisi atanmış: ${manager.firstName} ${manager.lastName}. Personeli oluşturmadan önce ilgili kullanıcının rolünü değiştirin veya farklı bir yerleşke seçin.`,
+        )
+        setIsSubmitting(false)
+        return
+      }
+    }
+
     try {
       const { user, generatedPassword: password } = await createUser({
         personalId: data.personalId,
@@ -448,8 +469,12 @@ export function AddStaffPopup({ open, locations, onClose }: AddStaffPopupProps) 
       for (const locationId of data.locationIds) {
         try {
           finalUser = await assignLocationAccess(user.id, locationId)
-        } catch {
+        } catch (error) {
           failed.push(locationId)
+          const message = getApiErrorMessage(error)
+          if (isStockManagerConflict(message)) {
+            setStockManagerConflictMessage(message)
+          }
         }
       }
 
@@ -481,14 +506,20 @@ export function AddStaffPopup({ open, locations, onClose }: AddStaffPopupProps) 
       setFailedLocationIds((prev) => prev.filter((id) => id !== locationId))
       updateUserInCache(queryClient, updatedUser)
       toast.success('Lokasyon ataması tamamlandı.')
-    } catch {
-      toast.error('Lokasyon ataması yine başarısız oldu.')
+    } catch (error) {
+      const message = getApiErrorMessage(error, 'Lokasyon ataması yine başarısız oldu.')
+      if (isStockManagerConflict(message)) {
+        setStockManagerConflictMessage(message)
+      } else {
+        toast.error(message)
+      }
     } finally {
       setRetryingLocationId(null)
     }
   }
 
   return (
+    <>
     <Dialog.Root open={open} onOpenChange={(nextOpen) => !nextOpen && handleClose()}>
       <Dialog.Portal>
         <Dialog.Backdrop className="fixed inset-0 bg-zinc-900/40 backdrop-blur-sm" />
@@ -518,5 +549,13 @@ export function AddStaffPopup({ open, locations, onClose }: AddStaffPopupProps) 
         </Dialog.Popup>
       </Dialog.Portal>
     </Dialog.Root>
+
+      <InfoDialog
+        open={Boolean(stockManagerConflictMessage)}
+        title="Stok Yöneticisi Atanamadı"
+        message={stockManagerConflictMessage ?? ''}
+        onClose={() => setStockManagerConflictMessage(null)}
+      />
+    </>
   )
 }

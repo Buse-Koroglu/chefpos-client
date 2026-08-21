@@ -26,6 +26,9 @@ export interface AdminStockRequestResponseDto {
   decidedByUserName?: string | null
   rejectionReason?: string | null
   decidedAt?: string | null
+  approvedUnitPrice?: number | null
+  ingredientLatestUnitPrice: number | null
+  ingredientWeightedAverageUnitPrice: number
 }
 
 export interface GetStockRequestsPagedQueryParams {

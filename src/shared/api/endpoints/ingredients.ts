@@ -7,6 +7,9 @@ import type {
   IngredientAdminResponseDto,
   IngredientResponseDto,
   PagedResult,
+  RecordIngredientPurchaseRequest,
+  RecordManualDeductionRequest,
+  RecordProductProductionRequest,
   UpdateIngredientRequest,
 } from '@/shared/types/ingredient'
 
@@ -14,7 +17,8 @@ interface RawIngredientPayload {
   id: string
   name: string
   unit: number
-  unitPrice: number
+  latestUnitPrice: number | null
+  weightedAverageUnitPrice: number
   currentStock: number
   minStockThreshold: number
   isBelowThreshold: boolean
@@ -69,4 +73,22 @@ export function deactivateIngredient(id: string) {
   return apiClient
     .post<RawIngredientPayload>(`/api/ingredients/${id}/deactivate`)
     .then((res) => normalizeIngredient(res.data))
+}
+
+export function recordIngredientPurchase(id: string, payload: RecordIngredientPurchaseRequest) {
+  return apiClient
+    .post<RawIngredientPayload>(`/api/ingredients/${id}/purchases`, payload)
+    .then((res) => normalizeIngredient(res.data))
+}
+
+export function recordManualDeduction(id: string, payload: RecordManualDeductionRequest) {
+  return apiClient
+    .post<RawIngredientPayload>(`/api/ingredients/${id}/manual-deduction`, payload)
+    .then((res) => normalizeIngredient(res.data))
+}
+
+export function recordProductProduction(payload: RecordProductProductionRequest) {
+  return apiClient
+    .post<RawIngredientPayload[]>('/api/ingredients/production', payload)
+    .then((res) => res.data.map(normalizeIngredient))
 }

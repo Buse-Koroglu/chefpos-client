@@ -13,12 +13,16 @@ import {
   addRole,
   assignLocationAccess,
   deactivateUser,
+  getStockManagerByLocation,
   removeRole,
   revokeLocationAccess,
 } from '@/shared/api/endpoints/users'
 import { Skeleton } from '@/shared/components/Skeleton'
+import { InfoDialog } from '@/shared/components/InfoDialog'
+import { getApiErrorMessage } from '@/shared/api/apiError'
 import { ROLE_LABELS, ROLE_OPTIONS } from '@/features/admin-staff/constants'
 import { useUserDetail } from '@/features/admin-staff/hooks/useUserDetail'
+import { isStockManagerConflict } from '@/features/admin-staff/utils'
 
 const FIELD_CLASSNAME =
   'h-10 w-full rounded-none border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
@@ -162,6 +166,7 @@ function StaffEditForm({ staff, locations, onClose }: StaffEditFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [saveErrors, setSaveErrors] = useState<string[]>([])
   const [showPersonalId, setShowPersonalId] = useState(false)
+  const [stockManagerConflictMessage, setStockManagerConflictMessage] = useState<string | null>(null)
 
   function toggleRole(role: Role) {
     setRoles((prev) => (prev.includes(role) ? prev.filter((value) => value !== role) : [...prev, role]))
@@ -176,14 +181,32 @@ function StaffEditForm({ staff, locations, onClose }: StaffEditFormProps) {
   async function handleSave() {
     setIsSubmitting(true)
     setSaveErrors([])
+    setStockManagerConflictMessage(null)
 
     let current = baseline
+    let hadConflict = false
     const errors: string[] = []
 
     const rolesToAdd = roles.filter((role) => !baseline.roles.includes(role))
     const rolesToRemove = baseline.roles.filter((role) => !roles.includes(role))
     const locationsToAdd = locationIds.filter((id) => !baseline.locationIds.includes(id))
     const locationsToRemove = baseline.locationIds.filter((id) => !locationIds.includes(id))
+
+    if (roles.includes('STOCK_MANAGER') && locationIds.length > 0) {
+      const existingManagers = await Promise.all(
+        locationIds.map((locationId) => getStockManagerByLocation(locationId)),
+      )
+      const conflictIndex = existingManagers.findIndex((manager) => manager !== null && manager.id !== staff.id)
+      if (conflictIndex !== -1) {
+        const manager = existingManagers[conflictIndex]!
+        const locationName = locations.find((location) => location.id === locationIds[conflictIndex])?.name ?? ''
+        setStockManagerConflictMessage(
+          `${locationName} yerleşkesinde zaten bir Stok Yöneticisi atanmış: ${manager.firstName} ${manager.lastName}. Değişiklikleri kaydetmeden önce ilgili kullanıcının rolünü değiştirin veya farklı bir yerleşke seçin.`,
+        )
+        setIsSubmitting(false)
+        return
+      }
+    }
 
     for (const role of rolesToAdd) {
       try {
@@ -204,9 +227,15 @@ function StaffEditForm({ staff, locations, onClose }: StaffEditFormProps) {
     for (const locationId of locationsToAdd) {
       try {
         current = await assignLocationAccess(current.id, locationId)
-      } catch {
+      } catch (error) {
         const name = locations.find((location) => location.id === locationId)?.name ?? locationId
-        errors.push(`${name} lokasyonu atanamadı.`)
+        const message = getApiErrorMessage(error, `${name} lokasyonu atanamadı.`)
+        if (isStockManagerConflict(message)) {
+          hadConflict = true
+          setStockManagerConflictMessage(message)
+        } else {
+          errors.push(message)
+        }
       }
     }
 
@@ -236,6 +265,10 @@ function StaffEditForm({ staff, locations, onClose }: StaffEditFormProps) {
 
     if (errors.length > 0) {
       setSaveErrors(errors)
+      return
+    }
+
+    if (hadConflict) {
       return
     }
 
@@ -372,6 +405,13 @@ function StaffEditForm({ staff, locations, onClose }: StaffEditFormProps) {
           {isSubmitting ? 'Kaydediliyor...' : 'Değişiklikleri Kaydet'}
         </Button>
       </div>
+
+      <InfoDialog
+        open={Boolean(stockManagerConflictMessage)}
+        title="Stok Yöneticisi Atanamadı"
+        message={stockManagerConflictMessage ?? ''}
+        onClose={() => setStockManagerConflictMessage(null)}
+      />
     </>
   )
 }

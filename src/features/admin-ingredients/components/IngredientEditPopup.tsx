@@ -26,7 +26,6 @@ function IngredientEditForm({ ingredient, onClose }: IngredientEditFormProps) {
   const queryClient = useQueryClient()
 
   const [name, setName] = useState(ingredient.name)
-  const [unitPrice, setUnitPrice] = useState(String(ingredient.unitPrice))
   const [minStockThreshold, setMinStockThreshold] = useState(String(ingredient.minStockThreshold))
   const [isActive, setIsActive] = useState(ingredient.isActive)
   const [error, setError] = useState<string | null>(null)
@@ -34,11 +33,10 @@ function IngredientEditForm({ ingredient, onClose }: IngredientEditFormProps) {
 
   const hasChanges =
     name.trim() !== ingredient.name ||
-    Number(unitPrice) !== ingredient.unitPrice ||
     Number(minStockThreshold) !== ingredient.minStockThreshold ||
     isActive !== ingredient.isActive
 
-  const isFormValid = name.trim() !== '' && Number(unitPrice) >= 0 && Number(minStockThreshold) >= 0
+  const isFormValid = name.trim() !== '' && Number(minStockThreshold) >= 0
 
   async function handleSave() {
     if (!isFormValid) {
@@ -50,8 +48,8 @@ function IngredientEditForm({ ingredient, onClose }: IngredientEditFormProps) {
     setError(null)
 
     try {
-      if (name.trim() !== ingredient.name || Number(unitPrice) !== ingredient.unitPrice) {
-        await updateIngredient(ingredient.id, { name: name.trim(), unitPrice: Number(unitPrice) })
+      if (name.trim() !== ingredient.name) {
+        await updateIngredient(ingredient.id, { name: name.trim() })
       }
       if (Number(minStockThreshold) !== ingredient.minStockThreshold) {
         await updateIngredientMinStockThreshold(ingredient.id, Number(minStockThreshold))
@@ -110,17 +108,24 @@ function IngredientEditForm({ ingredient, onClose }: IngredientEditFormProps) {
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-zinc-600">Birim Fiyat</label>
+            <label className="mb-1.5 block text-xs font-medium text-zinc-600">Son Alış Fiyatı</label>
             <input
-              value={unitPrice}
-              onChange={(event) => setUnitPrice(event.target.value)}
-              type="number"
-              min="0"
-              step="0.01"
-              disabled={isSubmitting}
-              className={FIELD_CLASSNAME}
+              value={ingredient.latestUnitPrice !== null ? ingredient.latestUnitPrice : '—'}
+              readOnly
+              className={cn(FIELD_CLASSNAME, 'bg-zinc-50 text-zinc-500')}
             />
           </div>
+          <div>
+            <label className="mb-1.5 block text-xs font-medium text-zinc-600">Ağırlıklı Ortalama Fiyat</label>
+            <input
+              value={ingredient.weightedAverageUnitPrice}
+              readOnly
+              className={cn(FIELD_CLASSNAME, 'bg-zinc-50 text-zinc-500')}
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="mb-1.5 block text-xs font-medium text-zinc-600">Min. Stok Eşiği</label>
             <input
@@ -133,17 +138,16 @@ function IngredientEditForm({ ingredient, onClose }: IngredientEditFormProps) {
               className={FIELD_CLASSNAME}
             />
           </div>
+          <div>
+            <label className="mb-1.5 block text-xs font-medium text-zinc-600">Mevcut Stok</label>
+            <input
+              value={`${ingredient.currentStock} ${STOCK_UNIT_LABELS[ingredient.unit]}`}
+              readOnly
+              className={cn(FIELD_CLASSNAME, 'bg-zinc-50 text-zinc-500')}
+            />
+          </div>
         </div>
-
-        <div>
-          <label className="mb-1.5 block text-xs font-medium text-zinc-600">Mevcut Stok</label>
-          <input
-            value={`${ingredient.currentStock} ${STOCK_UNIT_LABELS[ingredient.unit]}`}
-            readOnly
-            className={cn(FIELD_CLASSNAME, 'bg-zinc-50 text-zinc-500')}
-          />
-          <p className="mt-1.5 text-xs text-zinc-400">Stok yöneticisi tarafından stok talebi yapılabilir.</p>
-        </div>
+        <p className="text-xs text-zinc-400">Stok yöneticisi tarafından stok talebi yapılabilir.</p>
 
         <div>
           <label className="mb-1.5 block text-xs font-medium text-zinc-600">Durum</label>

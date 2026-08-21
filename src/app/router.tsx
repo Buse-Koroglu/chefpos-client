@@ -24,6 +24,12 @@ import { WaiterOrderPage } from '@/features/waiter-pos/pages/WaiterOrderPage'
 import { PreparingOrdersPage } from '@/features/kitchen-preparing-orders/pages/PreparingOrdersPage'
 import { InventoryDashboardPage } from '@/features/inventory-dashboard/pages/InventoryDashboardPage'
 import { MyStockRequestsPage } from '@/features/inventory-my-stock-requests/pages/MyStockRequestsPage'
+import { StockMovementsPage } from '@/features/inventory-stock-movements/pages/StockMovementsPage'
+import { InventoryIngredientsPage } from '@/features/inventory-ingredients/pages/InventoryIngredientsPage'
+import { StockManagerDashboardPage } from '@/features/stock-manager-dashboard/pages/StockManagerDashboardPage'
+import { StockManagerPendingRequestsPage } from '@/features/stock-manager-requests/pages/StockManagerPendingRequestsPage'
+import { StockManagerPastRequestsPage } from '@/features/stock-manager-requests/pages/StockManagerPastRequestsPage'
+import { StockManagerIngredientsPage } from '@/features/stock-manager-ingredients/pages/StockManagerIngredientsPage'
 
 const EMPTY_ROLES: Role[] = []
 
@@ -239,6 +245,72 @@ export function AppRouter() {
             <RequireAuth>
               <RequireRole path="/app/inventory/stock-requests">
                 <MyStockRequestsPage />
+              </RequireRole>
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="/app/inventory/stock-movements"
+          element={
+            <RequireAuth>
+              <RequireRole path="/app/inventory/stock-movements">
+                <StockMovementsPage />
+              </RequireRole>
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="/app/stock-manager"
+          element={
+            <RequireAuth>
+              <RequireRole path="/app/stock-manager">
+                <StockManagerDashboardPage />
+              </RequireRole>
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="/app/stock-manager/pending-requests"
+          element={
+            <RequireAuth>
+              <RequireRole path="/app/stock-manager/pending-requests">
+                <StockManagerPendingRequestsPage />
+              </RequireRole>
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="/app/stock-manager/past-requests"
+          element={
+            <RequireAuth>
+              <RequireRole path="/app/stock-manager/past-requests">
+                <StockManagerPastRequestsPage />
+              </RequireRole>
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="/app/stock-manager/ingredients"
+          element={
+            <RequireAuth>
+              <RequireRole path="/app/stock-manager/ingredients">
+                <StockManagerIngredientsPage />
+              </RequireRole>
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="/app/inventory/ingredients"
+          element={
+            <RequireAuth>
+              <RequireRole path="/app/inventory/ingredients">
+                <InventoryIngredientsPage />
               </RequireRole>
             </RequireAuth>
           }
