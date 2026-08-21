@@ -1,33 +1,34 @@
 export const STOCK_UNITS = ['KG', 'LT'] as const
-
+ 
 export type StockUnit = (typeof STOCK_UNITS)[number]
-
+ 
 export const STOCK_UNIT_LABELS: Record<StockUnit, string> = {
   KG: 'KG',
   LT: 'L',
 }
-
+ 
 export interface IngredientResponseDto {
   id: string
   name: string
   unit: StockUnit
-  unitPrice: number
+  latestUnitPrice: number | null
+  weightedAverageUnitPrice: number
   currentStock: number
   minStockThreshold: number
   isBelowThreshold: boolean
   isActive: boolean
   locationId: string
 }
-
+ 
 export interface GetIngredientsQueryParams {
   locationId: string
   includeInactive?: boolean
 }
-
+ 
 export interface IngredientAdminResponseDto extends IngredientResponseDto {
   locationName: string
 }
-
+ 
 export interface GetIngredientsPagedQueryParams {
   searchTerm?: string
   locationId?: string
@@ -35,7 +36,7 @@ export interface GetIngredientsPagedQueryParams {
   pageNumber?: number
   pageSize?: number
 }
-
+ 
 export interface PagedResult<T> {
   items: T[]
   totalCount: number
@@ -43,7 +44,7 @@ export interface PagedResult<T> {
   pageSize: number
   totalPages: number
 }
-
+ 
 export interface CreateIngredientRequest {
   name: string
   unit: StockUnit
@@ -52,8 +53,25 @@ export interface CreateIngredientRequest {
   initialStock: number
   minStockThreshold: number
 }
-
+ 
 export interface UpdateIngredientRequest {
   name: string
+}
+ 
+export interface RecordIngredientPurchaseRequest {
+  quantity: number
   unitPrice: number
+  note?: string
+}
+ 
+export interface RecordManualDeductionRequest {
+  quantity: number
+  note: string
+}
+ 
+export interface RecordProductProductionRequest {
+  productId: string
+  locationId: string
+  quantity: number
+  note?: string
 }

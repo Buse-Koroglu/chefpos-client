@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import axios from 'axios'
 import { useQueryClient } from '@tanstack/react-query'
 import { Dialog } from '@base-ui/react/dialog'
@@ -22,6 +22,7 @@ interface FormErrors {
 interface CreateStockRequestPopupProps {
   open: boolean
   onClose: () => void
+  initialIngredientId?: string
 }
 
 function validate(
@@ -67,6 +68,7 @@ function getCreateErrorMessage(error: unknown): string {
 export function CreateStockRequestPopup({
   open,
   onClose,
+  initialIngredientId,
 }: CreateStockRequestPopupProps) {
   const queryClient = useQueryClient()
 
@@ -84,6 +86,16 @@ export function CreateStockRequestPopup({
   const [ingredientId, setIngredientId] = useState('')
   const [requestedQuantity, setRequestedQuantity] =
     useState('')
+
+  useEffect(() => {
+    if (open && initialIngredientId) {
+      setIngredientId(initialIngredientId)
+    }
+  }, [open, initialIngredientId])
+
+  const selectedIngredient = ingredients.find(
+    (ingredient) => ingredient.id === ingredientId,
+  )
 
   const [errors, setErrors] = useState<FormErrors>({})
   const [submitError, setSubmitError] =
@@ -252,6 +264,18 @@ export function CreateStockRequestPopup({
                     bulunamadı.
                   </p>
                 )}
+
+              {selectedIngredient && (
+                <p className="mt-1.5 text-xs text-zinc-500">
+                  Güncel birim fiyat:{' '}
+                  <span className="font-medium text-zinc-700">
+                    {selectedIngredient.weightedAverageUnitPrice.toLocaleString(
+                      'tr-TR',
+                      { minimumFractionDigits: 2, maximumFractionDigits: 2 },
+                    )}
+                  </span>
+                </p>
+              )}
             </div>
 
             <div>

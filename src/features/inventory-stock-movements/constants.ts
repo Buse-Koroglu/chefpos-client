@@ -1,0 +1,1 @@
+export const STOCK_MOVEMENTS_PAGE_SIZE = 10

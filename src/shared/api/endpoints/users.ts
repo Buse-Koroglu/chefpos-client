@@ -127,3 +127,9 @@ export function activateUser(userId: string) {
 export function deactivateUser(userId: string) {
   return apiClient.post<RawUserPayload>(`/api/users/${userId}/deactivate`).then((res) => normalizeUser(res.data))
 }
+
+export function getStockManagerByLocation(locationId: string) {
+  return apiClient
+    .get<RawUserPayload | null>('/api/users/stock-manager', { params: { locationId } })
+    .then((res) => (res.data ? normalizeUser(res.data) : null))
+}

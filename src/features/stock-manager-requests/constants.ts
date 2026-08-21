@@ -1,0 +1,1 @@
+export const STOCK_MANAGER_REQUESTS_PAGE_SIZE = 10
