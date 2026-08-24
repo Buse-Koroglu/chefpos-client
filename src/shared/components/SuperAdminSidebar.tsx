@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react'
-import { Boxes, ClipboardList, Home, Layers, Table2, UtensilsCrossed, Users } from 'lucide-react'
+import { MapPin, Users } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { SidebarUserCard } from './SidebarUserCard'
@@ -11,16 +11,11 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { label: 'Ana Sayfa', icon: Home, to: '/app/dashboard' },
-  { label: 'Personeller', icon: Users, to: '/app/users' },
-  { label: 'Ürün Kategorileri', icon: Layers, to: '/app/categories' },
-  { label: 'Ürün Ham Maddeleri', icon: Boxes, to: '/app/ingredients' },
-  { label: 'Ürünler', icon: UtensilsCrossed, to: '/app/products' },
-  { label: 'Masalar', icon: Table2, to: '/app/tables' },
-  { label: 'Stok Talepleri', icon: ClipboardList, to: '/app/stock-requests' },
+  { label: 'Kullanıcılar', icon: Users, to: '/app/super-admin/users' },
+  { label: 'Yerleşkeler', icon: MapPin, to: '/app/locations' },
 ]
 
-export function AdminSidebar() {
+export function SuperAdminSidebar() {
   return (
     <aside className="flex h-screen w-64 shrink-0 flex-col border-r border-zinc-200 bg-zinc-100">
       <div className="flex items-center gap-2 border-b border-zinc-200 px-5 py-5">

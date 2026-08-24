@@ -1,12 +1,21 @@
 import { useState } from 'react'
 import axios from 'axios'
-import { useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Dialog } from '@base-ui/react/dialog'
 import { X } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { createLocation } from '@/shared/api/endpoints/locations'
+import { addRole, assignLocationAccess, getUsers } from '@/shared/api/endpoints/users'
+import { getApiErrorMessage } from '@/shared/api/apiError'
+
+function useActiveUsers() {
+  return useQuery({
+    queryKey: ['users', 'admin-picker'],
+    queryFn: () => getUsers({ isActive: true, pageSize: 100 }),
+  })
+}
 
 const FIELD_CLASSNAME =
   'h-10 w-full rounded-none border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
@@ -27,13 +36,17 @@ interface AddLocationPopupProps {
 
 export function AddLocationPopup({ open, onClose }: AddLocationPopupProps) {
   const queryClient = useQueryClient()
+  const { data: usersResult, isLoading: isUsersLoading } = useActiveUsers()
+  const users = usersResult?.items ?? []
 
   const [name, setName] = useState('')
+  const [adminUserId, setAdminUserId] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   function reset() {
     setName('')
+    setAdminUserId('')
     setError(null)
     setIsSubmitting(false)
   }
@@ -53,9 +66,24 @@ export function AddLocationPopup({ open, onClose }: AddLocationPopupProps) {
     setError(null)
 
     try {
-      await createLocation({ name: name.trim() })
+      const location = await createLocation({ name: name.trim() })
       queryClient.invalidateQueries({ queryKey: ['locations'], exact: false })
-      toast.success('Yerleşke başarıyla eklendi.')
+
+      if (adminUserId) {
+        try {
+          await addRole(adminUserId, 'ADMIN')
+          await assignLocationAccess(adminUserId, location.id)
+          queryClient.invalidateQueries({ queryKey: ['users'], exact: false })
+          toast.success('Yerleşke ve Yönetici ataması başarıyla tamamlandı.')
+        } catch (adminError) {
+          toast.warning(
+            `Yerleşke oluşturuldu ancak Yönetici ataması başarısız oldu: ${getApiErrorMessage(adminError)}`,
+          )
+        }
+      } else {
+        toast.success('Yerleşke başarıyla eklendi.')
+      }
+
       handleClose()
     } catch (err) {
       setError(getCreateErrorMessage(err))
@@ -89,6 +117,26 @@ export function AddLocationPopup({ open, onClose }: AddLocationPopupProps) {
                 className={cn(FIELD_CLASSNAME, error && 'border-red-300')}
                 autoFocus
               />
+            </div>
+
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-zinc-600">Bu Yerleşkenin Yöneticisi</label>
+              <select
+                value={adminUserId}
+                onChange={(event) => setAdminUserId(event.target.value)}
+                disabled={isUsersLoading}
+                className={FIELD_CLASSNAME}
+              >
+                <option value="">Daha sonra ata</option>
+                {users.map((user) => (
+                  <option key={user.id} value={user.id}>
+                    {user.firstName} {user.lastName}
+                  </option>
+                ))}
+              </select>
+              <p className="mt-1.5 text-xs text-zinc-400">
+                Seçilen kullanıcıya bu yerleşke için Yönetici rolü ve erişimi atanır.
+              </p>
             </div>
           </div>
 

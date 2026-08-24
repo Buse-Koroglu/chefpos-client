@@ -11,6 +11,7 @@ import { CashierHomePage } from '@/features/cashier-dashboard/pages/CashierHomeP
 import { AdminHomePage } from '@/features/admin-dashboard/pages/AdminHomePage'
 import { StaffListPage } from '@/features/admin-staff/pages/StaffListPage'
 import { LocationsListPage } from '@/features/admin-locations/pages/LocationsListPage'
+import { SuperAdminUsersPage } from '@/features/super-admin-users/pages/SuperAdminUsersPage'
 import { CategoriesListPage } from '@/features/admin-categories/pages/CategoriesListPage'
 import { IngredientsListPage } from '@/features/admin-ingredients/pages/IngredientsListPage'
 import { ProductsListPage } from '@/features/admin-products/pages/ProductsListPage'
@@ -121,6 +122,16 @@ export function AppRouter() {
             <RequireAuth>
               <RequireRole path="/app/locations">
                 <LocationsListPage />
+              </RequireRole>
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/app/super-admin/users"
+          element={
+            <RequireAuth>
+              <RequireRole path="/app/super-admin/users">
+                <SuperAdminUsersPage />
               </RequireRole>
             </RequireAuth>
           }
