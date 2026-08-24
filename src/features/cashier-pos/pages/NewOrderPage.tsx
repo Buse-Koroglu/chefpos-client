@@ -13,6 +13,7 @@ import { SelectedItemsPanel } from '../components/SelectedItemsPanel'
 import { useProducts } from '../hooks/useProducts'
 import { useCategories } from '../hooks/useCategories'
 import { useCreateOrder } from '../hooks/useCreateOrder'
+import { useMenus } from '../hooks/useMenus'
 
 const FORM_INPUT_CLASSNAME =
   'h-11 rounded-none border-zinc-200 bg-white text-zinc-900 placeholder:text-zinc-400 focus-visible:border-zinc-400 focus-visible:ring-zinc-200'
@@ -23,10 +24,30 @@ export function NewOrderPage() {
   const locationName = locations.find((location) => location.id === locationId)?.name ?? '—'
 
   const [categoryId, setCategoryId] = useState('')
+  const [menuId, setMenuId] = useState('')
 
   const { data: categories = [] } = useCategories(locationId)
-  const { data: products = [], isLoading, isError } = useProducts(locationId, categoryId || undefined)
+  const { data: menus = [] } = useMenus(locationId)
+  const activeMenu = menus.find((menu) => menu.id === menuId)
+  const {
+    data: products = [],
+    isLoading,
+    isError,
+  } = useProducts(locationId, menuId ? undefined : categoryId || undefined, Boolean(menuId))
+  const displayProducts = activeMenu
+    ? products.filter((product) => activeMenu.products.some((menuProduct) => menuProduct.productId === product.id))
+    : products
   const createOrder = useCreateOrder()
+
+  function handleCategoryChange(value: string) {
+    setCategoryId(value)
+    setMenuId('')
+  }
+
+  function handleMenuChange(value: string) {
+    setMenuId(value)
+    setCategoryId('')
+  }
 
   const [customerName, setCustomerName] = useState('')
   const [items, setItems] = useState<OrderItem[]>([])
@@ -113,7 +134,7 @@ export function NewOrderPage() {
                 <select
                   id="categoryFilter"
                   value={categoryId}
-                  onChange={(event) => setCategoryId(event.target.value)}
+                  onChange={(event) => handleCategoryChange(event.target.value)}
                   className={`${FORM_INPUT_CLASSNAME} w-full appearance-none border pr-9 pl-3 text-sm outline-none`}
                 >
                   <option value="">Tümü</option>
@@ -126,6 +147,30 @@ export function NewOrderPage() {
                 <ChevronDown className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-zinc-400" />
               </div>
             </div>
+
+            {menus.length > 0 && (
+              <div className="w-48 space-y-1.5">
+                <Label htmlFor="menuFilter" className="text-zinc-700">
+                  Menü
+                </Label>
+                <div className="relative">
+                  <select
+                    id="menuFilter"
+                    value={menuId}
+                    onChange={(event) => handleMenuChange(event.target.value)}
+                    className={`${FORM_INPUT_CLASSNAME} w-full appearance-none border pr-9 pl-3 text-sm outline-none`}
+                  >
+                    <option value="">Menü Seçilmedi</option>
+                    {menus.map((menu) => (
+                      <option key={menu.id} value={menu.id}>
+                        {menu.name}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-zinc-400" />
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="flex min-h-0 flex-1 gap-4">
@@ -138,7 +183,7 @@ export function NewOrderPage() {
                 Ürünler yüklenemedi.
               </div>
             ) : (
-              <ProductCatalog products={products} onAdd={handleAddItem} />
+              <ProductCatalog products={displayProducts} onAdd={handleAddItem} />
             )}
 
             <SelectedItemsPanel

@@ -67,7 +67,7 @@ export function ProductsTable({ products, onSelect, isLoading }: ProductsTablePr
                   <span className="font-medium text-zinc-900">{product.name}</span>
                 </div>
               </td>
-              <td className="px-4 py-3 text-zinc-600">{product.categoryName}</td>
+              <td className="px-4 py-3 text-zinc-600">{product.categoryName ?? '—'}</td>
               <td className="px-4 py-3">
                 <ProductLocationChips locationNames={product.locationNames} />
               </td>

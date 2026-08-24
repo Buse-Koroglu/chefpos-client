@@ -7,10 +7,11 @@ export function useProducts(params: {
   searchTerm?: string
   pageNumber: number
   pageSize?: number
+  includeUncategorized?: boolean
 }) {
-  const { locationId, categoryId, searchTerm, pageNumber, pageSize = 20 } = params
+  const { locationId, categoryId, searchTerm, pageNumber, pageSize = 20, includeUncategorized } = params
   return useQuery({
-    queryKey: ['waiter-products', locationId, categoryId, searchTerm, pageNumber],
+    queryKey: ['waiter-products', locationId, categoryId, searchTerm, pageNumber, pageSize, includeUncategorized],
     queryFn: () =>
       getProductsPaged({
         locationId,
@@ -19,6 +20,7 @@ export function useProducts(params: {
         isActive: true,
         pageNumber,
         pageSize,
+        includeUncategorized,
       }),
     enabled: Boolean(locationId),
     placeholderData: keepPreviousData,

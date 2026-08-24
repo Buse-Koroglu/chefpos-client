@@ -16,6 +16,7 @@ export const APP_ROUTES: RouteConfig[] = [
   { path: '/app/orders/:id', label: 'Sipariş Detay', allowedRoles: ['CASHIER', 'WAITER', 'ADMIN'], showInSidebar: false },
   { path: '/app/waiter-orders', label: 'Sipariş Al', allowedRoles: ['WAITER'], showInSidebar: true },
   { path: '/app/products', label: 'Ürünler', allowedRoles: ['ADMIN'], showInSidebar: true },
+  { path: '/app/menus', label: 'Menüler', allowedRoles: ['ADMIN'], showInSidebar: true },
   { path: '/app/tables', label: 'Masalar', allowedRoles: ['ADMIN'], showInSidebar: true },
   { path: '/app/categories', label: 'Kategoriler', allowedRoles: ['ADMIN'], showInSidebar: true },
   { path: '/app/kitchen-orders', label: 'Mutfak Siparişleri', allowedRoles: ['ADMIN', 'KITCHEN'], showInSidebar: true },
@@ -34,6 +35,7 @@ export const APP_ROUTES: RouteConfig[] = [
   { path: '/app/super-admin/users', label: 'Personeller', allowedRoles: ['SUPER_ADMIN'], showInSidebar: true },
   { path: '/app/super-admin/categories', label: 'Kategoriler', allowedRoles: ['SUPER_ADMIN'], showInSidebar: true },
   { path: '/app/super-admin/products', label: 'Ürünler', allowedRoles: ['SUPER_ADMIN'], showInSidebar: true },
+  { path: '/app/super-admin/menus', label: 'Menüler', allowedRoles: ['SUPER_ADMIN'], showInSidebar: true },
   { path: '/app/super-admin/ingredients', label: 'Ham Maddeler', allowedRoles: ['SUPER_ADMIN'], showInSidebar: true },
   { path: '/app/change-password', label: 'Şifre Değiştir', allowedRoles: 'ANY', showInSidebar: false },
 ]

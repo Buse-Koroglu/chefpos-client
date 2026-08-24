@@ -169,7 +169,7 @@ function ProductEditForm({ product, locations, categories, canEditLocations, onC
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [confirmingDeactivate, setConfirmingDeactivate] = useState(false)
 
-  const categoryName = categories.find((category) => category.id === product.categoryId)?.name ?? product.categoryId
+  const categoryName = categories.find((category) => category.id === product.categoryId)?.name ?? product.categoryId ?? '—'
 
   const hasChanges =
     name.trim() !== product.name ||
