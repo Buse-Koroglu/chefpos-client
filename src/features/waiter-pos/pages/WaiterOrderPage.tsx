@@ -7,10 +7,12 @@ import { useDebouncedValue } from '@/shared/hooks/useDebouncedValue'
 import { WaiterHeader } from '../components/WaiterHeader'
 import { TableSelector } from '../components/TableSelector'
 import { CategoryTabs } from '../components/CategoryTabs'
+import { MenuTabs } from '../components/MenuTabs'
 import { ProductCard } from '../components/ProductCard'
 import { CartBar } from '../components/CartBar'
 import { useActiveTables } from '../hooks/useActiveTables'
 import { useCategories } from '../hooks/useCategories'
+import { useMenus } from '../hooks/useMenus'
 import { useProducts } from '../hooks/useProducts'
 import { useCart } from '../hooks/useCart'
 import { useCreateOrder } from '../hooks/useCreateOrder'
@@ -18,6 +20,7 @@ import { MobileUserMenu } from '@/shared/components/MobileUserMenu'
 import { CartItemsSheet } from '../components/CartItemsSheet'
 import { getApiErrorMessage } from '@/shared/api/apiError'
 import { isTableOccupiedConflict } from '../utils'
+import type { Product } from '../types'
 
 export function WaiterOrderPage() {
   const locationId = useLocationStore((s) => s.selectedLocationId) ?? undefined
@@ -26,18 +29,59 @@ export function WaiterOrderPage() {
   const [cartOpen, setCartOpen] = useState(false)
   const [tableId, setTableId] = useState<string | null>(null)
   const [categoryId, setCategoryId] = useState('')
+  const [selectedMenuId, setSelectedMenuId] = useState('')
   const [customerName, setCustomerName] = useState('')
   const [searchInput, setSearchInput] = useState('')
   const debouncedSearch = useDebouncedValue(searchInput, 400)
   const [menuOpen, setMenuOpen] = useState(false)
   const { data: tables = [] } = useActiveTables(locationId)
   const { data: categories = [] } = useCategories(locationId)
-  const { data: productsPage, isLoading } = useProducts({
+  const { data: menus = [] } = useMenus(locationId)
+  const activeMenu = menus.find((menu) => menu.id === selectedMenuId)
+
+  const [pageNumber, setPageNumber] = useState(1)
+  const [accumulatedItems, setAccumulatedItems] = useState<Product[]>([])
+
+  const filterKey = `${locationId ?? ''}|${categoryId}|${selectedMenuId}|${debouncedSearch}`
+  const [lastFilterKey, setLastFilterKey] = useState(filterKey)
+  if (filterKey !== lastFilterKey) {
+    setLastFilterKey(filterKey)
+    setPageNumber(1)
+    setAccumulatedItems([])
+  }
+
+  const { data: productsPage, isLoading, isFetching } = useProducts({
     locationId,
-    categoryId: categoryId || undefined,
-    searchTerm: debouncedSearch,
-    pageNumber: 1,
+    categoryId: selectedMenuId ? undefined : categoryId || undefined,
+    searchTerm: selectedMenuId ? undefined : debouncedSearch,
+    pageNumber,
+    pageSize: selectedMenuId ? 100 : undefined,
+    includeUncategorized: Boolean(selectedMenuId),
   })
+
+  const [lastMergedPage, setLastMergedPage] = useState(productsPage)
+  if (productsPage && productsPage !== lastMergedPage && filterKey === lastFilterKey) {
+    setLastMergedPage(productsPage)
+    setAccumulatedItems((current) =>
+      productsPage.pageNumber === 1 ? productsPage.items : [...current, ...productsPage.items],
+    )
+  }
+
+  const canLoadMore = !selectedMenuId && Boolean(productsPage) && productsPage!.pageNumber < productsPage!.totalPages
+
+  const displayProducts = activeMenu
+    ? accumulatedItems.filter((product) => activeMenu.products.some((menuProduct) => menuProduct.productId === product.id))
+    : accumulatedItems
+
+  function handleCategorySelect(value: string) {
+    setCategoryId(value)
+    setSelectedMenuId('')
+  }
+
+  function handleMenuSelect(value: string) {
+    setSelectedMenuId(value)
+    setCategoryId('')
+  }
 
   const { items, addItem, totalCount, increaseQuantity, decreaseQuantity, removeItem,totalAmount, clear } = useCart()
   const createOrder = useCreateOrder()
@@ -47,6 +91,7 @@ export function WaiterOrderPage() {
     setLastSyncedLocationId(locationId)
     setTableId(null)
     setCategoryId('')
+    setSelectedMenuId('')
     setCustomerName('')
     clear()
   }
@@ -128,17 +173,32 @@ export function WaiterOrderPage() {
         </div>
       </div>
 
-      <CategoryTabs categories={categories} selectedCategoryId={categoryId} onSelect={setCategoryId} />
+      <MenuTabs menus={menus} selectedMenuId={selectedMenuId} onSelect={handleMenuSelect} />
+      {!selectedMenuId && (
+        <CategoryTabs categories={categories} selectedCategoryId={categoryId} onSelect={handleCategorySelect} />
+      )}
 
       <main className="flex-1 overflow-y-auto p-3 pb-24">
         {isLoading ? (
           <p className="py-8 text-center text-sm text-zinc-400">Yükleniyor...</p>
         ) : (
-          <div className="grid grid-cols-2 gap-3">
-            {productsPage?.items.map((product) => (
-              <ProductCard key={product.id} product={product} onAdd={() => addItem(product)} />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-2 gap-3">
+              {displayProducts.map((product) => (
+                <ProductCard key={product.id} product={product} onAdd={() => addItem(product)} />
+              ))}
+            </div>
+            {canLoadMore && (
+              <button
+                type="button"
+                onClick={() => setPageNumber((current) => current + 1)}
+                disabled={isFetching}
+                className="mt-3 h-10 w-full border border-zinc-300 bg-white text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50 disabled:opacity-50"
+              >
+                {isFetching ? 'Yükleniyor...' : 'Daha Fazla Yükle'}
+              </button>
+            )}
+          </>
         )}
       </main>
 

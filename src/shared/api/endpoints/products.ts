@@ -31,7 +31,7 @@ interface RawProductPayload {
   description?: string | null
   imageUrl?: string | null
   isActive: boolean
-  categoryId: string
+  categoryId: string | null
   locationIds: string[]
   locations: RawProductLocationPayload[]
 }

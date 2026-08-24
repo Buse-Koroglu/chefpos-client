@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react'
-import { Boxes, ClipboardList, Home, Layers, Table2, UtensilsCrossed, Users } from 'lucide-react'
+import { BookOpen, Boxes, ClipboardList, Home, Layers, Table2, UtensilsCrossed, Users } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { SidebarUserCard } from './SidebarUserCard'
@@ -16,6 +16,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Ürün Kategorileri', icon: Layers, to: '/app/categories' },
   { label: 'Ürün Ham Maddeleri', icon: Boxes, to: '/app/ingredients' },
   { label: 'Ürünler', icon: UtensilsCrossed, to: '/app/products' },
+  { label: 'Menüler', icon: BookOpen, to: '/app/menus' },
   { label: 'Masalar', icon: Table2, to: '/app/tables' },
   { label: 'Stok Talepleri', icon: ClipboardList, to: '/app/stock-requests' },
 ]

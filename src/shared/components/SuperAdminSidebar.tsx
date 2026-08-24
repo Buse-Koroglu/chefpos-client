@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react'
-import { Boxes, Layers, MapPin, UtensilsCrossed, Users } from 'lucide-react'
+import { BookOpen, Boxes, Layers, MapPin, UtensilsCrossed, Users } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { SidebarUserCard } from './SidebarUserCard'
@@ -15,6 +15,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Yerleşkeler', icon: MapPin, to: '/app/locations' },
   { label: 'Kategoriler', icon: Layers, to: '/app/super-admin/categories' },
   { label: 'Ürünler', icon: UtensilsCrossed, to: '/app/super-admin/products' },
+  { label: 'Menüler', icon: BookOpen, to: '/app/super-admin/menus' },
   { label: 'Ham Maddeler', icon: Boxes, to: '/app/super-admin/ingredients' },
 ]
 

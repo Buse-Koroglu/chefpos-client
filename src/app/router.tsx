@@ -15,6 +15,7 @@ import { SuperAdminUsersPage } from '@/features/super-admin-users/pages/SuperAdm
 import { CategoriesListPage } from '@/features/admin-categories/pages/CategoriesListPage'
 import { IngredientsListPage } from '@/features/admin-ingredients/pages/IngredientsListPage'
 import { ProductsListPage } from '@/features/admin-products/pages/ProductsListPage'
+import { MenusListPage } from '@/features/admin-menus/pages/MenusListPage'
 import { TablesListPage } from '@/features/admin-tables/pages/TablesListPage'
 import { StockRequestsListPage } from '@/features/admin-stock-requests/pages/StockRequestsListPage'
 import type { Role } from '@/shared/types/auth'
@@ -192,6 +193,26 @@ export function AppRouter() {
             <RequireAuth>
               <RequireRole path="/app/super-admin/products">
                 <ProductsListPage variant="super-admin" />
+              </RequireRole>
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/app/menus"
+          element={
+            <RequireAuth>
+              <RequireRole path="/app/menus">
+                <MenusListPage variant="admin" />
+              </RequireRole>
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/app/super-admin/menus"
+          element={
+            <RequireAuth>
+              <RequireRole path="/app/super-admin/menus">
+                <MenusListPage variant="super-admin" />
               </RequireRole>
             </RequireAuth>
           }

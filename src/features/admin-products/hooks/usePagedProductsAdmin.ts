@@ -24,6 +24,7 @@ export function usePagedProductsAdmin(
         isActive: toIsActiveParam(status),
         pageNumber,
         pageSize: PRODUCTS_PAGE_SIZE,
+        includeUncategorized: true,
       }),
     placeholderData: keepPreviousData,
   })

@@ -4,6 +4,7 @@ export interface GetProductsQueryParams {
   locationId: string;
   categoryId?: string | null;
   includeInactive?: boolean;
+  includeUncategorized?: boolean;
 }
 
 export interface ProductItemResponse {
@@ -26,7 +27,7 @@ export interface ProductResponse {
   description?: string | null;
   imageUrl?: string | null;
   isActive: boolean;
-  categoryId: string;
+  categoryId: string | null;
   locationIds: string[];
   locations: ProductLocationRecipe[];
 }
@@ -37,8 +38,8 @@ export interface ProductAdminResponseDto {
   price: number;
   imageUrl?: string | null;
   isActive: boolean;
-  categoryId: string;
-  categoryName: string;
+  categoryId: string | null;
+  categoryName: string | null;
   locationIds: string[];
   locationNames: string[];
 }
@@ -50,6 +51,7 @@ export interface GetProductsPagedQueryParams {
   isActive?: boolean;
   pageNumber?: number;
   pageSize?: number;
+  includeUncategorized?: boolean;
 }
 
 export interface CreateProductRequest {
