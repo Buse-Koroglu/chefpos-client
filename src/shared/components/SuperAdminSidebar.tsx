@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react'
-import { MapPin, Users } from 'lucide-react'
+import { Boxes, Layers, MapPin, UtensilsCrossed, Users } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { SidebarUserCard } from './SidebarUserCard'
@@ -11,8 +11,11 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { label: 'Kullanıcılar', icon: Users, to: '/app/super-admin/users' },
+  { label: 'Personeller', icon: Users, to: '/app/super-admin/users' },
   { label: 'Yerleşkeler', icon: MapPin, to: '/app/locations' },
+  { label: 'Kategoriler', icon: Layers, to: '/app/super-admin/categories' },
+  { label: 'Ürünler', icon: UtensilsCrossed, to: '/app/super-admin/products' },
+  { label: 'Ham Maddeler', icon: Boxes, to: '/app/super-admin/ingredients' },
 ]
 
 export function SuperAdminSidebar() {

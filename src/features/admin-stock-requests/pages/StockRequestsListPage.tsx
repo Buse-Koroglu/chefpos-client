@@ -87,7 +87,7 @@ export function StockRequestsListPage() {
               locations={locations}
               onLocationChange={handleLocationChange}
               onStatusChange={handleStatusChange}
-              hideLocationFilter={!isAdminView}
+              hideLocationFilter
             />
           }
         />

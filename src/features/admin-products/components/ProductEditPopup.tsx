@@ -152,10 +152,11 @@ interface ProductEditFormProps {
   product: ProductResponse
   locations: LocationDto[]
   categories: CategoryAdminResponseDto[]
+  canEditLocations: boolean
   onClose: () => void
 }
 
-function ProductEditForm({ product, locations, categories, onClose }: ProductEditFormProps) {
+function ProductEditForm({ product, locations, categories, canEditLocations, onClose }: ProductEditFormProps) {
   const queryClient = useQueryClient()
 
   const [name, setName] = useState(product.name)
@@ -362,16 +363,32 @@ function ProductEditForm({ product, locations, categories, onClose }: ProductEdi
           </div>
         </div>
 
-        {/* Yerleşkeler Multi-Select Dropdown */}
-        <MultiSelectDropdown
-          label="Yerleşkeler"
-          placeholder="Yerleşke seçiniz..."
-          options={locationOptions}
-          selectedIds={locationIds}
-          onToggle={toggleLocation}
-          disabled={isSubmitting}
-          minRequired={1}
-        />
+        {/* Yerleşkeler */}
+        {canEditLocations ? (
+          <MultiSelectDropdown
+            label="Yerleşkeler"
+            placeholder="Yerleşke seçiniz..."
+            options={locationOptions}
+            selectedIds={locationIds}
+            onToggle={toggleLocation}
+            disabled={isSubmitting}
+            minRequired={1}
+          />
+        ) : (
+          <div>
+            <label className="mb-1.5 block text-xs font-medium text-zinc-600">Yerleşke</label>
+            <input
+              value={
+                locations
+                  .filter((location) => locationIds.includes(location.id))
+                  .map((location) => location.name)
+                  .join(', ') || '—'
+              }
+              readOnly
+              className={cn(FIELD_CLASSNAME, 'bg-zinc-50 text-zinc-500')}
+            />
+          </div>
+        )}
 
         <div>
           <label className="mb-1.5 block text-xs font-medium text-zinc-600">Durum</label>
@@ -472,10 +489,11 @@ interface ProductEditPopupProps {
   productId: string | null
   locations: LocationDto[]
   categories: CategoryAdminResponseDto[]
+  canEditLocations?: boolean
   onClose: () => void
 }
 
-export function ProductEditPopup({ productId, locations, categories, onClose }: ProductEditPopupProps) {
+export function ProductEditPopup({ productId, locations, categories, canEditLocations = false, onClose }: ProductEditPopupProps) {
   const { data: product, isLoading, isError } = useProductDetail(productId ?? undefined)
 
   return (
@@ -496,7 +514,14 @@ export function ProductEditPopup({ productId, locations, categories, onClose }: 
               <Skeleton className="h-10 w-full" />
             </div>
           ) : (
-            <ProductEditForm key={product.id} product={product} locations={locations} categories={categories} onClose={onClose} />
+            <ProductEditForm
+              key={product.id}
+              product={product}
+              locations={locations}
+              categories={categories}
+              canEditLocations={canEditLocations}
+              onClose={onClose}
+            />
           )}
         </Dialog.Popup>
       </Dialog.Portal>

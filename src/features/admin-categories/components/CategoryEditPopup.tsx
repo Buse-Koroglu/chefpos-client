@@ -142,10 +142,11 @@ function MultiSelectDropdown({
 interface CategoryEditFormProps {
   category: CategoryAdminResponseDto
   locations: LocationDto[]
+  canEditLocations: boolean
   onClose: () => void
 }
 
-function CategoryEditForm({ category, locations, onClose }: CategoryEditFormProps) {
+function CategoryEditForm({ category, locations, canEditLocations, onClose }: CategoryEditFormProps) {
   const queryClient = useQueryClient()
 
   const [name, setName] = useState(category.name)
@@ -311,16 +312,27 @@ function CategoryEditForm({ category, locations, onClose }: CategoryEditFormProp
           </div>
         </div>
 
-        {/* Yerleşkeler Multi-Select Dropdown */}
-        <MultiSelectDropdown
-          label="Yerleşkeler"
-          placeholder="Yerleşke seçiniz..."
-          options={locationOptions}
-          selectedIds={locationIds}
-          onToggle={toggleLocation}
-          disabled={isSubmitting}
-          minRequired={1}
-        />
+        {/* Yerleşkeler */}
+        {canEditLocations ? (
+          <MultiSelectDropdown
+            label="Yerleşkeler"
+            placeholder="Yerleşke seçiniz..."
+            options={locationOptions}
+            selectedIds={locationIds}
+            onToggle={toggleLocation}
+            disabled={isSubmitting}
+            minRequired={1}
+          />
+        ) : (
+          <div>
+            <label className="mb-1.5 block text-xs font-medium text-zinc-600">Yerleşke</label>
+            <input
+              value={selectedLocationNames.join(', ') || '—'}
+              readOnly
+              className={cn(FIELD_CLASSNAME, 'bg-zinc-50 text-zinc-500')}
+            />
+          </div>
+        )}
 
         <div>
           <label className="mb-1.5 block text-xs font-medium text-zinc-600">Ürün Sayısı</label>
@@ -410,16 +422,25 @@ function CategoryEditForm({ category, locations, onClose }: CategoryEditFormProp
 interface CategoryEditPopupProps {
   category: CategoryAdminResponseDto | null
   locations: LocationDto[]
+  canEditLocations?: boolean
   onClose: () => void
 }
 
-export function CategoryEditPopup({ category, locations, onClose }: CategoryEditPopupProps) {
+export function CategoryEditPopup({ category, locations, canEditLocations = false, onClose }: CategoryEditPopupProps) {
   return (
     <Dialog.Root open={Boolean(category)} onOpenChange={(open) => !open && onClose()}>
       <Dialog.Portal>
         <Dialog.Backdrop className="fixed inset-0 bg-zinc-900/40 backdrop-blur-sm" />
         <Dialog.Popup className="fixed top-1/2 left-1/2 w-full max-w-md -translate-x-1/2 -translate-y-1/2 border border-zinc-200 bg-white">
-          {category && <CategoryEditForm key={category.id} category={category} locations={locations} onClose={onClose} />}
+          {category && (
+            <CategoryEditForm
+              key={category.id}
+              category={category}
+              locations={locations}
+              canEditLocations={canEditLocations}
+              onClose={onClose}
+            />
+          )}
         </Dialog.Popup>
       </Dialog.Portal>
     </Dialog.Root>

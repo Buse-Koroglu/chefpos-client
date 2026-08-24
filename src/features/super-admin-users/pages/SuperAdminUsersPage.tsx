@@ -14,6 +14,7 @@ import { SuperAdminUsersTable } from '@/features/super-admin-users/components/Su
 import { SuperAdminUsersPagination } from '@/features/super-admin-users/components/SuperAdminUsersPagination'
 import { PromoteToAdminPopup } from '@/features/super-admin-users/components/PromoteToAdminPopup'
 import { AddAdminPopup } from '@/features/super-admin-users/components/AddAdminPopup'
+import { UserDetailPopup } from '@/features/super-admin-users/components/UserDetailPopup'
 import { usePagedSuperAdminUsers } from '@/features/super-admin-users/hooks/usePagedSuperAdminUsers'
 
 const SEARCH_DEBOUNCE_MS = 400
@@ -35,6 +36,7 @@ export function SuperAdminUsersPage() {
   const [promoteUserId, setPromoteUserId] = useState<string | null>(null)
   const [demotingUserId, setDemotingUserId] = useState<string | null>(null)
   const [isAddAdminOpen, setIsAddAdminOpen] = useState(false)
+  const [detailUserId, setDetailUserId] = useState<string | null>(null)
 
   const { data: locations = [] } = useLocations()
   const locationsById = useMemo(() => new Map(locations.map((location) => [location.id, location.name])), [locations])
@@ -43,6 +45,7 @@ export function SuperAdminUsersPage() {
   const { data, isLoading, isFetching, isError, error } = usePagedSuperAdminUsers(searchTerm, pageNumber)
   const items = useMemo(() => data?.items ?? [], [data])
   const promoteUser = items.find((user) => user.id === promoteUserId) ?? null
+  const detailUser = items.find((user) => user.id === detailUserId) ?? null
 
   function handleSearchChange(value: string) {
     setSearchInput(value)
@@ -54,9 +57,9 @@ export function SuperAdminUsersPage() {
     try {
       await removeRole(userId, 'ADMIN')
       queryClient.invalidateQueries({ queryKey: ['users'], exact: false })
-      toast.success('Kullanıcı adminlikten indirildi.')
+      toast.success('Kullanıcı yöneticilik indirildi.')
     } catch (err) {
-      toast.error(getApiErrorMessage(err, 'Kullanıcı adminlikten indirilemedi.'))
+      toast.error(getApiErrorMessage(err, 'Kullanıcı yöneticilik indirilemedi.'))
     } finally {
       setDemotingUserId(null)
     }
@@ -68,7 +71,7 @@ export function SuperAdminUsersPage() {
 
       <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
         <AdminHeader
-          title="Kullanıcılar"
+          title="Personeller"
           actions={
             <button
               type="button"
@@ -76,7 +79,7 @@ export function SuperAdminUsersPage() {
               className="flex items-center gap-1.5 bg-[#133458] px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-[#0f2843]"
             >
               <Plus className="size-4" />
-              Yeni Admin Ekle
+              Yeni Yönetici Ekle
             </button>
           }
         />
@@ -95,6 +98,7 @@ export function SuperAdminUsersPage() {
               users={items}
               locationsById={locationsById}
               isLoading={isLoading || (isFetching && items.length === 0)}
+              onSelect={setDetailUserId}
               onPromote={setPromoteUserId}
               onDemote={handleDemote}
               demotingUserId={demotingUserId}
@@ -116,6 +120,7 @@ export function SuperAdminUsersPage() {
         onClose={() => setPromoteUserId(null)}
       />
       <AddAdminPopup open={isAddAdminOpen} locations={locations} onClose={() => setIsAddAdminOpen(false)} />
+      <UserDetailPopup user={detailUser} locationsById={locationsById} onClose={() => setDetailUserId(null)} />
     </div>
   )
 }

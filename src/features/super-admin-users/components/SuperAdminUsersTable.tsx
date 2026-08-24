@@ -7,6 +7,7 @@ interface SuperAdminUsersTableProps {
   users: UserResponseDto[]
   locationsById: Map<string, string>
   isLoading?: boolean
+  onSelect: (userId: string) => void
   onPromote: (userId: string) => void
   onDemote: (userId: string) => void
   demotingUserId: string | null
@@ -27,6 +28,7 @@ export function SuperAdminUsersTable({
   users,
   locationsById,
   isLoading,
+  onSelect,
   onPromote,
   onDemote,
   demotingUserId,
@@ -70,7 +72,11 @@ export function SuperAdminUsersTable({
             const isSuperAdmin = user.roles.includes('SUPER_ADMIN')
 
             return (
-              <tr key={user.id} className="border-b border-zinc-100 last:border-b-0">
+              <tr
+                key={user.id}
+                onClick={() => onSelect(user.id)}
+                className="cursor-pointer border-b border-zinc-100 transition-colors last:border-b-0 hover:bg-zinc-100/80"
+              >
                 <td className="px-4 py-3 font-medium text-zinc-900">
                   {user.firstName} {user.lastName}
                 </td>
@@ -94,19 +100,25 @@ export function SuperAdminUsersTable({
                   {isSuperAdmin ? null : isAdmin ? (
                     <button
                       type="button"
-                      onClick={() => onDemote(user.id)}
+                      onClick={(event) => {
+                        event.stopPropagation()
+                        onDemote(user.id)
+                      }}
                       disabled={demotingUserId === user.id}
                       className="border border-red-200 px-2.5 py-1 text-xs font-medium text-red-600 transition-colors hover:border-red-300 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      {demotingUserId === user.id ? 'İşleniyor...' : 'Adminlikten Al'}
+                      {demotingUserId === user.id ? 'İşleniyor...' : 'Yöneticilik Al'}
                     </button>
                   ) : (
                     <button
                       type="button"
-                      onClick={() => onPromote(user.id)}
+                      onClick={(event) => {
+                        event.stopPropagation()
+                        onPromote(user.id)
+                      }}
                       className="border border-zinc-200 px-2.5 py-1 text-xs font-medium text-zinc-600 transition-colors hover:border-zinc-300 hover:bg-zinc-50"
                     >
-                      Admin Yap
+                      Yönetici Yap
                     </button>
                   )}
                 </td>

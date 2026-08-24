@@ -141,7 +141,17 @@ export function AppRouter() {
           element={
             <RequireAuth>
               <RequireRole path="/app/categories">
-                <CategoriesListPage />
+                <CategoriesListPage variant="admin" />
+              </RequireRole>
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/app/super-admin/categories"
+          element={
+            <RequireAuth>
+              <RequireRole path="/app/super-admin/categories">
+                <CategoriesListPage variant="super-admin" />
               </RequireRole>
             </RequireAuth>
           }
@@ -151,7 +161,17 @@ export function AppRouter() {
           element={
             <RequireAuth>
               <RequireRole path="/app/ingredients">
-                <IngredientsListPage />
+                <IngredientsListPage variant="admin" />
+              </RequireRole>
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/app/super-admin/ingredients"
+          element={
+            <RequireAuth>
+              <RequireRole path="/app/super-admin/ingredients">
+                <IngredientsListPage variant="super-admin" />
               </RequireRole>
             </RequireAuth>
           }
@@ -161,7 +181,17 @@ export function AppRouter() {
           element={
             <RequireAuth>
               <RequireRole path="/app/products">
-                <ProductsListPage />
+                <ProductsListPage variant="admin" />
+              </RequireRole>
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/app/super-admin/products"
+          element={
+            <RequireAuth>
+              <RequireRole path="/app/super-admin/products">
+                <ProductsListPage variant="super-admin" />
               </RequireRole>
             </RequireAuth>
           }

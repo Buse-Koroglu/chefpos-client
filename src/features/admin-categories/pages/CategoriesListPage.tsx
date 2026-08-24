@@ -4,6 +4,7 @@ import { Plus } from 'lucide-react'
 import { useLocations } from '@/shared/hooks/useLocations'
 import { useDebouncedValue } from '@/shared/hooks/useDebouncedValue'
 import { AdminSidebar } from '@/shared/components/AdminSidebar'
+import { SuperAdminSidebar } from '@/shared/components/SuperAdminSidebar'
 import { AdminHeader } from '@/shared/components/AdminHeader'
 import { CategoriesSearchInput } from '@/features/admin-categories/components/CategoriesSearchInput'
 import { CategoriesFiltersBar } from '@/features/admin-categories/components/CategoriesFiltersBar'
@@ -25,7 +26,12 @@ function getCategoriesErrorMessage(error: unknown): string {
   return 'Kategori listesi yüklenemedi. Lütfen tekrar deneyin.'
 }
 
-export function CategoriesListPage() {
+interface CategoriesListPageProps {
+  variant?: 'admin' | 'super-admin'
+}
+
+export function CategoriesListPage({ variant = 'admin' }: CategoriesListPageProps) {
+  const isSuperAdmin = variant === 'super-admin'
   const [searchInput, setSearchInput] = useState('')
   const [locationId, setLocationId] = useState('ALL')
   const [status, setStatus] = useState<CategoryStatusFilter>('ALL')
@@ -65,28 +71,32 @@ export function CategoriesListPage() {
 
   return (
     <div className="flex h-screen bg-zinc-50">
-      <AdminSidebar />
+      {isSuperAdmin ? <SuperAdminSidebar /> : <AdminSidebar />}
 
       <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
         <AdminHeader
           title="Kategoriler"
           actions={
             <div className="flex items-center gap-3">
-              <CategoriesFiltersBar
-                locationId={locationId}
-                status={status}
-                locations={locations}
-                onLocationChange={handleLocationChange}
-                onStatusChange={handleStatusChange}
-              />
-              <button
-                type="button"
-                onClick={() => setIsAddModalOpen(true)}
-                className="flex items-center gap-1.5 bg-[#133458] px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-[#0f2843]"
-              >
-                <Plus className="size-4" />
-                Yeni Kategori Ekle
-              </button>
+              {isSuperAdmin && (
+                <CategoriesFiltersBar
+                  locationId={locationId}
+                  status={status}
+                  locations={locations}
+                  onLocationChange={handleLocationChange}
+                  onStatusChange={handleStatusChange}
+                />
+              )}
+              {isSuperAdmin && (
+                <button
+                  type="button"
+                  onClick={() => setIsAddModalOpen(true)}
+                  className="flex items-center gap-1.5 bg-[#133458] px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-[#0f2843]"
+                >
+                  <Plus className="size-4" />
+                  Yeni Kategori Ekle
+                </button>
+              )}
             </div>
           }
         />
@@ -116,8 +126,15 @@ export function CategoriesListPage() {
         </main>
       </div>
 
-      <CategoryEditPopup category={selectedCategory} locations={locations} onClose={() => setSelectedCategoryId(null)} />
-      <AddCategoryPopup open={isAddModalOpen} locations={locations} onClose={() => setIsAddModalOpen(false)} />
+      <CategoryEditPopup
+        category={selectedCategory}
+        locations={locations}
+        canEditLocations={isSuperAdmin}
+        onClose={() => setSelectedCategoryId(null)}
+      />
+      {isSuperAdmin && (
+        <AddCategoryPopup open={isAddModalOpen} locations={locations} onClose={() => setIsAddModalOpen(false)} />
+      )}
     </div>
   )
 }

@@ -4,6 +4,7 @@ import { Plus } from 'lucide-react'
 import { useLocations } from '@/shared/hooks/useLocations'
 import { useDebouncedValue } from '@/shared/hooks/useDebouncedValue'
 import { AdminSidebar } from '@/shared/components/AdminSidebar'
+import { SuperAdminSidebar } from '@/shared/components/SuperAdminSidebar'
 import { AdminHeader } from '@/shared/components/AdminHeader'
 import { ProductsSearchInput } from '@/features/admin-products/components/ProductsSearchInput'
 import { ProductsFiltersBar } from '@/features/admin-products/components/ProductsFiltersBar'
@@ -26,7 +27,12 @@ function getProductsErrorMessage(error: unknown): string {
   return 'Ürün listesi yüklenemedi. Lütfen tekrar deneyin.'
 }
 
-export function ProductsListPage() {
+interface ProductsListPageProps {
+  variant?: 'admin' | 'super-admin'
+}
+
+export function ProductsListPage({ variant = 'admin' }: ProductsListPageProps) {
+  const isSuperAdmin = variant === 'super-admin'
   const [searchInput, setSearchInput] = useState('')
   const [locationId, setLocationId] = useState('ALL')
   const [status, setStatus] = useState<ProductStatusFilter>('ALL')
@@ -63,28 +69,32 @@ export function ProductsListPage() {
 
   return (
     <div className="flex h-screen bg-zinc-50">
-      <AdminSidebar />
+      {isSuperAdmin ? <SuperAdminSidebar /> : <AdminSidebar />}
 
       <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
         <AdminHeader
           title="Ürünler"
           actions={
             <div className="flex items-center gap-3">
-              <ProductsFiltersBar
-                locationId={locationId}
-                status={status}
-                locations={locations}
-                onLocationChange={handleLocationChange}
-                onStatusChange={handleStatusChange}
-              />
-              <button
-                type="button"
-                onClick={() => setIsAddModalOpen(true)}
-                className="flex items-center gap-1.5 bg-[#133458] px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-[#0f2843]"
-              >
-                <Plus className="size-4" />
-                Yeni Ürün Ekle
-              </button>
+              {isSuperAdmin && (
+                <ProductsFiltersBar
+                  locationId={locationId}
+                  status={status}
+                  locations={locations}
+                  onLocationChange={handleLocationChange}
+                  onStatusChange={handleStatusChange}
+                />
+              )}
+              {isSuperAdmin && (
+                <button
+                  type="button"
+                  onClick={() => setIsAddModalOpen(true)}
+                  className="flex items-center gap-1.5 bg-[#133458] px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-[#0f2843]"
+                >
+                  <Plus className="size-4" />
+                  Yeni Ürün Ekle
+                </button>
+              )}
             </div>
           }
         />
@@ -118,9 +128,12 @@ export function ProductsListPage() {
         productId={selectedProductId}
         locations={locations}
         categories={categories}
+        canEditLocations={isSuperAdmin}
         onClose={() => setSelectedProductId(null)}
       />
-      <AddProductPopup open={isAddModalOpen} locations={locations} onClose={() => setIsAddModalOpen(false)} />
+      {isSuperAdmin && (
+        <AddProductPopup open={isAddModalOpen} locations={locations} onClose={() => setIsAddModalOpen(false)} />
+      )}
     </div>
   )
 }
