@@ -11,6 +11,7 @@ import {
   deactivateIngredient,
   updateIngredient,
   updateIngredientMinStockThreshold,
+  updateIngredientPrice,
 } from '@/shared/api/endpoints/ingredients'
 import type { IngredientWithLocation } from '@/features/admin-ingredients/types'
 
@@ -26,17 +27,26 @@ function IngredientEditForm({ ingredient, onClose }: IngredientEditFormProps) {
   const queryClient = useQueryClient()
 
   const [name, setName] = useState(ingredient.name)
+  const [latestUnitPrice, setLatestUnitPrice] = useState(
+    ingredient.latestUnitPrice !== null ? String(ingredient.latestUnitPrice) : '',
+  )
   const [minStockThreshold, setMinStockThreshold] = useState(String(ingredient.minStockThreshold))
   const [isActive, setIsActive] = useState(ingredient.isActive)
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
+  const canEditPrice = ingredient.latestUnitPrice !== null
+
   const hasChanges =
     name.trim() !== ingredient.name ||
+    (canEditPrice && Number(latestUnitPrice) !== ingredient.latestUnitPrice) ||
     Number(minStockThreshold) !== ingredient.minStockThreshold ||
     isActive !== ingredient.isActive
 
-  const isFormValid = name.trim() !== '' && Number(minStockThreshold) >= 0
+  const isFormValid =
+    name.trim() !== '' &&
+    Number(minStockThreshold) >= 0 &&
+    (!canEditPrice || (latestUnitPrice.trim() !== '' && Number(latestUnitPrice) >= 0))
 
   async function handleSave() {
     if (!isFormValid) {
@@ -50,6 +60,9 @@ function IngredientEditForm({ ingredient, onClose }: IngredientEditFormProps) {
     try {
       if (name.trim() !== ingredient.name) {
         await updateIngredient(ingredient.id, { name: name.trim() })
+      }
+      if (canEditPrice && Number(latestUnitPrice) !== ingredient.latestUnitPrice) {
+        await updateIngredientPrice(ingredient.id, { unitPrice: Number(latestUnitPrice) })
       }
       if (Number(minStockThreshold) !== ingredient.minStockThreshold) {
         await updateIngredientMinStockThreshold(ingredient.id, Number(minStockThreshold))
@@ -109,11 +122,19 @@ function IngredientEditForm({ ingredient, onClose }: IngredientEditFormProps) {
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="mb-1.5 block text-xs font-medium text-zinc-600">Son Alış Fiyatı</label>
-            <input
-              value={ingredient.latestUnitPrice !== null ? ingredient.latestUnitPrice : '—'}
-              readOnly
-              className={cn(FIELD_CLASSNAME, 'bg-zinc-50 text-zinc-500')}
-            />
+            {canEditPrice ? (
+              <input
+                value={latestUnitPrice}
+                onChange={(event) => setLatestUnitPrice(event.target.value)}
+                type="number"
+                min="0"
+                step="0.01"
+                disabled={isSubmitting}
+                className={FIELD_CLASSNAME}
+              />
+            ) : (
+              <input value="—" readOnly className={cn(FIELD_CLASSNAME, 'bg-zinc-50 text-zinc-500')} />
+            )}
           </div>
           <div>
             <label className="mb-1.5 block text-xs font-medium text-zinc-600">Ağırlıklı Ortalama Fiyat</label>

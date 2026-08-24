@@ -55,7 +55,7 @@ function ChartTooltip({ active, payload }: { active?: boolean; payload?: Array<{
       <p className="font-medium text-zinc-700">
         {entry.dayName} · {dateFormatter.format(new Date(entry.date))}
       </p>
-      <p className="mt-0.5 tabular-nums text-zinc-500">{currencyFormatter.format(entry.revenue)}</p>
+      <p className="mt-0.5 tabular-nums text-zinc-500">{currencyFormatter.format(entry.profit)}</p>
     </div>
   )
 }
@@ -65,11 +65,11 @@ export function WeeklyRevenueBarChart({ data, isLoading, isError }: WeeklyRevenu
 
   return (
     <div className="flex h-full min-h-88 flex-col border-2 border-zinc-300 bg-white p-5">
-      <h2 className="text-sm font-semibold text-zinc-700">Haftalık Ciro Grafiği</h2>
+      <h2 className="text-sm font-semibold text-zinc-700">Haftalık Kâr Grafiği</h2>
 
       {isError ? (
         <div className="flex flex-1 items-center justify-center text-sm text-zinc-500">
-          Haftalık ciro verisi alınamadı.
+          Haftalık kâr verisi alınamadı.
         </div>
       ) : isLoading ? (
         <div className="mt-1.5 flex flex-1 items-end gap-2 pb-4">
@@ -79,7 +79,7 @@ export function WeeklyRevenueBarChart({ data, isLoading, isError }: WeeklyRevenu
         </div>
       ) : entries.length === 0 ? (
         <div className="flex flex-1 items-center justify-center text-sm text-zinc-500">
-          Bu hafta için ciro verisi yok.
+          Bu hafta için kâr verisi yok.
         </div>
       ) : (
         <div className="mt-1.5 flex flex-1 items-center">
@@ -95,7 +95,7 @@ export function WeeklyRevenueBarChart({ data, isLoading, isError }: WeeklyRevenu
                 tick={{ fontSize: 11, fill: '#71717a' }}
               />
               <Tooltip cursor={{ fill: '#fafafa' }} content={<ChartTooltip />} />
-              <Bar dataKey="revenue" radius={[0, 0, 0, 0]} maxBarSize={36}>
+              <Bar dataKey="profit" radius={[0, 0, 0, 0]} maxBarSize={36}>
                 {entries.map((entry) => (
                   <Cell key={entry.date} fill={isToday(entry.date) ? '#133458' : '#d4d4d8'} />
                 ))}

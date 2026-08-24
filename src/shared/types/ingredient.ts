@@ -57,6 +57,10 @@ export interface CreateIngredientRequest {
 export interface UpdateIngredientRequest {
   name: string
 }
+
+export interface UpdateIngredientPriceRequest {
+  unitPrice: number
+}
  
 export interface RecordIngredientPurchaseRequest {
   quantity: number

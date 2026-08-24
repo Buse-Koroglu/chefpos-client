@@ -13,7 +13,7 @@ export interface CashierDashboardResponse {
 export interface DailyRevenueDto {
   date: string
   dayName: string
-  revenue: number
+  profit: number
 }
 
 export interface WeeklyRevenueResponse {

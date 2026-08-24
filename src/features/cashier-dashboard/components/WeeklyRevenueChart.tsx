@@ -46,21 +46,21 @@ export function WeeklyRevenueChart({ days, isLoading, isError }: WeeklyRevenueCh
     isToday: isSameUtcDate(entry.date, today),
   }))
 
-  const maxRevenue = niceMax(Math.max(0, ...entries.map((entry) => entry.revenue)))
+  const maxRevenue = niceMax(Math.max(0, ...entries.map((entry) => entry.profit)))
   const hovered = entries.find((entry) => entry.date === hoveredDay)
 
   return (
     <div className="flex h-full flex-col border-2 border-zinc-300 bg-white p-5">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-zinc-700">Haftalık Ciro Grafiği</h2>
+        <h2 className="text-sm font-semibold text-zinc-700">Haftalık Kâr Grafiği</h2>
         <span className="min-w-24 text-right text-sm tabular-nums text-zinc-500">
-          {hovered ? currencyFormatter.format(hovered.revenue) : ' '}
+          {hovered ? currencyFormatter.format(hovered.profit) : ' '}
         </span>
       </div>
 
       {isError ? (
         <div className="flex flex-1 items-center justify-center py-10 text-sm text-zinc-500">
-          Haftalık ciro verisi alınamadı.
+          Haftalık kâr verisi alınamadı.
         </div>
       ) : isLoading ? (
         <div className="flex flex-1 items-center justify-center py-10 text-sm text-zinc-500">Yükleniyor…</div>
@@ -78,19 +78,19 @@ export function WeeklyRevenueChart({ days, isLoading, isError }: WeeklyRevenueCh
               <div className="absolute inset-x-0 bottom-0 h-px bg-zinc-200" />
 
               {entries.map((entry) => {
-                const barHeight = Math.max(2, (entry.revenue / maxRevenue) * 100)
+                const barHeight = Math.max(2, (entry.profit / maxRevenue) * 100)
                 const isHovered = hoveredDay === entry.date
 
                 return (
                   <div key={entry.date} className="relative flex h-full flex-1 flex-col items-center justify-end">
                     {isHovered && (
                       <div className="absolute -top-8 z-10 border border-zinc-200 bg-white px-2 py-1 text-xs whitespace-nowrap text-zinc-700 shadow-sm">
-                        {currencyFormatter.format(entry.revenue)}
+                        {currencyFormatter.format(entry.profit)}
                       </div>
                     )}
                     <button
                       type="button"
-                      aria-label={`${entry.dayName}: ${currencyFormatter.format(entry.revenue)}`}
+                      aria-label={`${entry.dayName}: ${currencyFormatter.format(entry.profit)}`}
                       onMouseEnter={() => setHoveredDay(entry.date)}
                       onMouseLeave={() => setHoveredDay(null)}
                       onFocus={() => setHoveredDay(entry.date)}

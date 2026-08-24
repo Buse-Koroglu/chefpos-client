@@ -1,6 +1,6 @@
 export interface DailyRevenueEntry {
   date: string
-  revenue: number
+  profit: number
 }
 
 export interface LocationOrderCount {
