@@ -16,6 +16,8 @@ import { useCart } from '../hooks/useCart'
 import { useCreateOrder } from '../hooks/useCreateOrder'
 import { MobileUserMenu } from '@/shared/components/MobileUserMenu'
 import { CartItemsSheet } from '../components/CartItemsSheet'
+import { getApiErrorMessage } from '@/shared/api/apiError'
+import { isTableOccupiedConflict } from '../utils'
 
 export function WaiterOrderPage() {
   const locationId = useLocationStore((s) => s.selectedLocationId) ?? undefined
@@ -70,7 +72,14 @@ export function WaiterOrderPage() {
           setCartOpen(false)
           setCustomerName('')
         },
-        onError: () => toast.error('Sipariş oluşturulamadı.'),
+        onError: (error) => {
+          const message = getApiErrorMessage(error, 'Sipariş oluşturulamadı.')
+          if (isTableOccupiedConflict(message)) {
+            toast.error('Seçtiğiniz masa dolu. Ödeme alınmadan yeni sipariş oluşturulamaz.')
+            return
+          }
+          toast.error(message)
+        },
       },
     )
   }

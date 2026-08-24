@@ -10,6 +10,7 @@ import type {
   RecordIngredientPurchaseRequest,
   RecordManualDeductionRequest,
   RecordProductProductionRequest,
+  UpdateIngredientPriceRequest,
   UpdateIngredientRequest,
 } from '@/shared/types/ingredient'
 
@@ -57,6 +58,10 @@ export function createIngredient(payload: CreateIngredientRequest) {
 
 export function updateIngredient(id: string, payload: UpdateIngredientRequest) {
   return apiClient.patch<RawIngredientPayload>(`/api/ingredients/${id}`, payload).then((res) => normalizeIngredient(res.data))
+}
+
+export function updateIngredientPrice(id: string, payload: UpdateIngredientPriceRequest) {
+  return apiClient.patch<RawIngredientPayload>(`/api/ingredients/${id}/price`, payload).then((res) => normalizeIngredient(res.data))
 }
 
 export function updateIngredientMinStockThreshold(id: string, minStockThreshold: number) {
