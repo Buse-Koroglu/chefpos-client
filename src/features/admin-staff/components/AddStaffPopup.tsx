@@ -6,6 +6,7 @@ import { AlertTriangle, Check, ChevronDown, Copy, RotateCcw, X } from 'lucide-re
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { useAuthStore } from '@/shared/stores/authStore'
 import type { Role, UserResponseDto } from '@/shared/types/auth'
 import type { LocationDto } from '@/shared/types/location'
 import { assignLocationAccess, createUser, getStockManagerByLocation } from '@/shared/api/endpoints/users'
@@ -168,28 +169,25 @@ function updateUserInCache(queryClient: ReturnType<typeof useQueryClient>, user:
 
 interface StaffFormStepProps {
   locations: LocationDto[]
+  adminLocationId: string | undefined
   isSubmitting: boolean
   submitError: string | null
   onCancel: () => void
   onSubmit: (data: { firstName: string; lastName: string; personalId: string; roles: Role[]; locationIds: string[] }) => void
 }
 
-function StaffFormStep({ locations, isSubmitting, submitError, onCancel, onSubmit }: StaffFormStepProps) {
+function StaffFormStep({ locations, adminLocationId, isSubmitting, submitError, onCancel, onSubmit }: StaffFormStepProps) {
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [personalId, setPersonalId] = useState('')
   const [roles, setRoles] = useState<Role[]>([])
-  const [locationIds, setLocationIds] = useState<string[]>([])
   const [errors, setErrors] = useState<FormErrors>({})
+
+  const locationIds = adminLocationId ? [adminLocationId] : []
+  const adminLocationName = locations.find((location) => location.id === adminLocationId)?.name ?? '—'
 
   function toggleRole(role: Role) {
     setRoles((prev) => (prev.includes(role) ? prev.filter((value) => value !== role) : [...prev, role]))
-  }
-
-  function toggleLocation(locationId: string) {
-    setLocationIds((prev) =>
-      prev.includes(locationId) ? prev.filter((value) => value !== locationId) : [...prev, locationId],
-    )
   }
 
   function handleSubmit() {
@@ -200,7 +198,6 @@ function StaffFormStep({ locations, isSubmitting, submitError, onCancel, onSubmi
   }
 
   const roleOptions = ROLE_OPTIONS.map((r) => ({ id: r, label: ROLE_LABELS[r] }))
-  const locationOptions = locations.map((loc) => ({ id: loc.id, label: loc.name }))
 
   return (
     <>
@@ -266,20 +263,8 @@ function StaffFormStep({ locations, isSubmitting, submitError, onCancel, onSubmi
         </div>
 
         <div>
-          <MultiSelectDropdown
-            label="Lokasyonlar"
-            placeholder="Lokasyon seçiniz..."
-            itemLabelSingular="lokasyon"
-            options={locationOptions}
-            selectedIds={locationIds}
-            onToggle={toggleLocation}
-            disabled={isSubmitting}
-          />
-          {locationIds.length === 0 && (
-            <p className="mt-1.5 text-xs text-amber-600">
-              Lokasyonsuz personel hiçbir yere erişemez, en az bir lokasyon seçmeniz önerilir.
-            </p>
-          )}
+          <label className="mb-1.5 block text-xs font-medium text-zinc-600">Yerleşke</label>
+          <input value={adminLocationName} readOnly className={cn(FIELD_CLASSNAME, 'bg-zinc-50 text-zinc-500')} />
         </div>
       </div>
 
@@ -402,6 +387,7 @@ interface AddStaffPopupProps {
 
 export function AddStaffPopup({ open, locations, onClose }: AddStaffPopupProps) {
   const queryClient = useQueryClient()
+  const adminLocationId = useAuthStore((state) => state.user?.locationIds[0])
   const locationsById = useMemo(() => new Map(locations.map((location) => [location.id, location.name])), [locations])
 
   const [step, setStep] = useState<'form' | 'result'>('form')
@@ -528,6 +514,7 @@ export function AddStaffPopup({ open, locations, onClose }: AddStaffPopupProps) 
             <StaffFormStep
               key={open ? 'open' : 'closed'}
               locations={locations}
+              adminLocationId={adminLocationId}
               isSubmitting={isSubmitting}
               submitError={submitError}
               onCancel={handleClose}

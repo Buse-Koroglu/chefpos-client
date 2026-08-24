@@ -63,11 +63,8 @@ export function StaffListPage() {
               <StaffFiltersBar
                 role={filters.role}
                 status={filters.status}
-                locationId={filters.locationId}
-                locations={locations}
                 onRoleChange={(role: RoleFilter) => updateFilters({ role })}
                 onStatusChange={(status: StatusFilter) => updateFilters({ status })}
-                onLocationChange={(locationId) => updateFilters({ locationId })}
               />
               <button
                 type="button"

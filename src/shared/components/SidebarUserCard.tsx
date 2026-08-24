@@ -34,7 +34,7 @@ export function SidebarUserCard() {
   )
 
   useEffect(() => {
-    if (currentRole && currentRole !== 'ADMIN' && !selectedLocationId && userLocations.length > 0) {
+    if (currentRole && currentRole !== 'ADMIN' && currentRole !== 'SUPER_ADMIN' && !selectedLocationId && userLocations.length > 0) {
       setSelectedLocationId(userLocations[0].id)
     }
   }, [currentRole, selectedLocationId, userLocations, setSelectedLocationId])
@@ -48,7 +48,7 @@ export function SidebarUserCard() {
 
   return (
     <div className="flex flex-col gap-3 border-t border-zinc-200 px-3 py-4">
-      {currentRole && currentRole !== 'ADMIN' && (
+      {currentRole && currentRole !== 'ADMIN' && currentRole !== 'SUPER_ADMIN' && (
         <label className="flex items-center gap-2 border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-600">
           <MapPin className="size-4 shrink-0 text-zinc-400" />
           <select

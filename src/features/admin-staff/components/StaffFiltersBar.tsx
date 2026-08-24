@@ -1,4 +1,3 @@
-import type { LocationDto } from '@/shared/types/location'
 import { ROLE_LABELS, ROLE_OPTIONS } from '../constants'
 import type { RoleFilter, StatusFilter } from '../types'
 
@@ -8,22 +7,11 @@ const SELECT_CLASSNAME =
 interface StaffFiltersBarProps {
   role: RoleFilter
   status: StatusFilter
-  locationId: string
-  locations: LocationDto[]
   onRoleChange: (role: RoleFilter) => void
   onStatusChange: (status: StatusFilter) => void
-  onLocationChange: (locationId: string) => void
 }
 
-export function StaffFiltersBar({
-  role,
-  status,
-  locationId,
-  locations,
-  onRoleChange,
-  onStatusChange,
-  onLocationChange,
-}: StaffFiltersBarProps) {
+export function StaffFiltersBar({ role, status, onRoleChange, onStatusChange }: StaffFiltersBarProps) {
   return (
     <div className="flex items-center gap-2">
       <select
@@ -47,19 +35,6 @@ export function StaffFiltersBar({
         <option value="ALL">Tümü</option>
         <option value="ACTIVE">Aktif</option>
         <option value="INACTIVE">Pasif</option>
-      </select>
-
-      <select
-        value={locationId}
-        onChange={(event) => onLocationChange(event.target.value)}
-        className={SELECT_CLASSNAME}
-      >
-        <option value="ALL">Tüm Lokasyonlar</option>
-        {locations.map((location) => (
-          <option key={location.id} value={location.id}>
-            {location.name}
-          </option>
-        ))}
       </select>
     </div>
   )

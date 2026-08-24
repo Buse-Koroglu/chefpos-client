@@ -1,7 +1,8 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import axios from 'axios'
 import { Award, RefreshCw, Users } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useAuthStore } from '@/shared/stores/authStore'
 import { useLocationStore } from '@/shared/stores/locationStore'
 import { AdminSidebar } from '@/shared/components/AdminSidebar'
 import { AdminHeader } from '@/shared/components/AdminHeader'
@@ -25,8 +26,13 @@ function getSummaryErrorMessage(error: unknown): string {
 export function AdminHomePage() {
   const selectedLocationId = useLocationStore((state) => state.selectedLocationId)
   const setSelectedLocationId = useLocationStore((state) => state.setSelectedLocationId)
+  const user = useAuthStore((state) => state.user)
 
-  const { data: locations = [], isLoading: isLocationsLoading } = useLocations()
+  const { data: allLocations = [], isLoading: isLocationsLoading } = useLocations()
+  const locations = useMemo(
+    () => allLocations.filter((location) => user?.locationIds.includes(location.id)),
+    [allLocations, user],
+  )
 
   useEffect(() => {
     if (!selectedLocationId && locations.length > 0) {

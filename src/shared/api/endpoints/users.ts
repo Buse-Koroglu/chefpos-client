@@ -133,3 +133,9 @@ export function getStockManagerByLocation(locationId: string) {
     .get<RawUserPayload | null>('/api/users/stock-manager', { params: { locationId } })
     .then((res) => (res.data ? normalizeUser(res.data) : null))
 }
+
+export function getAdminByLocation(locationId: string) {
+  return apiClient
+    .get<RawUserPayload | null>('/api/users/admin', { params: { locationId } })
+    .then((res) => (res.data ? normalizeUser(res.data) : null))
+}

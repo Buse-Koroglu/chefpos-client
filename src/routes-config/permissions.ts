@@ -29,8 +29,12 @@ export const APP_ROUTES: RouteConfig[] = [
   { path: '/app/stock-manager/pending-requests', label: 'Bekleyen Stok Talepleri', allowedRoles: ['STOCK_MANAGER'], showInSidebar: true },
   { path: '/app/stock-manager/past-requests', label: 'Geçmiş Stok Talepleri', allowedRoles: ['STOCK_MANAGER'], showInSidebar: true },
   { path: '/app/stock-manager/ingredients', label: 'Ham Maddeler', allowedRoles: ['STOCK_MANAGER'], showInSidebar: true },
-  { path: '/app/users', label: 'Kullanıcılar', allowedRoles: ['ADMIN'], showInSidebar: true },
-  { path: '/app/locations', label: 'Şubeler', allowedRoles: ['ADMIN'], showInSidebar: true },
+  { path: '/app/users', label: 'Personeller', allowedRoles: ['ADMIN'], showInSidebar: true },
+  { path: '/app/locations', label: 'Şubeler', allowedRoles: ['SUPER_ADMIN'], showInSidebar: true },
+  { path: '/app/super-admin/users', label: 'Personeller', allowedRoles: ['SUPER_ADMIN'], showInSidebar: true },
+  { path: '/app/super-admin/categories', label: 'Kategoriler', allowedRoles: ['SUPER_ADMIN'], showInSidebar: true },
+  { path: '/app/super-admin/products', label: 'Ürünler', allowedRoles: ['SUPER_ADMIN'], showInSidebar: true },
+  { path: '/app/super-admin/ingredients', label: 'Ham Maddeler', allowedRoles: ['SUPER_ADMIN'], showInSidebar: true },
   { path: '/app/change-password', label: 'Şifre Değiştir', allowedRoles: 'ANY', showInSidebar: false },
 ]
 
@@ -39,6 +43,7 @@ export function findRouteConfig(path: string): RouteConfig | undefined {
 }
 
 const DEFAULT_ROUTE_BY_ROLE: Array<{ role: Role; path: string }> = [
+  { role: 'SUPER_ADMIN', path: '/app/super-admin/users' },
   { role: 'ADMIN', path: '/app/dashboard' },
   { role: 'CASHIER', path: '/app/home' },
   { role: 'WAITER', path: '/app/waiter-orders' },

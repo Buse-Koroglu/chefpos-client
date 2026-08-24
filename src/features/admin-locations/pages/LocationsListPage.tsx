@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import axios from 'axios'
 import { Plus } from 'lucide-react'
 import { useDebouncedValue } from '@/shared/hooks/useDebouncedValue'
-import { AdminSidebar } from '@/shared/components/AdminSidebar'
+import { SuperAdminSidebar } from '@/shared/components/SuperAdminSidebar'
 import { AdminHeader } from '@/shared/components/AdminHeader'
 import { LocationsSearchInput } from '@/features/admin-locations/components/LocationsSearchInput'
 import { LocationsStatusFilter } from '@/features/admin-locations/components/LocationsStatusFilter'
@@ -52,7 +52,7 @@ export function LocationsListPage() {
 
   return (
     <div className="flex h-screen bg-zinc-50">
-      <AdminSidebar />
+      <SuperAdminSidebar />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
         <AdminHeader

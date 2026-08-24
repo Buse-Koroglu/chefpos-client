@@ -8,21 +8,11 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import type { Role, UserResponseDto } from '@/shared/types/auth'
 import type { LocationDto } from '@/shared/types/location'
-import {
-  activateUser,
-  addRole,
-  assignLocationAccess,
-  deactivateUser,
-  getStockManagerByLocation,
-  removeRole,
-  revokeLocationAccess,
-} from '@/shared/api/endpoints/users'
+import { activateUser, addRole, deactivateUser, getStockManagerByLocation, removeRole } from '@/shared/api/endpoints/users'
 import { Skeleton } from '@/shared/components/Skeleton'
 import { InfoDialog } from '@/shared/components/InfoDialog'
-import { getApiErrorMessage } from '@/shared/api/apiError'
 import { ROLE_LABELS, ROLE_OPTIONS } from '@/features/admin-staff/constants'
 import { useUserDetail } from '@/features/admin-staff/hooks/useUserDetail'
-import { isStockManagerConflict } from '@/features/admin-staff/utils'
 
 const FIELD_CLASSNAME =
   'h-10 w-full rounded-none border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
@@ -172,25 +162,16 @@ function StaffEditForm({ staff, locations, onClose }: StaffEditFormProps) {
     setRoles((prev) => (prev.includes(role) ? prev.filter((value) => value !== role) : [...prev, role]))
   }
 
-  function toggleLocation(locationId: string) {
-    setLocationIds((prev) =>
-      prev.includes(locationId) ? prev.filter((value) => value !== locationId) : [...prev, locationId],
-    )
-  }
-
   async function handleSave() {
     setIsSubmitting(true)
     setSaveErrors([])
     setStockManagerConflictMessage(null)
 
     let current = baseline
-    let hadConflict = false
     const errors: string[] = []
 
     const rolesToAdd = roles.filter((role) => !baseline.roles.includes(role))
     const rolesToRemove = baseline.roles.filter((role) => !roles.includes(role))
-    const locationsToAdd = locationIds.filter((id) => !baseline.locationIds.includes(id))
-    const locationsToRemove = baseline.locationIds.filter((id) => !locationIds.includes(id))
 
     if (roles.includes('STOCK_MANAGER') && locationIds.length > 0) {
       const existingManagers = await Promise.all(
@@ -224,30 +205,6 @@ function StaffEditForm({ staff, locations, onClose }: StaffEditFormProps) {
       }
     }
 
-    for (const locationId of locationsToAdd) {
-      try {
-        current = await assignLocationAccess(current.id, locationId)
-      } catch (error) {
-        const name = locations.find((location) => location.id === locationId)?.name ?? locationId
-        const message = getApiErrorMessage(error, `${name} lokasyonu atanamadı.`)
-        if (isStockManagerConflict(message)) {
-          hadConflict = true
-          setStockManagerConflictMessage(message)
-        } else {
-          errors.push(message)
-        }
-      }
-    }
-
-    for (const locationId of locationsToRemove) {
-      try {
-        current = await revokeLocationAccess(current.id, locationId)
-      } catch {
-        const name = locations.find((location) => location.id === locationId)?.name ?? locationId
-        errors.push(`${name} lokasyonu kaldırılamadı.`)
-      }
-    }
-
     if (isActive !== baseline.isActive) {
       try {
         current = isActive ? await activateUser(current.id) : await deactivateUser(current.id)
@@ -268,10 +225,6 @@ function StaffEditForm({ staff, locations, onClose }: StaffEditFormProps) {
       return
     }
 
-    if (hadConflict) {
-      return
-    }
-
     toast.success('Personel bilgileri güncellendi.')
     onClose()
   }
@@ -279,12 +232,9 @@ function StaffEditForm({ staff, locations, onClose }: StaffEditFormProps) {
   const hasChanges =
     roles.length !== baseline.roles.length ||
     roles.some((role) => !baseline.roles.includes(role)) ||
-    locationIds.length !== baseline.locationIds.length ||
-    locationIds.some((id) => !baseline.locationIds.includes(id)) ||
     isActive !== baseline.isActive
 
   const roleOptions = ROLE_OPTIONS.map((r) => ({ id: r, label: ROLE_LABELS[r] }))
-  const locationOptions = locations.map((loc) => ({ id: loc.id, label: loc.name }))
 
   return (
     <>
@@ -347,14 +297,14 @@ function StaffEditForm({ staff, locations, onClose }: StaffEditFormProps) {
           disabled={isSubmitting}
         />
 
-        <MultiSelectDropdown
-          label="Lokasyon"
-          placeholder="Lokasyon seçiniz..."
-          options={locationOptions}
-          selectedIds={locationIds}
-          onToggle={toggleLocation}
-          disabled={isSubmitting}
-        />
+        <div>
+          <label className="mb-1.5 block text-xs font-medium text-zinc-600">Lokasyon</label>
+          <input
+            value={locations.filter((loc) => locationIds.includes(loc.id)).map((loc) => loc.name).join(', ') || '—'}
+            readOnly
+            className={cn(FIELD_CLASSNAME, 'bg-zinc-50 text-zinc-500')}
+          />
+        </div>
 
         <div>
           <label className="mb-1.5 block text-xs font-medium text-zinc-600">Durum</label>
