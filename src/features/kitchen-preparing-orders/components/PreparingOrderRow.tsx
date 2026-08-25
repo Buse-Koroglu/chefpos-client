@@ -1,8 +1,16 @@
+import { AlertTriangle } from 'lucide-react'
+
+import { cn } from '@/lib/utils'
+import { OrderTypeBadge } from '@/shared/components/OrderTypeBadge'
 import type { OrderResponse } from '@/shared/types/order'
+
+import { getOrderUrgency } from '../utils/orderUrgency'
 
 interface PreparingOrderRowProps {
   order: OrderResponse
   onClick: () => void
+  now: Date
+  showUrgency: boolean
 }
 
 const currencyFormatter =
@@ -12,14 +20,30 @@ const currencyFormatter =
     maximumFractionDigits: 2,
   })
 
+const URGENCY_ROW_CLASSNAME = {
+  normal: 'hover:bg-zinc-100',
+  warning: 'bg-amber-50 hover:bg-amber-100',
+  critical: 'bg-red-50 hover:bg-red-100',
+}
+
 export function PreparingOrderRow({
   order,
   onClick,
+  now,
+  showUrgency,
 }: PreparingOrderRowProps) {
+  const urgency =
+    showUrgency && order.status === 'PENDING'
+      ? getOrderUrgency(order.createdAt, now)
+      : 'normal'
+
   return (
     <tr
       onClick={onClick}
-      className="cursor-pointer border-b border-zinc-200 transition-colors hover:bg-zinc-100"
+      className={cn(
+        'cursor-pointer border-b border-zinc-200 transition-colors duration-300',
+        URGENCY_ROW_CLASSNAME[urgency],
+      )}
     >
       <td className="px-4 py-4">
         <span className="font-semibold tabular-nums text-zinc-900">
@@ -29,14 +53,26 @@ export function PreparingOrderRow({
 
       <td className="px-4 py-4">
         <div>
-          <p className="font-medium text-zinc-900">
-            {order.customerName ||
-              'Müşteri belirtilmedi'}
-          </p>
+          <div className="flex items-center gap-1.5">
+            <p className="font-medium text-zinc-900">
+              {order.customerName ||
+                'Müşteri belirtilmedi'}
+            </p>
 
-          <p className="text-xs text-zinc-400">
-            {order.type}
-          </p>
+            {urgency === 'critical' && (
+              <span
+                title="Sipariş kritik derecede gecikti"
+                className="inline-flex items-center gap-1 border border-red-300 bg-red-100 px-1.5 py-0.5 text-[10px] font-semibold text-red-700"
+              >
+                <AlertTriangle className="size-3" />
+                GECİKTİ
+              </span>
+            )}
+          </div>
+
+          <div className="mt-1">
+            <OrderTypeBadge type={order.type} />
+          </div>
         </div>
       </td>
 

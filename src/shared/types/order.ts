@@ -33,6 +33,7 @@ export interface OrderResponse {
   type: OrderType;
   paymentStatus: PaymentStatus;
   items: OrderItemResponse[];
+  createdAt: string;
   completedAt: string | null;
 }
 

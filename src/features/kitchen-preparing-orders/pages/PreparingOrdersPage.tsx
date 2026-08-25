@@ -11,11 +11,13 @@ import { useLocationStore } from '@/shared/stores/locationStore'
 
 import type { OrderResponse } from '@/shared/types/order'
 
+import { KITCHEN_URGENCY_TICK_INTERVAL_MS } from '../constants'
 import { KitchenSidebar } from '../components/KitchenSidebar'
 import { OrderDetailModal } from '../components/OrderDetailModal'
 import { PreparingOrdersTable } from '../components/PreparingOrdersTable'
 import { useKitchenOrdersCount } from '../hooks/useKitchenOrdersCount'
 import { usePreparingOrders, type KitchenOrdersTab } from '../hooks/usePreparingOrders'
+import { useTickingNow } from '../hooks/useTickingNow'
 
 const TABS: Array<{ value: KitchenOrdersTab; label: string }> = [
   { value: 'WAITER', label: 'Garson Siparişleri' },
@@ -73,6 +75,8 @@ export function PreparingOrdersPage() {
 
   const { waiterCount, kioskCashierCount } =
     useKitchenOrdersCount(locationId)
+
+  const now = useTickingNow(KITCHEN_URGENCY_TICK_INTERVAL_MS)
 
   const tabOrderCount =
     tab === 'WAITER' ? waiterCount : kioskCashierCount
@@ -217,6 +221,8 @@ export function PreparingOrdersPage() {
                     onSelectOrder={
                       setSelectedOrder
                     }
+                    now={now}
+                    showUrgency={tab === 'WAITER'}
                   />
                 </div>
 
