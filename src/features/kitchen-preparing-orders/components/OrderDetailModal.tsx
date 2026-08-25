@@ -26,6 +26,7 @@ export function OrderDetailModal({
   }
 
   const currentOrder = order
+  const canComplete = currentOrder.type === 'WAITER'
 
   function handleCompleteOrder() {
     completeOrderMutation.mutate(currentOrder.id, {
@@ -172,7 +173,7 @@ export function OrderDetailModal({
         </div>
 
         {/* ERROR */}
-        {completeOrderMutation.isError && (
+        {canComplete && completeOrderMutation.isError && (
           <div className="mx-5 mb-4 border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             Sipariş tamamlanamadı. Lütfen tekrar deneyin.
           </div>
@@ -181,8 +182,9 @@ export function OrderDetailModal({
         {/* FOOTER */}
         <div className="flex items-center justify-between border-t border-zinc-200 bg-zinc-50 px-5 py-4">
           <p className="text-xs text-zinc-400">
-            Sipariş hazır olduğunda tamamlandı olarak
-            işaretleyin.
+            {canComplete
+              ? 'Sipariş hazır olduğunda tamamlandı olarak işaretleyin.'
+              : 'Bu sipariş kasiyer tarafından tamamlanır, mutfaktan sadece görüntülenir.'}
           </p>
 
           <div className="flex items-center gap-2">
@@ -209,34 +211,36 @@ export function OrderDetailModal({
               Kapat
             </button>
 
-            <button
-              type="button"
-              onClick={handleCompleteOrder}
-              disabled={completeOrderMutation.isPending}
-              className="
-                inline-flex
-                items-center
-                gap-2
-                border
-                border-zinc-700
-                bg-[#133458]
-                px-5
-                py-2.5
-                text-sm
-                font-semibold
-                text-white
-                transition-colors
-                hover:bg-zinc-700
-                disabled:cursor-not-allowed
-                disabled:opacity-50
-              "
-            >
-              <Check className="size-4" />
+            {canComplete && (
+              <button
+                type="button"
+                onClick={handleCompleteOrder}
+                disabled={completeOrderMutation.isPending}
+                className="
+                  inline-flex
+                  items-center
+                  gap-2
+                  border
+                  border-zinc-700
+                  bg-[#133458]
+                  px-5
+                  py-2.5
+                  text-sm
+                  font-semibold
+                  text-white
+                  transition-colors
+                  hover:bg-zinc-700
+                  disabled:cursor-not-allowed
+                  disabled:opacity-50
+                "
+              >
+                <Check className="size-4" />
 
-              {completeOrderMutation.isPending
-                ? 'Tamamlanıyor...'
-                : 'Siparişi Tamamla'}
-            </button>
+                {completeOrderMutation.isPending
+                  ? 'Tamamlanıyor...'
+                  : 'Siparişi Tamamla'}
+              </button>
+            )}
           </div>
         </div>
       </div>
