@@ -23,6 +23,8 @@ import { NewOrderPage } from '@/features/cashier-pos/pages/NewOrderPage'
 import { PendingOrdersPage } from '@/features/cashier-pending-orders/pages/PendingOrdersPage'
 import { PastOrdersPage } from '@/features/cashier-past-orders/pages/PastOrdersPage'
 import { WaiterOrderPage } from '@/features/waiter-pos/pages/WaiterOrderPage'
+import { OrderHistoryPage } from '@/features/waiter-order-history/pages/OrderHistoryPage'
+import { OrderHistoryDetailPage } from '@/features/waiter-order-history/pages/OrderHistoryDetailPage'
 import { PreparingOrdersPage } from '@/features/kitchen-preparing-orders/pages/PreparingOrdersPage'
 import { InventoryDashboardPage } from '@/features/inventory-dashboard/pages/InventoryDashboardPage'
 import { MyStockRequestsPage } from '@/features/inventory-my-stock-requests/pages/MyStockRequestsPage'
@@ -285,6 +287,28 @@ export function AppRouter() {
             <RequireAuth>
               <RequireRole path="/app/waiter-orders">
                 <WaiterOrderPage />
+              </RequireRole>
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="/app/waiter-orders/history"
+          element={
+            <RequireAuth>
+              <RequireRole path="/app/waiter-orders/history">
+                <OrderHistoryPage />
+              </RequireRole>
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="/app/waiter-orders/history/:id"
+          element={
+            <RequireAuth>
+              <RequireRole path="/app/waiter-orders/history/:id">
+                <OrderHistoryDetailPage />
               </RequireRole>
             </RequireAuth>
           }

@@ -1,6 +1,13 @@
 import { apiClient } from '@/shared/api/client'
 import { ROLES } from '@/shared/types/auth'
-import type { CreateOrderRequest, GetOrdersQueryParams, OrderResponse, PagedResult } from '@/shared/types/order'
+import type {
+  AddOrderItemRequest,
+  CreateOrderRequest,
+  DecreaseOrderItemRequest,
+  GetOrdersQueryParams,
+  OrderResponse,
+  PagedResult,
+} from '@/shared/types/order'
 
 export function createOrder(payload: CreateOrderRequest) {
   return apiClient
@@ -22,4 +29,22 @@ export function cancelOrder(orderId: string) {
 
 export function makeOrderPaid(orderId: string) {
   return apiClient.post<OrderResponse>(`/api/orders/${orderId}/paid`).then((res) => res.data)
+}
+
+export function getOrderById(orderId: string) {
+  return apiClient.get<OrderResponse>(`/api/orders/${orderId}`).then((res) => res.data)
+}
+
+export function addOrderItem(orderId: string, payload: AddOrderItemRequest) {
+  return apiClient.post<OrderResponse>(`/api/orders/${orderId}/items`, payload).then((res) => res.data)
+}
+
+export function removeOrderItem(orderId: string, orderItemId: string) {
+  return apiClient.delete<OrderResponse>(`/api/orders/${orderId}/items/${orderItemId}`).then((res) => res.data)
+}
+
+export function decreaseOrderItem(orderId: string, orderItemId: string, payload: DecreaseOrderItemRequest) {
+  return apiClient
+    .patch<OrderResponse>(`/api/orders/${orderId}/items/${orderItemId}/decrease`, payload)
+    .then((res) => res.data)
 }
