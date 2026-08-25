@@ -1,4 +1,5 @@
 import { Plus, UtensilsCrossed } from 'lucide-react'
+import { resolveImageUrl } from '@/shared/lib/resolveImageUrl'
 import type { Product } from '../types'
 
 const currencyFormatter = new Intl.NumberFormat('tr-TR', {
@@ -13,11 +14,12 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, onAdd }: ProductCardProps) {
+  const resolvedImageUrl = resolveImageUrl(product.imageUrl)
   return (
     <div className="flex flex-col overflow-hidden border border-zinc-200 bg-white">
       <div className="flex h-20 items-center justify-center overflow-hidden bg-zinc-100 text-zinc-300">
-        {product.imageUrl ? (
-          <img src={product.imageUrl} alt={product.name} className="size-full object-cover" />
+        {resolvedImageUrl ? (
+          <img src={resolvedImageUrl} alt={product.name} className="size-full object-cover" />
         ) : (
           <UtensilsCrossed className="size-6" />
         )}

@@ -1,4 +1,5 @@
 import { ImageOff } from 'lucide-react'
+import { resolveImageUrl } from '@/shared/lib/resolveImageUrl'
 
 interface ProductImagePreviewProps {
   imageUrl: string | null | undefined
@@ -7,8 +8,9 @@ interface ProductImagePreviewProps {
 
 export function ProductImagePreview({ imageUrl, size = 'sm' }: ProductImagePreviewProps) {
   const sizeClassName = size === 'sm' ? 'size-9' : 'size-24'
+  const resolvedUrl = resolveImageUrl(imageUrl)
 
-  if (!imageUrl) {
+  if (!resolvedUrl) {
     return (
       <div className={`flex ${sizeClassName} shrink-0 items-center justify-center border border-zinc-200 bg-zinc-50 text-zinc-300`}>
         <ImageOff className={size === 'sm' ? 'size-4' : 'size-8'} />
@@ -18,7 +20,7 @@ export function ProductImagePreview({ imageUrl, size = 'sm' }: ProductImagePrevi
 
   return (
     <img
-      src={imageUrl}
+      src={resolvedUrl}
       alt=""
       className={`${sizeClassName} shrink-0 border border-zinc-200 object-cover`}
       onError={(event) => {

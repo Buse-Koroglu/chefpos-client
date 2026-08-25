@@ -60,13 +60,11 @@ export interface CreateProductRequest {
   categoryId: string;
   locationIds: string[];
   description?: string | null;
-  imageUrl?: string | null;
 }
 
 export interface UpdateProductRequest {
   name: string;
   description?: string | null;
-  imageUrl?: string | null;
 }
 
 export interface AddProductIngredientRequest {
