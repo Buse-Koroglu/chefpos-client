@@ -15,6 +15,8 @@ export const APP_ROUTES: RouteConfig[] = [
   { path: '/app/past-orders', label: 'Geçmiş Siparişler', allowedRoles: ['CASHIER'], showInSidebar: true },
   { path: '/app/orders/:id', label: 'Sipariş Detay', allowedRoles: ['CASHIER', 'WAITER', 'ADMIN'], showInSidebar: false },
   { path: '/app/waiter-orders', label: 'Sipariş Al', allowedRoles: ['WAITER'], showInSidebar: true },
+  { path: '/app/waiter-orders/history', label: 'Geçmiş Siparişler', allowedRoles: ['WAITER'], showInSidebar: false },
+  { path: '/app/waiter-orders/history/:id', label: 'Sipariş Detay', allowedRoles: ['WAITER'], showInSidebar: false },
   { path: '/app/products', label: 'Ürünler', allowedRoles: ['ADMIN'], showInSidebar: true },
   { path: '/app/menus', label: 'Menüler', allowedRoles: ['ADMIN'], showInSidebar: true },
   { path: '/app/tables', label: 'Masalar', allowedRoles: ['ADMIN'], showInSidebar: true },

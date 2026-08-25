@@ -9,6 +9,7 @@ export interface OrderItemResponse {
   quantity: number;
   name: string;
   price: number;
+  productId: string | null;
 }
 
 export interface CreateOrderItem {
@@ -33,7 +34,11 @@ export interface OrderResponse {
   type: OrderType;
   paymentStatus: PaymentStatus;
   items: OrderItemResponse[];
+  createdAt: string;
   completedAt: string | null;
+  createdByUserId: string | null;
+  tableId: string | null;
+  tableNumber: number | null;
 }
 
 export interface GetOrdersQueryParams {
@@ -42,6 +47,9 @@ export interface GetOrdersQueryParams {
   paymentStatus?: PaymentStatus;
   type?: OrderType;
   searchTerm?: string;
+  waiterId?: string;
+  fromDate?: string;
+  toDate?: string;
   pageNumber?: number;
   pageSize?: number;
 }

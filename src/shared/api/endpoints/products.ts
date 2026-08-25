@@ -70,6 +70,25 @@ export function updateProduct(id: string, payload: UpdateProductRequest) {
   return apiClient.patch<RawProductPayload>(`/api/products/${id}`, payload).then((res) => normalizeProduct(res.data))
 }
 
+export function uploadProductImage(id: string, file: File, onProgress?: (percent: number) => void) {
+  const formData = new FormData()
+  formData.append('file', file)
+  return apiClient
+    .post<RawProductPayload>(`/api/products/${id}/image`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      onUploadProgress: (event) => {
+        if (onProgress && event.total) {
+          onProgress(Math.round((event.loaded / event.total) * 100))
+        }
+      },
+    })
+    .then((res) => normalizeProduct(res.data))
+}
+
+export function deleteProductImage(id: string) {
+  return apiClient.delete<RawProductPayload>(`/api/products/${id}/image`).then((res) => normalizeProduct(res.data))
+}
+
 export function updateProductPrice(id: string, newPrice: number) {
   return apiClient
     .patch<RawProductPayload>(`/api/products/${id}/price`, { newPrice })

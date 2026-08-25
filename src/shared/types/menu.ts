@@ -39,5 +39,4 @@ export interface CreateProductForMenuRequest {
   name: string;
   price: number;
   description?: string | null;
-  imageUrl?: string | null;
 }

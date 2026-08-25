@@ -7,9 +7,9 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import type { LocationDto } from '@/shared/types/location'
-import { createProduct } from '@/shared/api/endpoints/products'
+import { createProduct, uploadProductImage } from '@/shared/api/endpoints/products'
 import { useActiveCategories } from '@/features/admin-products/hooks/useActiveCategories'
-import { ProductImagePreview } from './ProductImagePreview'
+import { ImageUploadInput } from '@/shared/components/ImageUploadInput'
 
 const FIELD_CLASSNAME =
   'h-10 w-full rounded-none border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
@@ -170,11 +170,12 @@ export function AddProductPopup({ open, locations, onClose }: AddProductPopupPro
   const [categoryId, setCategoryId] = useState('')
   const [price, setPrice] = useState('')
   const [description, setDescription] = useState('')
-  const [imageUrl, setImageUrl] = useState('')
+  const [imageFile, setImageFile] = useState<File | null>(null)
   const [locationIds, setLocationIds] = useState<string[]>([])
   const [errors, setErrors] = useState<FormErrors>({})
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState<number | undefined>(undefined)
 
   const selectedCategory = categories.find((category) => category.id === categoryId)
 
@@ -183,11 +184,12 @@ export function AddProductPopup({ open, locations, onClose }: AddProductPopupPro
     setCategoryId('')
     setPrice('')
     setDescription('')
-    setImageUrl('')
+    setImageFile(null)
     setLocationIds([])
     setErrors({})
     setSubmitError(null)
     setIsSubmitting(false)
+    setUploadProgress(undefined)
   }
 
   function handleClose() {
@@ -210,14 +212,23 @@ export function AddProductPopup({ open, locations, onClose }: AddProductPopupPro
     setSubmitError(null)
 
     try {
-      await createProduct({
+      const product = await createProduct({
         name: name.trim(),
         price: Number(price),
         categoryId,
         locationIds,
         description: description.trim() || null,
-        imageUrl: imageUrl.trim() || null,
       })
+
+      if (imageFile) {
+        try {
+          setUploadProgress(0)
+          await uploadProductImage(product.id, imageFile, setUploadProgress)
+        } catch {
+          toast.error('Ürün oluşturuldu ancak görsel yüklenemedi. Düzenleme ekranından tekrar deneyebilirsiniz.')
+        }
+      }
+
       queryClient.invalidateQueries({ queryKey: ['products'], exact: false })
       toast.success('Ürün başarıyla eklendi.')
       handleClose()
@@ -303,16 +314,14 @@ export function AddProductPopup({ open, locations, onClose }: AddProductPopupPro
             </div>
 
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-zinc-600">Görsel URL (opsiyonel)</label>
-              <div className="flex items-center gap-2">
-                <ProductImagePreview imageUrl={imageUrl.trim() || null} />
-                <input
-                  value={imageUrl}
-                  onChange={(event) => setImageUrl(event.target.value)}
-                  placeholder="https://..."
-                  className={FIELD_CLASSNAME}
-                />
-              </div>
+              <label className="mb-1.5 block text-xs font-medium text-zinc-600">Görsel (opsiyonel)</label>
+              <ImageUploadInput
+                file={imageFile}
+                onFileChange={setImageFile}
+                disabled={isSubmitting}
+                uploading={isSubmitting && uploadProgress !== undefined}
+                uploadProgress={uploadProgress}
+              />
             </div>
 
             <div>

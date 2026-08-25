@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from 'react'
-import { LogOut, MapPin, X } from 'lucide-react'
+import { History, LogOut, MapPin, X } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/shared/stores/authStore'
 import { useActiveRoleStore } from '@/shared/stores/activeRoleStore'
@@ -117,6 +117,22 @@ export function MobileUserMenu({ open, onClose }: MobileUserMenuProps) {
             )}
           </label>
         </div>
+
+        {roles.includes('WAITER') && (
+          <nav className="border-t border-zinc-200 px-2 py-2">
+            <button
+              type="button"
+              onClick={() => {
+                onClose()
+                navigate('/app/waiter-orders/history')
+              }}
+              className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 hover:text-zinc-900"
+            >
+              <History className="size-4" />
+              Geçmiş Siparişler
+            </button>
+          </nav>
+        )}
 
         <button
           type="button"

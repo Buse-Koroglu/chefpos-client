@@ -7,11 +7,15 @@ interface PreparingOrdersTableProps {
   onSelectOrder: (
     order: OrderResponse,
   ) => void
+  now: Date
+  showUrgency: boolean
 }
 
 export function PreparingOrdersTable({
   orders,
   onSelectOrder,
+  now,
+  showUrgency,
 }: PreparingOrdersTableProps) {
   return (
     <div className="overflow-x-auto">
@@ -48,6 +52,8 @@ export function PreparingOrdersTable({
               onClick={() =>
                 onSelectOrder(order)
               }
+              now={now}
+              showUrgency={showUrgency}
             />
           ))}
         </tbody>

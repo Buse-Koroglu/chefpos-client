@@ -2,6 +2,7 @@ import { useState } from 'react'
 import axios from 'axios'
 import { Search } from 'lucide-react'
 
+import { cn } from '@/lib/utils'
 import { CashierHeader } from '@/shared/components/CashierHeader'
 import { Pagination } from '@/shared/components/Pagination'
 import { useDebouncedValue } from '@/shared/hooks/useDebouncedValue'
@@ -10,10 +11,18 @@ import { useLocationStore } from '@/shared/stores/locationStore'
 
 import type { OrderResponse } from '@/shared/types/order'
 
+import { KITCHEN_URGENCY_TICK_INTERVAL_MS } from '../constants'
 import { KitchenSidebar } from '../components/KitchenSidebar'
 import { OrderDetailModal } from '../components/OrderDetailModal'
 import { PreparingOrdersTable } from '../components/PreparingOrdersTable'
-import { usePreparingOrders } from '../hooks/usePreparingOrders'
+import { useKitchenOrdersCount } from '../hooks/useKitchenOrdersCount'
+import { usePreparingOrders, type KitchenOrdersTab } from '../hooks/usePreparingOrders'
+import { useTickingNow } from '../hooks/useTickingNow'
+
+const TABS: Array<{ value: KitchenOrdersTab; label: string }> = [
+  { value: 'WAITER', label: 'Garson Siparişleri' },
+  { value: 'KIOSK_CASHIER', label: 'Kiosk / Kasiyer Siparişleri' },
+]
 
 function getErrorMessage(error: unknown) {
   if (axios.isAxiosError(error)) {
@@ -40,6 +49,7 @@ export function PreparingOrdersPage() {
       (location) => location.id === locationId,
     )?.name ?? '—'
 
+  const [tab, setTab] = useState<KitchenOrdersTab>('WAITER')
   const [searchTerm, setSearchTerm] = useState('')
   const [pageNumber, setPageNumber] = useState(1)
   const [selectedOrder, setSelectedOrder] =
@@ -58,9 +68,28 @@ export function PreparingOrdersPage() {
     error,
   } = usePreparingOrders({
     locationId,
+    tab,
     pageNumber,
     searchTerm: debouncedSearchTerm.trim(),
   })
+
+  const { waiterCount, kioskCashierCount } =
+    useKitchenOrdersCount(locationId)
+
+  const now = useTickingNow(KITCHEN_URGENCY_TICK_INTERVAL_MS)
+
+  const tabOrderCount =
+    tab === 'WAITER' ? waiterCount : kioskCashierCount
+
+  const orders = (data?.items ?? []).filter(
+    (order) =>
+      tab === 'WAITER' || order.type !== 'WAITER',
+  )
+
+  function handleTabChange(nextTab: KitchenOrdersTab) {
+    setTab(nextTab)
+    setPageNumber(1)
+  }
 
   function handleSearchChange(
     value: string,
@@ -84,7 +113,30 @@ export function PreparingOrdersPage() {
         />
 
         <main className="flex min-h-0 flex-1 flex-col gap-4 p-4">
-        
+
+          <div className="flex border border-zinc-200 bg-white">
+            {TABS.map((tabItem) => (
+              <button
+                key={tabItem.value}
+                type="button"
+                onClick={() => handleTabChange(tabItem.value)}
+                className={cn(
+                  'flex-1 border-b-2 px-4 py-3 text-sm font-medium transition-colors',
+                  tab === tabItem.value
+                    ? 'border-[#133458] bg-zinc-50 text-zinc-900'
+                    : 'border-transparent text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900',
+                )}
+              >
+                {tabItem.label}
+                {tab === tabItem.value && (
+                  <span className="ml-1.5 inline-flex items-center border border-zinc-300 bg-white px-1.5 py-0.5 text-xs font-semibold text-zinc-700">
+                    {tabOrderCount}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+
           <div className="relative w-full">
             <Search
               className="
@@ -144,12 +196,13 @@ export function PreparingOrdersPage() {
               <div className="flex flex-1 items-center justify-center text-sm text-red-500">
                 {getErrorMessage(error)}
               </div>
-            ) : !data ||
-              data.items.length === 0 ? (
+            ) : orders.length === 0 ? (
               <div className="flex flex-1 items-center justify-center">
                 <div className="text-center">
                   <p className="text-sm font-medium text-zinc-700">
-                    Hazırlanan sipariş bulunamadı
+                    {tab === 'WAITER'
+                      ? 'Hazırlanan garson siparişi bulunamadı'
+                      : 'Hazırlanan kiosk/kasiyer siparişi bulunamadı'}
                   </p>
 
                   {debouncedSearchTerm && (
@@ -164,17 +217,19 @@ export function PreparingOrdersPage() {
               <>
                 <div className="min-h-0 flex-1 overflow-auto">
                   <PreparingOrdersTable
-                    orders={data.items}
+                    orders={orders}
                     onSelectOrder={
                       setSelectedOrder
                     }
+                    now={now}
+                    showUrgency={tab === 'WAITER'}
                   />
                 </div>
 
                 <Pagination
                   pageNumber={pageNumber}
-                  totalPages={data.totalPages}
-                  totalCount={data.totalCount}
+                  totalPages={data?.totalPages ?? 1}
+                  totalCount={tabOrderCount}
                   onPageChange={
                     handlePageChange
                   }

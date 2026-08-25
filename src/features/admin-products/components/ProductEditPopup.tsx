@@ -12,13 +12,15 @@ import {
   activateProduct,
   addProductLocation,
   deactivateProduct,
+  deleteProductImage,
   removeProductLocation,
   updateProduct,
   updateProductPrice,
+  uploadProductImage,
 } from '@/shared/api/endpoints/products'
 import { Skeleton } from '@/shared/components/Skeleton'
+import { ImageUploadInput } from '@/shared/components/ImageUploadInput'
 import { useProductDetail } from '@/features/admin-products/hooks/useProductDetail'
-import { ProductImagePreview } from './ProductImagePreview'
 import { ProductRecipeSection } from './ProductRecipeSection'
 
 const FIELD_CLASSNAME =
@@ -161,7 +163,9 @@ function ProductEditForm({ product, locations, categories, canEditLocations, onC
 
   const [name, setName] = useState(product.name)
   const [description, setDescription] = useState(product.description ?? '')
-  const [imageUrl, setImageUrl] = useState(product.imageUrl ?? '')
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [removeExistingImage, setRemoveExistingImage] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState<number | undefined>(undefined)
   const [price, setPrice] = useState(String(product.price))
   const [locationIds, setLocationIds] = useState<string[]>(product.locationIds)
   const [isActive, setIsActive] = useState(product.isActive)
@@ -174,7 +178,8 @@ function ProductEditForm({ product, locations, categories, canEditLocations, onC
   const hasChanges =
     name.trim() !== product.name ||
     description.trim() !== (product.description ?? '') ||
-    imageUrl.trim() !== (product.imageUrl ?? '') ||
+    imageFile !== null ||
+    removeExistingImage ||
     Number(price) !== product.price ||
     isActive !== product.isActive ||
     locationIds.length !== product.locationIds.length ||
@@ -231,16 +236,17 @@ function ProductEditForm({ product, locations, categories, canEditLocations, onC
     }
 
     try {
-      if (
-        name.trim() !== product.name ||
-        description.trim() !== (product.description ?? '') ||
-        imageUrl.trim() !== (product.imageUrl ?? '')
-      ) {
+      if (name.trim() !== product.name || description.trim() !== (product.description ?? '')) {
         await updateProduct(product.id, {
           name: name.trim(),
           description: description.trim() || null,
-          imageUrl: imageUrl.trim() || null,
         })
+      }
+      if (imageFile) {
+        setUploadProgress(0)
+        await uploadProductImage(product.id, imageFile, setUploadProgress)
+      } else if (removeExistingImage) {
+        await deleteProductImage(product.id)
       }
       if (Number(price) !== product.price) {
         await updateProductPrice(product.id, Number(price))
@@ -350,17 +356,19 @@ function ProductEditForm({ product, locations, categories, canEditLocations, onC
         </div>
 
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-zinc-600">Görsel URL</label>
-          <div className="flex items-center gap-2">
-            <ProductImagePreview imageUrl={imageUrl.trim() || null} />
-            <input
-              value={imageUrl}
-              onChange={(event) => setImageUrl(event.target.value)}
-              placeholder="https://..."
-              disabled={isSubmitting}
-              className={FIELD_CLASSNAME}
-            />
-          </div>
+          <label className="mb-1.5 block text-xs font-medium text-zinc-600">Görsel</label>
+          <ImageUploadInput
+            file={imageFile}
+            onFileChange={(nextFile) => {
+              setImageFile(nextFile)
+              if (nextFile) setRemoveExistingImage(false)
+            }}
+            existingImageUrl={removeExistingImage ? null : product.imageUrl}
+            onRemoveExisting={() => setRemoveExistingImage(true)}
+            disabled={isSubmitting}
+            uploading={isSubmitting && uploadProgress !== undefined}
+            uploadProgress={uploadProgress}
+          />
         </div>
 
         {/* Yerleşkeler */}
