@@ -19,7 +19,8 @@ export interface CreateOrderItem {
 
 export interface CreateOrderRequest {
   locationId: string;
-  tableId?: string | null;  
+  tableId?: string | null;
+  isPackage?: boolean;
   customerName?: string | null;
   items: CreateOrderItem[];
   requestedAs: Role;
@@ -39,6 +40,7 @@ export interface OrderResponse {
   createdByUserId: string | null;
   tableId: string | null;
   tableNumber: number | null;
+  isPackage: boolean;
 }
 
 export interface GetOrdersQueryParams {

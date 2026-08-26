@@ -1,4 +1,4 @@
-import { AlertTriangle } from 'lucide-react'
+import { AlertTriangle, ShoppingBag } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 import { OrderTypeBadge } from '@/shared/components/OrderTypeBadge'
@@ -70,8 +70,18 @@ export function PreparingOrderRow({
             )}
           </div>
 
-          <div className="mt-1">
+          <div className="mt-1 flex items-center gap-1.5">
             <OrderTypeBadge type={order.type} />
+            {order.isPackage ? (
+              <span className="inline-flex items-center gap-1 border border-[#133458]/30 bg-[#133458]/10 px-1.5 py-0.5 text-[10px] font-semibold text-[#133458]">
+                <ShoppingBag className="size-3" />
+                PAKET
+              </span>
+            ) : order.tableNumber != null ? (
+              <span className="inline-flex border border-zinc-300 bg-zinc-100 px-1.5 py-0.5 text-[10px] font-semibold text-zinc-600">
+                Masa {order.tableNumber}
+              </span>
+            ) : null}
           </div>
         </div>
       </td>
