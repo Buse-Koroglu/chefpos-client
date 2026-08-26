@@ -1,4 +1,4 @@
-import { Check, X } from 'lucide-react'
+import { Check, ShoppingBag, X } from 'lucide-react'
 
 import type { OrderResponse } from '@/shared/types/order'
 
@@ -80,7 +80,7 @@ export function OrderDetailModal({
         </div>
 
         {/* ORDER INFORMATION */}
-        <div className="grid grid-cols-2 border-b border-zinc-200">
+        <div className="grid grid-cols-3 border-b border-zinc-200">
           <div className="border-r border-zinc-200 px-5 py-4">
             <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
               Müşteri
@@ -90,6 +90,23 @@ export function OrderDetailModal({
               {order.customerName ||
                 'Müşteri belirtilmedi'}
             </p>
+          </div>
+
+          <div className="border-r border-zinc-200 px-5 py-4">
+            <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
+              Masa
+            </p>
+
+            {order.isPackage ? (
+              <span className="mt-1 inline-flex items-center gap-1 border border-[#133458]/30 bg-[#133458]/10 px-2 py-0.5 text-xs font-semibold text-[#133458]">
+                <ShoppingBag className="size-3" />
+                Paket
+              </span>
+            ) : (
+              <p className="mt-1 text-sm font-semibold text-zinc-900">
+                {order.tableNumber != null ? `Masa ${order.tableNumber}` : '—'}
+              </p>
+            )}
           </div>
 
           <div className="px-5 py-4">

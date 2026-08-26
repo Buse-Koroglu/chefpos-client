@@ -28,6 +28,7 @@ export function WaiterOrderPage() {
   const locationName = locations.find((l) => l.id === locationId)?.name ?? '—'
   const [cartOpen, setCartOpen] = useState(false)
   const [tableId, setTableId] = useState<string | null>(null)
+  const [isPackage, setIsPackage] = useState(false)
   const [categoryId, setCategoryId] = useState('')
   const [selectedMenuId, setSelectedMenuId] = useState('')
   const [customerName, setCustomerName] = useState('')
@@ -90,6 +91,7 @@ export function WaiterOrderPage() {
   if (locationId !== lastSyncedLocationId) {
     setLastSyncedLocationId(locationId)
     setTableId(null)
+    setIsPackage(false)
     setCategoryId('')
     setSelectedMenuId('')
     setCustomerName('')
@@ -98,14 +100,15 @@ export function WaiterOrderPage() {
 
 
   function handleSubmit() {
-    if (!tableId || !locationId) {
-      toast.error('Lütfen masa seçin.')
+    if (!locationId || (!isPackage && !tableId)) {
+      toast.error('Lütfen masa seçin veya paket seçeneğini işaretleyin.')
       return
     }
     createOrder.mutate(
       {
         locationId,
-        tableId,
+        tableId: isPackage ? null : tableId,
+        isPackage,
         customerName: customerName.trim() || null,
         items: items.map((i) => ({ productId: i.productId, quantity: i.quantity })),
         requestedAs: 'WAITER',
@@ -136,7 +139,15 @@ export function WaiterOrderPage() {
         <TableSelector
           tables={tables}
           selectedTableId={tableId}
-          onSelect={setTableId}
+          isPackage={isPackage}
+          onSelect={(id) => {
+            setTableId(id)
+            setIsPackage(false)
+          }}
+          onSelectPackage={() => {
+            setIsPackage(true)
+            setTableId(null)
+          }}
         />
 
         <div className="mt-3">
