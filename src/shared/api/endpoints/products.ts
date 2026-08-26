@@ -1,4 +1,5 @@
 import { apiClient } from '@/shared/api/client'
+import { kioskClient } from '@/shared/api/kioskClient'
 import { STOCK_UNITS } from '@/shared/types/ingredient'
 import type {
   AddProductIngredientRequest,
@@ -31,6 +32,7 @@ interface RawProductPayload {
   description?: string | null
   imageUrl?: string | null
   isActive: boolean
+  isAvailable: boolean
   categoryId: string | null
   locationIds: string[]
   locations: RawProductLocationPayload[]
@@ -48,6 +50,12 @@ function normalizeProduct(raw: RawProductPayload): ProductResponse {
 
 export function getProducts(params: GetProductsQueryParams) {
   return apiClient
+    .get<RawProductPayload[]>('/api/products', { params })
+    .then((res) => res.data.map(normalizeProduct))
+}
+
+export function getKioskProducts(params: GetProductsQueryParams) {
+  return kioskClient
     .get<RawProductPayload[]>('/api/products', { params })
     .then((res) => res.data.map(normalizeProduct))
 }

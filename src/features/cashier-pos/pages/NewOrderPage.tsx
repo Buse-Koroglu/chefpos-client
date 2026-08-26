@@ -70,6 +70,20 @@ export function NewOrderPage() {
     setItems((current) => current.filter((item) => item.id !== productId))
   }
 
+  function handleIncreaseItem(productId: string) {
+    setItems((current) =>
+      current.map((item) => (item.id === productId ? { ...item, quantity: item.quantity + 1 } : item)),
+    )
+  }
+
+  function handleDecreaseItem(productId: string) {
+    setItems((current) =>
+      current
+        .map((item) => (item.id === productId ? { ...item, quantity: item.quantity - 1 } : item))
+        .filter((item) => item.quantity > 0),
+    )
+  }
+
   function handleSubmit() {
     if (!customerName.trim()) {
       toast.error('Müşteri adını giriniz.')
@@ -183,11 +197,13 @@ export function NewOrderPage() {
                 Ürünler yüklenemedi.
               </div>
             ) : (
-              <ProductCatalog products={displayProducts} onAdd={handleAddItem} />
+              <ProductCatalog products={displayProducts} onAdd={handleAddItem} size="large" />
             )}
 
             <SelectedItemsPanel
               items={items}
+              onIncrease={handleIncreaseItem}
+              onDecrease={handleDecreaseItem}
               onRemove={handleRemoveItem}
               onSubmit={handleSubmit}
               isSubmitDisabled={!isValid}

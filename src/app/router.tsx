@@ -34,6 +34,7 @@ import { StockManagerDashboardPage } from '@/features/stock-manager-dashboard/pa
 import { StockManagerPendingRequestsPage } from '@/features/stock-manager-requests/pages/StockManagerPendingRequestsPage'
 import { StockManagerPastRequestsPage } from '@/features/stock-manager-requests/pages/StockManagerPastRequestsPage'
 import { StockManagerIngredientsPage } from '@/features/stock-manager-ingredients/pages/StockManagerIngredientsPage'
+import { KioskPage } from '@/features/kiosk/pages/KioskPage'
 
 const EMPTY_ROLES: Role[] = []
 
@@ -405,8 +406,8 @@ export function AppRouter() {
         <Route path="/403" element={<Placeholder label="403 — Bu sayfaya erişim yetkiniz yok" />} />
         <Route path="*" element={<Placeholder label="404 — Sayfa bulunamadı" />} />
 
-        <Route path="/kiosk" element={<KioskLayout />}>
-          <Route index element={<Placeholder label="Kiosk — Faz 5" />} />
+        <Route path="/kiosk/:locationId" element={<KioskLayout />}>
+          <Route index element={<KioskPage />} />
         </Route>
 
         <Route

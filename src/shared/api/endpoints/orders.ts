@@ -1,7 +1,9 @@
 import { apiClient } from '@/shared/api/client'
+import { kioskClient } from '@/shared/api/kioskClient'
 import { ROLES } from '@/shared/types/auth'
 import type {
   AddOrderItemRequest,
+  CreateKioskOrderRequest,
   CreateOrderRequest,
   DecreaseOrderItemRequest,
   GetOrdersQueryParams,
@@ -13,6 +15,14 @@ export function createOrder(payload: CreateOrderRequest) {
   return apiClient
     .post<OrderResponse>('/api/orders', { ...payload, requestedAs: ROLES.indexOf(payload.requestedAs) })
     .then((res) => res.data)
+}
+
+export function createKioskOrder(payload: CreateKioskOrderRequest) {
+  return kioskClient.post<OrderResponse>('/api/orders/kiosk', payload).then((res) => res.data)
+}
+
+export function makeKioskOrderPaid(orderId: string) {
+  return kioskClient.post<OrderResponse>(`/api/orders/kiosk/${orderId}/paid`).then((res) => res.data)
 }
 
 export function getOrders(params: GetOrdersQueryParams) {

@@ -26,6 +26,12 @@ export interface CreateOrderRequest {
   requestedAs: Role;
 }
 
+export interface CreateKioskOrderRequest {
+  locationId: string;
+  customerName: string;
+  items: CreateOrderItem[];
+}
+
 export interface OrderResponse {
   id: string;
   orderNumber: number;

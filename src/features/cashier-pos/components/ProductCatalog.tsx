@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Search } from 'lucide-react'
 import { Label } from '@/components/ui/label'
+import { cn } from '@/lib/utils'
 import type { Product } from '../types'
 import { ProductCard } from './ProductCard'
 
@@ -10,9 +11,10 @@ const FORM_INPUT_CLASSNAME =
 interface ProductCatalogProps {
   products: Product[]
   onAdd: (product: Product) => void
+  size?: 'default' | 'large'
 }
 
-export function ProductCatalog({ products, onAdd }: ProductCatalogProps) {
+export function ProductCatalog({ products, onAdd, size = 'default' }: ProductCatalogProps) {
   const [query, setQuery] = useState('')
 
   const filteredProducts = products.filter((product) =>
@@ -37,9 +39,16 @@ export function ProductCatalog({ products, onAdd }: ProductCatalogProps) {
           Ürün bulunamadı
         </div>
       ) : (
-        <div className="grid flex-1 auto-rows-min grid-cols-[repeat(auto-fill,minmax(112px,1fr))] gap-2.5 overflow-y-auto pr-1">
+        <div
+          className={cn(
+            'grid flex-1 auto-rows-min gap-3 overflow-y-auto pr-1',
+            size === 'large'
+              ? 'grid-cols-[repeat(auto-fill,minmax(190px,1fr))]'
+              : 'grid-cols-[repeat(auto-fill,minmax(112px,1fr))]',
+          )}
+        >
           {filteredProducts.map((product) => (
-            <ProductCard key={product.id} product={product} onAdd={onAdd} />
+            <ProductCard key={product.id} product={product} onAdd={onAdd} size={size} />
           ))}
         </div>
       )}

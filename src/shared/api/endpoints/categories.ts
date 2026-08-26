@@ -1,4 +1,5 @@
 import { apiClient } from '@/shared/api/client'
+import { kioskClient } from '@/shared/api/kioskClient'
 import type {
   CategoryAdminResponseDto,
   CategoryResponseDto,
@@ -11,6 +12,10 @@ import type {
 
 export function getCategories(params: GetCategoriesQueryParams) {
   return apiClient.get<CategoryResponseDto[]>('/api/category', { params }).then((res) => res.data)
+}
+
+export function getKioskCategories(params: GetCategoriesQueryParams) {
+  return kioskClient.get<CategoryResponseDto[]>('/api/category', { params }).then((res) => res.data)
 }
 
 export function getCategoriesAdmin(params: GetCategoriesAdminQueryParams) {

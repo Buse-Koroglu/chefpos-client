@@ -8,7 +8,7 @@ import { getOrders } from '@/shared/api/endpoints/orders'
 const PAGE_SIZE = 20
 const REFETCH_INTERVAL_MS = 20_000
 
-export type KitchenOrdersTab = 'WAITER' | 'KIOSK_CASHIER'
+export type KitchenOrdersTab = 'WAITER' | 'CASHIER'
 
 interface UsePreparingOrdersParams {
   locationId: string | undefined
@@ -37,10 +37,10 @@ export function usePreparingOrders({
       getOrders({
         locationId: locationId!,
         status: 'PENDING',
-        // Backend yalnızca tek bir type filtresi kabul ediyor; KIOSK_CASHIER
-        // sekmesi CASHIER + SELF_SERVICE birleşimi olduğundan filtresiz çekilip
-        // sayfa tarafında WAITER dışlanıyor (bkz. cashier-pending-orders'daki aynı desen).
-        ...(tab === 'WAITER' ? { type: 'WAITER' as const } : {}),
+        // Backend yalnızca tek bir type filtresi kabul ediyor; WAITER sekmesi
+        // WAITER + SELF_SERVICE (kiosk) birleşimi olduğundan filtresiz çekilip
+        // sayfa tarafında CASHIER dışlanıyor.
+        ...(tab === 'CASHIER' ? { type: 'CASHIER' as const } : {}),
         searchTerm,
         pageNumber,
         pageSize: PAGE_SIZE,

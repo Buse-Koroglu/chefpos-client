@@ -13,7 +13,7 @@ export function usePendingOrders(locationId: string | undefined, tab: PendingOrd
       getOrders({
         locationId: locationId!,
         ...(tab === 'PREPARING'
-          ? { status: 'PENDING' as const }
+          ? { status: 'PENDING' as const, type: 'CASHIER' as const }
           : { status: 'COMPLETED' as const, paymentStatus: 'UNPAID' as const }),
         pageNumber,
         pageSize: PAGE_SIZE,

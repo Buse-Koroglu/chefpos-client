@@ -27,6 +27,7 @@ export interface ProductResponse {
   description?: string | null;
   imageUrl?: string | null;
   isActive: boolean;
+  isAvailable: boolean;
   categoryId: string | null;
   locationIds: string[];
   locations: ProductLocationRecipe[];
