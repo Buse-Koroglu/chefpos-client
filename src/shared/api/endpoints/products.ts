@@ -62,6 +62,14 @@ export function getProductsPaged(params: GetProductsPagedQueryParams) {
     .then((res) => res.data)
 }
 
+export type ExportProductsQueryParams = Omit<GetProductsPagedQueryParams, 'pageNumber' | 'pageSize'>
+
+export function exportProducts(params: ExportProductsQueryParams): Promise<Blob> {
+  return apiClient
+    .get<Blob>('/api/products/export', { params, responseType: 'blob' })
+    .then((res) => res.data)
+}
+
 export function createProduct(payload: CreateProductRequest) {
   return apiClient.post<RawProductPayload>('/api/products', payload).then((res) => normalizeProduct(res.data))
 }
