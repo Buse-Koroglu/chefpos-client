@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import axios from 'axios'
+import { toast } from 'sonner'
 import { useAuthStore } from '@/shared/stores/authStore'
 import { useActiveRoleStore } from '@/shared/stores/activeRoleStore'
 import { useLocationStore } from '@/shared/stores/locationStore'
@@ -7,6 +8,9 @@ import { useLocations } from '@/shared/hooks/useLocations'
 import { useDebouncedValue } from '@/shared/hooks/useDebouncedValue'
 import { AdminSidebar } from '@/shared/components/AdminSidebar'
 import { AdminHeader } from '@/shared/components/AdminHeader'
+import { ExportButton } from '@/shared/components/ExportButton'
+import { downloadBlob } from '@/shared/lib/downloadBlob'
+import { exportStockRequests } from '@/shared/api/endpoints/stockRequests'
 import { StockRequestsSearchInput } from '@/features/admin-stock-requests/components/StockRequestsSearchInput'
 import { StockRequestsFiltersBar } from '@/features/admin-stock-requests/components/StockRequestsFiltersBar'
 import { StockRequestsTable } from '@/features/admin-stock-requests/components/StockRequestsTable'
@@ -38,6 +42,8 @@ export function StockRequestsListPage() {
   const [searchInput, setSearchInput] = useState('')
   const [locationId, setLocationId] = useState('ALL')
   const [status, setStatus] = useState<StockRequestStatusFilter>('ALL')
+  const [startDate, setStartDate] = useState('')
+  const [endDate, setEndDate] = useState('')
   const [pageNumber, setPageNumber] = useState(1)
   const [selectedStockRequestId, setSelectedStockRequestId] = useState<string | null>(null)
 
@@ -51,6 +57,8 @@ export function StockRequestsListPage() {
     effectiveLocationId,
     status,
     pageNumber,
+    startDate,
+    endDate,
   )
   const items = useMemo(() => data?.items ?? [], [data])
   const selectedStockRequest = useMemo(
@@ -73,6 +81,16 @@ export function StockRequestsListPage() {
     setPageNumber(1)
   }
 
+  function handleStartDateChange(value: string) {
+    setStartDate(value)
+    setPageNumber(1)
+  }
+
+  function handleEndDateChange(value: string) {
+    setEndDate(value)
+    setPageNumber(1)
+  }
+
   return (
     <div className="flex h-screen bg-zinc-50">
       <AdminSidebar />
@@ -81,14 +99,36 @@ export function StockRequestsListPage() {
         <AdminHeader
           title="Stok Talepleri"
           actions={
-            <StockRequestsFiltersBar
-              locationId={locationId}
-              status={status}
-              locations={locations}
-              onLocationChange={handleLocationChange}
-              onStatusChange={handleStatusChange}
-              hideLocationFilter
-            />
+            <div className="flex items-center gap-3">
+              <StockRequestsFiltersBar
+                locationId={locationId}
+                status={status}
+                locations={locations}
+                onLocationChange={handleLocationChange}
+                onStatusChange={handleStatusChange}
+                hideLocationFilter
+                startDate={startDate}
+                endDate={endDate}
+                onStartDateChange={handleStartDateChange}
+                onEndDateChange={handleEndDateChange}
+              />
+              <ExportButton
+                onExport={async () => {
+                  if ((data?.totalCount ?? 0) === 0) {
+                    toast.error('Export edilecek kayıt bulunamadı.')
+                    return
+                  }
+                  const blob = await exportStockRequests({
+                    searchTerm: searchTerm || undefined,
+                    locationId: effectiveLocationId === 'ALL' ? undefined : effectiveLocationId,
+                    status: status === 'ALL' ? undefined : status,
+                    startDate: startDate || undefined,
+                    endDate: endDate || undefined,
+                  })
+                  downloadBlob(blob, `stok_talepleri_${new Date().toISOString().slice(0, 10)}.xlsx`)
+                }}
+              />
+            </div>
           }
         />
 

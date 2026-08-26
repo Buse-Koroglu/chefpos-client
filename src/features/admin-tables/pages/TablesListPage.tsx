@@ -1,10 +1,14 @@
 import { useMemo, useState } from 'react'
 import axios from 'axios'
 import { Plus } from 'lucide-react'
+import { toast } from 'sonner'
 import { useLocations } from '@/shared/hooks/useLocations'
 import { useDebouncedValue } from '@/shared/hooks/useDebouncedValue'
 import { AdminSidebar } from '@/shared/components/AdminSidebar'
 import { AdminHeader } from '@/shared/components/AdminHeader'
+import { ExportButton } from '@/shared/components/ExportButton'
+import { downloadBlob } from '@/shared/lib/downloadBlob'
+import { exportTables } from '@/shared/api/endpoints/tables'
 import { TablesSearchInput } from '@/features/admin-tables/components/TablesSearchInput'
 import { TablesFiltersBar } from '@/features/admin-tables/components/TablesFiltersBar'
 import { TablesTable } from '@/features/admin-tables/components/TablesTable'
@@ -14,6 +18,12 @@ import { AddTablePopup } from '@/features/admin-tables/components/AddTablePopup'
 import { usePagedTablesAdmin } from '@/features/admin-tables/hooks/usePagedTablesAdmin'
 import { TABLES_SEARCH_DEBOUNCE_MS } from '@/features/admin-tables/constants'
 import type { TableStatusFilter } from '@/features/admin-tables/types'
+
+function toIsActiveParam(status: TableStatusFilter): boolean | undefined {
+  if (status === 'ACTIVE') return true
+  if (status === 'INACTIVE') return false
+  return undefined
+}
 
 function getTablesErrorMessage(error: unknown): string {
   if (axios.isAxiosError(error)) {
@@ -71,6 +81,20 @@ export function TablesListPage() {
                 locations={locations}
                 onLocationChange={handleLocationChange}
                 onStatusChange={handleStatusChange}
+              />
+              <ExportButton
+                onExport={async () => {
+                  if ((data?.totalCount ?? 0) === 0) {
+                    toast.error('Export edilecek kayıt bulunamadı.')
+                    return
+                  }
+                  const blob = await exportTables({
+                    searchTerm: searchTerm || undefined,
+                    locationId: locationId === 'ALL' ? undefined : locationId,
+                    isActive: toIsActiveParam(status),
+                  })
+                  downloadBlob(blob, `masalar_${new Date().toISOString().slice(0, 10)}.xlsx`)
+                }}
               />
               <button
                 type="button"

@@ -12,6 +12,14 @@ export function getTablesPaged(params: GetTablesPagedQueryParams) {
   return apiClient.get<PagedResult<TableResponseDto>>('/api/tables/paged', { params }).then((res) => res.data)
 }
 
+export type ExportTablesQueryParams = Omit<GetTablesPagedQueryParams, 'pageNumber' | 'pageSize'>
+
+export function exportTables(params: ExportTablesQueryParams): Promise<Blob> {
+  return apiClient
+    .get<Blob>('/api/tables/export', { params, responseType: 'blob' })
+    .then((res) => res.data)
+}
+
 export function createTable(payload: CreateTableRequest) {
   return apiClient.post<TableResponseDto>('/api/tables', payload).then((res) => res.data)
 }

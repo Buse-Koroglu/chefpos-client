@@ -37,6 +37,8 @@ export interface GetStockRequestsPagedQueryParams {
   status?: StockRequestStatus
   onlyMyRequests?: boolean
   onlyHistory?: boolean
+  startDate?: string
+  endDate?: string
   pageNumber?: number
   pageSize?: number
 }
