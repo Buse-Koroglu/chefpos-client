@@ -50,6 +50,14 @@ export function getIngredientsPaged(params: GetIngredientsPagedQueryParams) {
     }))
 }
 
+export type ExportIngredientsQueryParams = Omit<GetIngredientsPagedQueryParams, 'pageNumber' | 'pageSize'>
+
+export function exportIngredients(params: ExportIngredientsQueryParams): Promise<Blob> {
+  return apiClient
+    .get<Blob>('/api/ingredients/export', { params, responseType: 'blob' })
+    .then((res) => res.data)
+}
+
 export function createIngredient(payload: CreateIngredientRequest) {
   return apiClient
     .post<RawIngredientPayload[]>('/api/ingredients', { ...payload, unit: STOCK_UNITS.indexOf(payload.unit) })
