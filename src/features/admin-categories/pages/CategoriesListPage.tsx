@@ -1,11 +1,15 @@
 import { useMemo, useState } from 'react'
 import axios from 'axios'
 import { Plus } from 'lucide-react'
+import { toast } from 'sonner'
 import { useLocations } from '@/shared/hooks/useLocations'
 import { useDebouncedValue } from '@/shared/hooks/useDebouncedValue'
 import { AdminSidebar } from '@/shared/components/AdminSidebar'
 import { SuperAdminSidebar } from '@/shared/components/SuperAdminSidebar'
 import { AdminHeader } from '@/shared/components/AdminHeader'
+import { ExportButton } from '@/shared/components/ExportButton'
+import { downloadBlob } from '@/shared/lib/downloadBlob'
+import { exportCategories } from '@/shared/api/endpoints/categories'
 import { CategoriesSearchInput } from '@/features/admin-categories/components/CategoriesSearchInput'
 import { CategoriesFiltersBar } from '@/features/admin-categories/components/CategoriesFiltersBar'
 import { CategoriesTable } from '@/features/admin-categories/components/CategoriesTable'
@@ -15,6 +19,12 @@ import { AddCategoryPopup } from '@/features/admin-categories/components/AddCate
 import { usePagedCategoriesAdmin } from '@/features/admin-categories/hooks/usePagedCategoriesAdmin'
 import { CATEGORIES_SEARCH_DEBOUNCE_MS } from '@/features/admin-categories/constants'
 import type { CategoryStatusFilter } from '@/features/admin-categories/types'
+
+function toIsActiveParam(status: CategoryStatusFilter): boolean | undefined {
+  if (status === 'ACTIVE') return true
+  if (status === 'INACTIVE') return false
+  return undefined
+}
 
 function getCategoriesErrorMessage(error: unknown): string {
   if (axios.isAxiosError(error)) {
@@ -87,6 +97,20 @@ export function CategoriesListPage({ variant = 'admin' }: CategoriesListPageProp
                   onStatusChange={handleStatusChange}
                 />
               )}
+              <ExportButton
+                onExport={async () => {
+                  if ((data?.totalCount ?? 0) === 0) {
+                    toast.error('Export edilecek kayıt bulunamadı.')
+                    return
+                  }
+                  const blob = await exportCategories({
+                    searchTerm: searchTerm || undefined,
+                    locationId: locationId === 'ALL' ? undefined : locationId,
+                    isActive: toIsActiveParam(status),
+                  })
+                  downloadBlob(blob, `kategoriler_${new Date().toISOString().slice(0, 10)}.xlsx`)
+                }}
+              />
               {isSuperAdmin && (
                 <button
                   type="button"
