@@ -1,11 +1,15 @@
 import { useMemo, useState } from 'react'
 import axios from 'axios'
 import { Plus } from 'lucide-react'
+import { toast } from 'sonner'
 import { useLocations } from '@/shared/hooks/useLocations'
 import { useDebouncedValue } from '@/shared/hooks/useDebouncedValue'
 import { AdminSidebar } from '@/shared/components/AdminSidebar'
 import { SuperAdminSidebar } from '@/shared/components/SuperAdminSidebar'
 import { AdminHeader } from '@/shared/components/AdminHeader'
+import { ExportButton } from '@/shared/components/ExportButton'
+import { downloadBlob } from '@/shared/lib/downloadBlob'
+import { exportIngredients } from '@/shared/api/endpoints/ingredients'
 import { IngredientsSearchInput } from '@/features/admin-ingredients/components/IngredientsSearchInput'
 import { IngredientsFiltersBar } from '@/features/admin-ingredients/components/IngredientsFiltersBar'
 import { IngredientsTable } from '@/features/admin-ingredients/components/IngredientsTable'
@@ -15,6 +19,12 @@ import { AddIngredientPopup } from '@/features/admin-ingredients/components/AddI
 import { usePagedIngredientsAdmin } from '@/features/admin-ingredients/hooks/usePagedIngredientsAdmin'
 import { INGREDIENTS_SEARCH_DEBOUNCE_MS } from '@/features/admin-ingredients/constants'
 import type { IngredientStatusFilter } from '@/features/admin-ingredients/types'
+
+function toIsActiveParam(status: IngredientStatusFilter): boolean | undefined {
+  if (status === 'ACTIVE') return true
+  if (status === 'INACTIVE') return false
+  return undefined
+}
 
 function getIngredientsErrorMessage(error: unknown): string {
   if (axios.isAxiosError(error)) {
@@ -87,6 +97,20 @@ export function IngredientsListPage({ variant = 'admin' }: IngredientsListPagePr
                   onStatusChange={handleStatusChange}
                 />
               )}
+              <ExportButton
+                onExport={async () => {
+                  if ((data?.totalCount ?? 0) === 0) {
+                    toast.error('Export edilecek kayıt bulunamadı.')
+                    return
+                  }
+                  const blob = await exportIngredients({
+                    searchTerm: searchTerm || undefined,
+                    locationId: locationId === 'ALL' ? undefined : locationId,
+                    isActive: toIsActiveParam(status),
+                  })
+                  downloadBlob(blob, `ham_maddeler_${new Date().toISOString().slice(0, 10)}.xlsx`)
+                }}
+              />
               {isSuperAdmin && (
                 <button
                   type="button"

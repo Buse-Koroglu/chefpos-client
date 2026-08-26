@@ -1,11 +1,15 @@
 import { useState } from 'react'
 import axios from 'axios'
 import { Plus } from 'lucide-react'
+import { toast } from 'sonner'
 import { useLocations } from '@/shared/hooks/useLocations'
 import { useDebouncedValue } from '@/shared/hooks/useDebouncedValue'
 import { AdminSidebar } from '@/shared/components/AdminSidebar'
 import { SuperAdminSidebar } from '@/shared/components/SuperAdminSidebar'
 import { AdminHeader } from '@/shared/components/AdminHeader'
+import { ExportButton } from '@/shared/components/ExportButton'
+import { downloadBlob } from '@/shared/lib/downloadBlob'
+import { exportProducts } from '@/shared/api/endpoints/products'
 import { ProductsSearchInput } from '@/features/admin-products/components/ProductsSearchInput'
 import { ProductsFiltersBar } from '@/features/admin-products/components/ProductsFiltersBar'
 import { ProductsTable } from '@/features/admin-products/components/ProductsTable'
@@ -16,6 +20,12 @@ import { usePagedProductsAdmin } from '@/features/admin-products/hooks/usePagedP
 import { useActiveCategories } from '@/features/admin-products/hooks/useActiveCategories'
 import { PRODUCTS_SEARCH_DEBOUNCE_MS } from '@/features/admin-products/constants'
 import type { ProductStatusFilter } from '@/features/admin-products/types'
+
+function toIsActiveParam(status: ProductStatusFilter): boolean | undefined {
+  if (status === 'ACTIVE') return true
+  if (status === 'INACTIVE') return false
+  return undefined
+}
 
 function getProductsErrorMessage(error: unknown): string {
   if (axios.isAxiosError(error)) {
@@ -85,6 +95,21 @@ export function ProductsListPage({ variant = 'admin' }: ProductsListPageProps) {
                   onStatusChange={handleStatusChange}
                 />
               )}
+              <ExportButton
+                onExport={async () => {
+                  if ((data?.totalCount ?? 0) === 0) {
+                    toast.error('Export edilecek kayıt bulunamadı.')
+                    return
+                  }
+                  const blob = await exportProducts({
+                    searchTerm: searchTerm || undefined,
+                    locationId: locationId === 'ALL' ? undefined : locationId,
+                    isActive: toIsActiveParam(status),
+                    includeUncategorized: true,
+                  })
+                  downloadBlob(blob, `urunler_${new Date().toISOString().slice(0, 10)}.xlsx`)
+                }}
+              />
               {isSuperAdmin && (
                 <button
                   type="button"

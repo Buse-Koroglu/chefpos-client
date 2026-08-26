@@ -1,10 +1,14 @@
 import { useMemo, useState } from 'react'
 import axios from 'axios'
 import { Plus } from 'lucide-react'
+import { toast } from 'sonner'
 import { useLocations } from '@/shared/hooks/useLocations'
 import { useDebouncedValue } from '@/shared/hooks/useDebouncedValue'
 import { AdminSidebar } from '@/shared/components/AdminSidebar'
 import { AdminHeader } from '@/shared/components/AdminHeader'
+import { ExportButton } from '@/shared/components/ExportButton'
+import { downloadBlob } from '@/shared/lib/downloadBlob'
+import { exportUsers } from '@/shared/api/endpoints/users'
 import { StaffSearchInput } from '@/features/admin-staff/components/StaffSearchInput'
 import { StaffFiltersBar } from '@/features/admin-staff/components/StaffFiltersBar'
 import { StaffTable } from '@/features/admin-staff/components/StaffTable'
@@ -14,6 +18,12 @@ import { AddStaffPopup } from '@/features/admin-staff/components/AddStaffPopup'
 import { usePagedStaffAdmin } from '@/features/admin-staff/hooks/usePagedStaffAdmin'
 import { STAFF_SEARCH_DEBOUNCE_MS } from '@/features/admin-staff/constants'
 import type { RoleFilter, StaffFilters, StatusFilter } from '@/features/admin-staff/types'
+
+function toIsActiveParam(status: StaffFilters['status']): boolean | undefined {
+  if (status === 'ACTIVE') return true
+  if (status === 'INACTIVE') return false
+  return undefined
+}
 
 const INITIAL_FILTERS: StaffFilters = { role: 'ALL', status: 'ALL', locationId: 'ALL' }
 
@@ -65,6 +75,21 @@ export function StaffListPage() {
                 status={filters.status}
                 onRoleChange={(role: RoleFilter) => updateFilters({ role })}
                 onStatusChange={(status: StatusFilter) => updateFilters({ status })}
+              />
+              <ExportButton
+                onExport={async () => {
+                  if ((data?.totalCount ?? 0) === 0) {
+                    toast.error('Export edilecek kayıt bulunamadı.')
+                    return
+                  }
+                  const blob = await exportUsers({
+                    searchTerm: searchTerm || undefined,
+                    role: filters.role === 'ALL' ? undefined : filters.role,
+                    isActive: toIsActiveParam(filters.status),
+                    locationId: filters.locationId === 'ALL' ? undefined : filters.locationId,
+                  })
+                  downloadBlob(blob, `personeller_${new Date().toISOString().slice(0, 10)}.xlsx`)
+                }}
               />
               <button
                 type="button"

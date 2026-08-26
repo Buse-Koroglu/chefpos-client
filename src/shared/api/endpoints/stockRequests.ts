@@ -53,6 +53,14 @@ export function getStockRequestsPaged(params: GetStockRequestsPagedQueryParams) 
     .then((res) => ({ ...res.data, items: res.data.items.map(normalizeStockRequest) }))
 }
 
+export type ExportStockRequestsQueryParams = Omit<GetStockRequestsPagedQueryParams, 'pageNumber' | 'pageSize' | 'onlyMyRequests'>
+
+export function exportStockRequests(params: ExportStockRequestsQueryParams): Promise<Blob> {
+  return apiClient
+    .get<Blob>('/api/stock-requests/export', { params, responseType: 'blob' })
+    .then((res) => res.data)
+}
+
 export interface ApproveStockRequestRequest {
   unitPrice: number
 }

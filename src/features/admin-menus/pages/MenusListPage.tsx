@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import axios from 'axios'
 import { Plus } from 'lucide-react'
+import { toast } from 'sonner'
 import { useAuthStore } from '@/shared/stores/authStore'
 import { useLocationStore } from '@/shared/stores/locationStore'
 import { useLocations } from '@/shared/hooks/useLocations'
@@ -8,6 +9,9 @@ import { AdminSidebar } from '@/shared/components/AdminSidebar'
 import { SuperAdminSidebar } from '@/shared/components/SuperAdminSidebar'
 import { AdminHeader } from '@/shared/components/AdminHeader'
 import { Skeleton } from '@/shared/components/Skeleton'
+import { ExportButton } from '@/shared/components/ExportButton'
+import { downloadBlob } from '@/shared/lib/downloadBlob'
+import { exportMenus } from '@/shared/api/endpoints/menus'
 import { LocationSelect } from '@/features/admin-dashboard/components/LocationSelect'
 import { MenuCard } from '@/features/admin-menus/components/MenuCard'
 import { AddMenuPopup } from '@/features/admin-menus/components/AddMenuPopup'
@@ -67,6 +71,18 @@ export function MenusListPage({ variant = 'admin' }: MenusListPageProps) {
                 value={selectedLocationId ?? undefined}
                 onChange={setSelectedLocationId}
                 disabled={isLocationsLoading}
+              />
+              <ExportButton
+                disabled={!selectedLocationId}
+                onExport={async () => {
+                  if (!selectedLocationId) return
+                  if (menus.length === 0) {
+                    toast.error('Export edilecek kayıt bulunamadı.')
+                    return
+                  }
+                  const blob = await exportMenus({ locationId: selectedLocationId, includeInactive })
+                  downloadBlob(blob, `menuler_${new Date().toISOString().slice(0, 10)}.xlsx`)
+                }}
               />
               <button
                 type="button"

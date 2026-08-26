@@ -66,6 +66,14 @@ export function getUsers(params: GetUsersQueryParams): Promise<GetUsersResult> {
     })
 }
 
+export type ExportUsersQueryParams = Omit<GetUsersQueryParams, 'pageNumber' | 'pageSize'>
+
+export function exportUsers(params: ExportUsersQueryParams): Promise<Blob> {
+  return apiClient
+    .get<Blob>('/api/users/export', { params, responseType: 'blob' })
+    .then((res) => res.data)
+}
+
 export function getUserById(id: string) {
   return apiClient.get<RawUserPayload>(`/api/users/${id}`).then((res) => normalizeUser(res.data))
 }

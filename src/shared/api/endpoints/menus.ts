@@ -13,6 +13,10 @@ export function getMenus(params: GetMenusQueryParams) {
   return apiClient.get<MenuResponseDto[]>('/api/menus', { params }).then((res) => res.data)
 }
 
+export function exportMenus(params: GetMenusQueryParams): Promise<Blob> {
+  return apiClient.get<Blob>('/api/menus/export', { params, responseType: 'blob' }).then((res) => res.data)
+}
+
 export function getMenuById(id: string) {
   return apiClient.get<MenuResponseDto>(`/api/menus/${id}`).then((res) => res.data)
 }

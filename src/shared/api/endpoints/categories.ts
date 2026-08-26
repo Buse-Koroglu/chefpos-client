@@ -19,6 +19,14 @@ export function getCategoriesAdmin(params: GetCategoriesAdminQueryParams) {
     .then((res) => res.data)
 }
 
+export type ExportCategoriesQueryParams = Omit<GetCategoriesAdminQueryParams, 'pageNumber' | 'pageSize'>
+
+export function exportCategories(params: ExportCategoriesQueryParams): Promise<Blob> {
+  return apiClient
+    .get<Blob>('/api/category/export', { params, responseType: 'blob' })
+    .then((res) => res.data)
+}
+
 export function createCategory(payload: CreateCategoryRequest) {
   return apiClient.post<CategoryResponseDto>('/api/category', payload).then((res) => res.data)
 }

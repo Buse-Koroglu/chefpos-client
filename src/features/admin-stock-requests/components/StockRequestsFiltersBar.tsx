@@ -12,6 +12,10 @@ interface StockRequestsFiltersBarProps {
   onLocationChange: (locationId: string) => void
   onStatusChange: (status: StockRequestStatusFilter) => void
   hideLocationFilter?: boolean
+  startDate?: string
+  endDate?: string
+  onStartDateChange?: (value: string) => void
+  onEndDateChange?: (value: string) => void
 }
 
 export function StockRequestsFiltersBar({
@@ -21,6 +25,10 @@ export function StockRequestsFiltersBar({
   onLocationChange,
   onStatusChange,
   hideLocationFilter,
+  startDate,
+  endDate,
+  onStartDateChange,
+  onEndDateChange,
 }: StockRequestsFiltersBarProps) {
   return (
     <div className="flex items-center gap-2">
@@ -51,6 +59,26 @@ export function StockRequestsFiltersBar({
           </option>
         ))}
       </select>
+
+      {onStartDateChange && (
+        <input
+          type="date"
+          value={startDate ?? ''}
+          onChange={(event) => onStartDateChange(event.target.value)}
+          className={SELECT_CLASSNAME}
+          aria-label="Başlangıç Tarihi"
+        />
+      )}
+
+      {onEndDateChange && (
+        <input
+          type="date"
+          value={endDate ?? ''}
+          onChange={(event) => onEndDateChange(event.target.value)}
+          className={SELECT_CLASSNAME}
+          aria-label="Bitiş Tarihi"
+        />
+      )}
     </div>
   )
 }
