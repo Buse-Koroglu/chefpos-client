@@ -34,10 +34,10 @@ export function OrderCard({
 
   return (
     <div className="flex flex-col border-2 border-zinc-300 bg-white">
-      <div className="flex items-start justify-between gap-2 border-b border-zinc-100 p-3">
+      <div className="flex items-start justify-between gap-2 border-b border-zinc-100 p-4">
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-zinc-900">#{order.orderNumber}</p>
-          <p className="truncate text-xs text-zinc-500">{order.customerName || 'Müşteri belirtilmedi'}</p>
+          <p className="text-base font-semibold text-zinc-900">#{order.orderNumber}</p>
+          <p className="truncate text-sm text-zinc-500">{order.customerName || 'Müşteri belirtilmedi'}</p>
         </div>
         <div className="flex shrink-0 flex-col items-end gap-1">
           <OrderTypeBadge type={order.type} />
@@ -45,11 +45,11 @@ export function OrderCard({
         </div>
       </div>
 
-      <div className="flex-1 p-3">
+      <div className="flex-1 p-4">
         {order.items.length === 0 ? (
-          <p className="text-xs text-zinc-400">Ürün bilgisi yok</p>
+          <p className="text-sm text-zinc-400">Ürün bilgisi yok</p>
         ) : (
-          <ul className="space-y-1 text-xs text-zinc-600">
+          <ul className="space-y-1.5 text-sm text-zinc-600">
             {order.items.slice(0, MAX_VISIBLE_ITEMS).map((item) => (
               <li key={item.id} className="flex items-center gap-1.5">
                 <span className="shrink-0 tabular-nums text-zinc-400">{item.quantity}x</span>
@@ -63,8 +63,8 @@ export function OrderCard({
         )}
       </div>
 
-      <div className="border-t border-zinc-200 p-3">
-        <span className="mb-2 block text-sm font-semibold tabular-nums text-zinc-900">
+      <div className="border-t border-zinc-200 p-4">
+        <span className="mb-3 block text-lg font-semibold tabular-nums text-zinc-900">
           {currencyFormatter.format(order.totalPrice)}
         </span>
         <div className="flex gap-2">
@@ -73,7 +73,7 @@ export function OrderCard({
             variant="destructive"
             onClick={() => onCancel(order.id)}
             disabled={isBusy}
-            className="h-9 flex-1 rounded-none text-sm"
+            className="h-11 flex-1 rounded-none text-base"
           >
             {isCancelling ? 'İptal ediliyor...' : 'İptal Et'}
           </Button>
@@ -82,7 +82,7 @@ export function OrderCard({
               type="button"
               onClick={() => onOpenPayment(order)}
               disabled={isBusy}
-              className="h-9 flex-1 rounded-none bg-[#84994F] text-sm text-white hover:bg-[#708243]"
+              className="h-11 flex-1 rounded-none bg-[#84994F] text-base text-white hover:bg-[#708243]"
             >
               Ödeme Al
             </Button>
@@ -91,7 +91,7 @@ export function OrderCard({
               type="button"
               onClick={() => onComplete(order.id)}
               disabled={isBusy}
-              className="h-9 flex-1 rounded-none bg-[#133458] text-sm text-white hover:bg-[#0f2843]"
+              className="h-11 flex-1 rounded-none bg-[#133458] text-base text-white hover:bg-[#0f2843]"
             >
               {isCompleting ? 'Tamamlanıyor...' : 'Tamamla'}
             </Button>

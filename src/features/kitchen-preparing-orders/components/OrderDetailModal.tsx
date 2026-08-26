@@ -26,7 +26,7 @@ export function OrderDetailModal({
   }
 
   const currentOrder = order
-  const canComplete = currentOrder.type === 'WAITER'
+  const canComplete = currentOrder.type === 'WAITER' || currentOrder.type === 'SELF_SERVICE'
 
   function handleCompleteOrder() {
     completeOrderMutation.mutate(currentOrder.id, {

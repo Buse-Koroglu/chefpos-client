@@ -4,13 +4,13 @@ import type { OrderType } from '@/shared/types/order'
 
 const REFETCH_INTERVAL_MS = 20_000
 
-const TYPES_BY_TAB: Record<'WAITER' | 'KIOSK_CASHIER', OrderType[]> = {
-  WAITER: ['WAITER'],
-  KIOSK_CASHIER: ['CASHIER', 'SELF_SERVICE'],
+const TYPES_BY_TAB: Record<'WAITER' | 'CASHIER', OrderType[]> = {
+  WAITER: ['WAITER', 'SELF_SERVICE'],
+  CASHIER: ['CASHIER'],
 }
 
 export function useKitchenOrdersCount(locationId: string | undefined) {
-  const types = [...TYPES_BY_TAB.WAITER, ...TYPES_BY_TAB.KIOSK_CASHIER]
+  const types = [...TYPES_BY_TAB.WAITER, ...TYPES_BY_TAB.CASHIER]
 
   const queries = useQueries({
     queries: types.map((type) => ({
@@ -30,9 +30,9 @@ export function useKitchenOrdersCount(locationId: string | undefined) {
 
   const countByType = new Map(types.map((type, index) => [type, queries[index].data?.totalCount ?? 0]))
 
-  const waiterCount = countByType.get('WAITER') ?? 0
-  const kioskCashierCount = (countByType.get('CASHIER') ?? 0) + (countByType.get('SELF_SERVICE') ?? 0)
+  const waiterCount = (countByType.get('WAITER') ?? 0) + (countByType.get('SELF_SERVICE') ?? 0)
+  const cashierCount = countByType.get('CASHIER') ?? 0
   const isLoading = queries.some((query) => query.isLoading)
 
-  return { waiterCount, kioskCashierCount, isLoading }
+  return { waiterCount, cashierCount, isLoading }
 }

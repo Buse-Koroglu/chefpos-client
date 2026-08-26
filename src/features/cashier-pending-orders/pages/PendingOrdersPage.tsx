@@ -53,10 +53,7 @@ export function PendingOrdersPage() {
   const cancelOrder = useCancelOrder()
   const makePaidOrder = useMakePaidOrder()
 
-  const orders = (data?.items ?? []).filter(
-  (order) =>
-    tab === 'AWAITING_PAYMENT' ||
-    order.type !== 'WAITER')
+  const orders = data?.items ?? []
   const normalizedQuery = query.trim().toLocaleLowerCase('tr-TR')
   const filteredOrders = normalizedQuery
     ? orders.filter(
@@ -192,7 +189,7 @@ export function PendingOrdersPage() {
                 {tab === 'PREPARING' ? 'Hazırlanan sipariş yok' : 'Ödeme bekleyen sipariş yok'}
               </div>
             ) : (
-              <div className="grid flex-1 auto-rows-min grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-3 overflow-y-auto p-4">
+              <div className="grid flex-1 auto-rows-min grid-cols-[repeat(auto-fill,minmax(330px,1fr))] gap-4 overflow-y-auto p-4">
                 {filteredOrders.map((order) => (
                   <OrderCard
                     key={order.id}

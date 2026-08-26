@@ -60,7 +60,7 @@ export function WaiterOrderPage() {
     includeUncategorized: Boolean(selectedMenuId),
   })
 
-  const [lastMergedPage, setLastMergedPage] = useState(productsPage)
+  const [lastMergedPage, setLastMergedPage] = useState<typeof productsPage>(undefined)
   if (productsPage && productsPage !== lastMergedPage && filterKey === lastFilterKey) {
     setLastMergedPage(productsPage)
     setAccumulatedItems((current) =>

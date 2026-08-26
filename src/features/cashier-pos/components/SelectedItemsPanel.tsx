@@ -1,4 +1,4 @@
-import { X } from 'lucide-react'
+import { Minus, Plus, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { OrderItem } from '../types'
 
@@ -10,6 +10,8 @@ const currencyFormatter = new Intl.NumberFormat('tr-TR', {
 
 interface SelectedItemsPanelProps {
   items: OrderItem[]
+  onIncrease: (productId: string) => void
+  onDecrease: (productId: string) => void
   onRemove: (productId: string) => void
   onSubmit: () => void
   isSubmitDisabled: boolean
@@ -18,6 +20,8 @@ interface SelectedItemsPanelProps {
 
 export function SelectedItemsPanel({
   items,
+  onIncrease,
+  onDecrease,
   onRemove,
   onSubmit,
   isSubmitDisabled,
@@ -26,7 +30,7 @@ export function SelectedItemsPanel({
   const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
 
   return (
-    <div className="flex w-64 shrink-0 flex-col border border-zinc-200 bg-white">
+    <div className="flex w-72 shrink-0 flex-col border border-zinc-200 bg-white">
       <p className="border-b border-zinc-200 px-3 py-2.5 text-xs font-semibold tracking-wide text-zinc-500 uppercase">
         Seçilen Ürünler
       </p>
@@ -40,11 +44,35 @@ export function SelectedItemsPanel({
               key={item.id}
               className="flex items-center gap-2 border-b border-zinc-100 px-3 py-2.5 text-sm last:border-b-0"
             >
-              <span className="shrink-0 tabular-nums text-zinc-400">{item.quantity}x</span>
-              <span className="flex-1 truncate text-zinc-900">{item.name}</span>
-              <span className="shrink-0 tabular-nums text-zinc-900">
-                {currencyFormatter.format(item.price * item.quantity)}
-              </span>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-zinc-900">{item.name}</p>
+                <p className="text-xs tabular-nums text-zinc-500">
+                  {currencyFormatter.format(item.price * item.quantity)}
+                </p>
+              </div>
+
+              <div className="flex shrink-0 items-center border border-zinc-300">
+                <button
+                  type="button"
+                  onClick={() => onDecrease(item.id)}
+                  aria-label={`${item.name} adedini azalt`}
+                  className="flex size-7 items-center justify-center text-zinc-700 hover:bg-zinc-100"
+                >
+                  <Minus className="size-3.5" />
+                </button>
+                <span className="w-6 text-center text-xs font-semibold tabular-nums text-zinc-900">
+                  {item.quantity}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => onIncrease(item.id)}
+                  aria-label={`${item.name} adedini artır`}
+                  className="flex size-7 items-center justify-center text-zinc-700 hover:bg-zinc-100"
+                >
+                  <Plus className="size-3.5" />
+                </button>
+              </div>
+
               <button
                 type="button"
                 onClick={() => onRemove(item.id)}

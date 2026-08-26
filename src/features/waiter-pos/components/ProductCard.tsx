@@ -16,32 +16,35 @@ interface ProductCardProps {
 export function ProductCard({ product, onAdd }: ProductCardProps) {
   const resolvedImageUrl = resolveImageUrl(product.imageUrl)
   return (
-    <div className="flex flex-col overflow-hidden border border-zinc-200 bg-white">
-      <div className="flex h-20 items-center justify-center overflow-hidden bg-zinc-100 text-zinc-300">
+    <button
+      type="button"
+      onClick={() => onAdd(product)}
+      aria-label={`${product.name} ürününü ekle`}
+      className="flex flex-col overflow-hidden border border-zinc-200 bg-white text-left transition-colors hover:border-[#133458]/50"
+    >
+      <div className="flex h-28 items-center justify-center overflow-hidden bg-zinc-100 text-zinc-300">
         {resolvedImageUrl ? (
           <img src={resolvedImageUrl} alt={product.name} className="size-full object-cover" />
         ) : (
-          <UtensilsCrossed className="size-6" />
+          <UtensilsCrossed className="size-9" />
         )}
       </div>
 
-      <div className="flex flex-1 flex-col gap-1.5 p-2.5">
-        <p className="line-clamp-2 min-h-8 text-xs font-medium text-zinc-900">{product.name}</p>
+      <div className="flex flex-1 flex-col gap-2 p-3">
+        <p className="line-clamp-2 min-h-10 text-sm font-medium text-zinc-900">{product.name}</p>
 
         <div className="mt-auto flex items-center justify-between gap-1">
-          <span className="text-xs font-semibold tabular-nums text-zinc-900">
+          <span className="text-sm font-semibold tabular-nums text-zinc-900">
             {currencyFormatter.format(product.price)}
           </span>
-          <button
-            type="button"
-            onClick={() => onAdd(product)}
-            aria-label={`${product.name} ürününü ekle`}
-            className="flex size-6 shrink-0 items-center justify-center bg-[#133458] text-white transition-colors hover:bg-[#0f2843]"
+          <span
+            aria-hidden="true"
+            className="flex size-9 shrink-0 items-center justify-center bg-[#133458] text-white"
           >
-            <Plus className="size-3.5" />
-          </button>
+            <Plus className="size-5" />
+          </span>
         </div>
       </div>
-    </div>
+    </button>
   )
 }

@@ -125,7 +125,7 @@ export function PastOrdersPage() {
                 {filter === 'PAID' ? 'Ödenen sipariş yok' : 'İptal edilen sipariş yok'}
               </div>
             ) : (
-              <div className="grid flex-1 auto-rows-min grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-3 overflow-y-auto p-4">
+              <div className="grid flex-1 auto-rows-min grid-cols-[repeat(auto-fill,minmax(330px,1fr))] gap-4 overflow-y-auto p-4">
                 {filteredOrders.map((order) => (
                   <PastOrderCard key={order.id} order={order} />
                 ))}

@@ -28,7 +28,7 @@ export function OrderHistoryPage() {
 
   const { data, isLoading, isFetching, isError, error } = useOrderHistory(locationId, filter, pageNumber)
 
-  const [lastMergedData, setLastMergedData] = useState(data)
+  const [lastMergedData, setLastMergedData] = useState<typeof data>(undefined)
   if (data && data !== lastMergedData) {
     setLastMergedData(data)
     setAccumulatedItems((current) => (data.pageNumber === 1 ? data.items : [...current, ...data.items]))

@@ -20,8 +20,8 @@ import { usePreparingOrders, type KitchenOrdersTab } from '../hooks/usePreparing
 import { useTickingNow } from '../hooks/useTickingNow'
 
 const TABS: Array<{ value: KitchenOrdersTab; label: string }> = [
-  { value: 'WAITER', label: 'Garson Siparişleri' },
-  { value: 'KIOSK_CASHIER', label: 'Kiosk / Kasiyer Siparişleri' },
+  { value: 'WAITER', label: 'Garson / Kiosk Siparişleri' },
+  { value: 'CASHIER', label: 'Kasiyer Siparişleri' },
 ]
 
 function getErrorMessage(error: unknown) {
@@ -73,17 +73,17 @@ export function PreparingOrdersPage() {
     searchTerm: debouncedSearchTerm.trim(),
   })
 
-  const { waiterCount, kioskCashierCount } =
+  const { waiterCount, cashierCount } =
     useKitchenOrdersCount(locationId)
 
   const now = useTickingNow(KITCHEN_URGENCY_TICK_INTERVAL_MS)
 
   const tabOrderCount =
-    tab === 'WAITER' ? waiterCount : kioskCashierCount
+    tab === 'WAITER' ? waiterCount : cashierCount
 
   const orders = (data?.items ?? []).filter(
     (order) =>
-      tab === 'WAITER' || order.type !== 'WAITER',
+      tab === 'CASHIER' || order.type !== 'CASHIER',
   )
 
   function handleTabChange(nextTab: KitchenOrdersTab) {
@@ -201,8 +201,8 @@ export function PreparingOrdersPage() {
                 <div className="text-center">
                   <p className="text-sm font-medium text-zinc-700">
                     {tab === 'WAITER'
-                      ? 'Hazırlanan garson siparişi bulunamadı'
-                      : 'Hazırlanan kiosk/kasiyer siparişi bulunamadı'}
+                      ? 'Hazırlanan garson/kiosk siparişi bulunamadı'
+                      : 'Hazırlanan kasiyer siparişi bulunamadı'}
                   </p>
 
                   {debouncedSearchTerm && (
