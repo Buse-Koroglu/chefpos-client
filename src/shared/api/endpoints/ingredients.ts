@@ -7,9 +7,9 @@ import type {
   IngredientAdminResponseDto,
   IngredientResponseDto,
   PagedResult,
-  RecordIngredientPurchaseRequest,
-  RecordManualDeductionRequest,
-  RecordProductProductionRequest,
+  IngredientPurchaseRequest,
+  ManualDeductionRequest,
+  ProductProductionRequest,
   UpdateIngredientPriceRequest,
   UpdateIngredientRequest,
 } from '@/shared/types/ingredient'
@@ -88,19 +88,19 @@ export function deactivateIngredient(id: string) {
     .then((res) => normalizeIngredient(res.data))
 }
 
-export function recordIngredientPurchase(id: string, payload: RecordIngredientPurchaseRequest) {
+export function recordIngredientPurchase(id: string, payload: IngredientPurchaseRequest) {
   return apiClient
     .post<RawIngredientPayload>(`/api/ingredients/${id}/purchases`, payload)
     .then((res) => normalizeIngredient(res.data))
 }
 
-export function recordManualDeduction(id: string, payload: RecordManualDeductionRequest) {
+export function recordManualDeduction(id: string, payload: ManualDeductionRequest) {
   return apiClient
     .post<RawIngredientPayload>(`/api/ingredients/${id}/manual-deduction`, payload)
     .then((res) => normalizeIngredient(res.data))
 }
 
-export function recordProductProduction(payload: RecordProductProductionRequest) {
+export function recordProductProduction(payload: ProductProductionRequest) {
   return apiClient
     .post<RawIngredientPayload[]>('/api/ingredients/production', payload)
     .then((res) => res.data.map(normalizeIngredient))

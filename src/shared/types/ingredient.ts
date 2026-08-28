@@ -62,18 +62,18 @@ export interface UpdateIngredientPriceRequest {
   unitPrice: number
 }
  
-export interface RecordIngredientPurchaseRequest {
+export interface IngredientPurchaseRequest {
   quantity: number
   unitPrice: number
   note?: string
 }
  
-export interface RecordManualDeductionRequest {
+export interface ManualDeductionRequest {
   quantity: number
   note: string
 }
  
-export interface RecordProductProductionRequest {
+export interface ProductProductionRequest {
   productId: string
   locationId: string
   quantity: number
