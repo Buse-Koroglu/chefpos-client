@@ -1,13 +1,13 @@
 import type { Role } from '@/shared/types/auth'
 
-export interface RouteConfig {
+export interface RouteConfiguration {
   path: string
   label: string
   allowedRoles: Role[] | 'ANY'
   showInSidebar: boolean
 }
 
-export const APP_ROUTES: RouteConfig[] = [
+export const APP_ROUTES: RouteConfiguration[] = [
   { path: '/app/dashboard', label: 'Panel', allowedRoles: ['ADMIN'], showInSidebar: true },
   { path: '/app/home', label: 'Ana Sayfa', allowedRoles: ['CASHIER'], showInSidebar: false },
   { path: '/app/pos', label: 'Sipariş Al', allowedRoles: ['CASHIER'], showInSidebar: true },
@@ -42,11 +42,11 @@ export const APP_ROUTES: RouteConfig[] = [
   { path: '/app/change-password', label: 'Şifre Değiştir', allowedRoles: 'ANY', showInSidebar: false },
 ]
 
-export function findRouteConfig(path: string): RouteConfig | undefined {
+export function findRouteConfiguration(path: string): RouteConfiguration | undefined {
   return APP_ROUTES.find((route) => route.path === path)
 }
 
-const DEFAULT_ROUTE_BY_ROLE: Array<{ role: Role; path: string }> = [
+const DEFAULT_ROUTE: Array<{ role: Role; path: string }> = [ // rollerin başlangıç route'ları
   { role: 'SUPER_ADMIN', path: '/app/super-admin/users' },
   { role: 'ADMIN', path: '/app/dashboard' },
   { role: 'CASHIER', path: '/app/home' },
@@ -57,10 +57,10 @@ const DEFAULT_ROUTE_BY_ROLE: Array<{ role: Role; path: string }> = [
 ]
 
 export function getDefaultRouteForRoles(roles: Role[]): string {
-  const match = DEFAULT_ROUTE_BY_ROLE.find((entry) => roles.includes(entry.role))
+  const match = DEFAULT_ROUTE.find((entry) => roles.includes(entry.role))
   return match?.path ?? '/app/dashboard'
 }
 
 export function getDefaultRouteForRole(role: Role): string {
-  return DEFAULT_ROUTE_BY_ROLE.find((entry) => entry.role === role)?.path ?? '/app/dashboard'
+  return DEFAULT_ROUTE.find((entry) => entry.role === role)?.path ?? '/app/dashboard'
 }

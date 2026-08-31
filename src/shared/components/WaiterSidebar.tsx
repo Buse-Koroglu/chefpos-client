@@ -8,15 +8,16 @@ import { useLocations } from '@/shared/hooks/useLocations'
 import { ROLE_LABELS, type Role } from '@/shared/types/auth'
 import { getDefaultRouteForRole } from '@/routes-config/permissions'
 
-const SELECT_CLASSNAME =
-  'h-10 border border-zinc-300 bg-white px-3 text-sm text-zinc-900 outline-none focus-visible:border-zinc-900'
+// Waiter sayfası ve aynı zamanda waiter için olan sidebar
 
-interface MobileUserMenuProps {
+const SELECT_CLASSNAME ='h-10 border border-zinc-300 bg-white px-3 text-sm text-zinc-900 outline-none focus-visible:border-zinc-900'
+
+interface WaiterSidebarProps {
   open: boolean
   onClose: () => void
 }
 
-export function MobileUserMenu({ open, onClose }: MobileUserMenuProps) {
+export function WaiterSidebar({ open, onClose }: WaiterSidebarProps) {
   const user = useAuthStore((state) => state.user)
   const logout = useAuthStore((state) => state.logout)
   const navigate = useNavigate()

@@ -1,16 +1,9 @@
 import { Toaster } from 'sonner'
 
-export function ToastProvider() {
+export function ToastProvider() { // toast provider ve css bilgileri
   return (
-    <Toaster
-      position="top-right"
-      richColors
-      closeButton
-      style={
-        {
-          '--border-radius': '0px',
-        } as React.CSSProperties
-      }
+    <Toaster position="top-right" richColors closeButton
+      style={{ '--border-radius': '0px',} as React.CSSProperties}
       toastOptions={{
         className: '!rounded-none border text-sm font-sans shadow-none',
         classNames: {

@@ -16,7 +16,7 @@ import { useMenus } from '../hooks/useMenus'
 import { useProducts } from '../hooks/useProducts'
 import { useCart } from '../hooks/useCart'
 import { useCreateOrder } from '../hooks/useCreateOrder'
-import { MobileUserMenu } from '@/shared/components/MobileUserMenu'
+import { WaiterSidebar } from '@/shared/components/WaiterSidebar'
 import { CartItemsSheet } from '../components/CartItemsSheet'
 import { getApiErrorMessage } from '@/shared/api/apiError'
 import { isTableOccupiedConflict } from '../utils'
@@ -230,7 +230,7 @@ export function WaiterOrderPage() {
         onRemove={removeItem}
       />
 
-      <MobileUserMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
+      <WaiterSidebar open={menuOpen} onClose={() => setMenuOpen(false)} />
 
     </div>
   )

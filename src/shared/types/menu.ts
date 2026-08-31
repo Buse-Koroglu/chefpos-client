@@ -15,7 +15,7 @@ export interface MenuResponseDto {
   products: MenuProductDto[];
 }
 
-export interface GetMenusQueryParams {
+export interface GetMenusQueryRequest {
   locationId: string;
   includeInactive?: boolean;
 }

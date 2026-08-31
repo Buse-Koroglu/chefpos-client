@@ -1,16 +1,16 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { ImageOff, Loader2, UploadCloud, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { resolveImageUrl } from '@/shared/lib/resolveImageUrl'
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
-const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024
+const MAX_FILE_SIZE = 5 * 1024 * 1024 // max 5 mb
 
 function validateFile(file: File): string | null {
   if (!ALLOWED_TYPES.includes(file.type)) {
     return 'Sadece JPG, PNG veya WEBP formatında görsel yükleyebilirsiniz.'
   }
-  if (file.size > MAX_FILE_SIZE_BYTES) {
+  if (file.size > MAX_FILE_SIZE) {
     return 'Dosya boyutu 5MB sınırını aşıyor.'
   }
   return null
@@ -27,30 +27,18 @@ interface ImageUploadInputProps {
   size?: 'sm' | 'lg'
 }
 
-export function ImageUploadInput({
-  file,
-  onFileChange,
-  existingImageUrl,
-  onRemoveExisting,
-  disabled = false,
-  uploading = false,
-  uploadProgress,
-  size = 'lg',
-}: ImageUploadInputProps) {
+export function ImageUploadInput({file, onFileChange, existingImageUrl, onRemoveExisting, disabled = false, uploading = false, uploadProgress, size = 'lg', }: ImageUploadInputProps) {
   const [error, setError] = useState<string | null>(null)
-  const [isDragging, setIsDragging] = useState(false)
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [isDragging, setIsDragging] = useState(false) // fotoğrafı sürükleme seçeneği için tutulan state
   const inputRef = useRef<HTMLInputElement>(null)
 
+  const previewUrl = useMemo(() => (file ? URL.createObjectURL(file) : null), [file])
+
   useEffect(() => {
-    if (!file) {
-      setPreviewUrl(null)
-      return
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl)
     }
-    const objectUrl = URL.createObjectURL(file)
-    setPreviewUrl(objectUrl)
-    return () => URL.revokeObjectURL(objectUrl)
-  }, [file])
+  }, [previewUrl])
 
   const sizeClassName = size === 'sm' ? 'size-9' : 'size-24'
   const iconSizeClassName = size === 'sm' ? 'size-4' : 'size-6'
@@ -122,10 +110,7 @@ export function ImageUploadInput({
         />
 
         {displayUrl ? (
-          <img src={displayUrl} alt="" className="size-full object-cover" />
-        ) : (
-          <UploadCloud className={iconSizeClassName} />
-        )}
+          <img src={displayUrl} alt="" className="size-full object-cover" />) : ( <UploadCloud className={iconSizeClassName} /> )}
 
         {uploading && (
           <div className="absolute inset-0 flex items-center justify-center bg-white/80">

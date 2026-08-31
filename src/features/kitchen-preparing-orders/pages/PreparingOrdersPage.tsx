@@ -3,7 +3,7 @@ import axios from 'axios'
 import { Search } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
-import { CashierHeader } from '@/shared/components/CashierHeader'
+import { StaffHeader } from '@/shared/components/StaffHeader'
 import { Pagination } from '@/shared/components/Pagination'
 import { useDebouncedValue } from '@/shared/hooks/useDebouncedValue'
 import { useLocations } from '@/shared/hooks/useLocations'
@@ -107,7 +107,7 @@ export function PreparingOrdersPage() {
       <KitchenSidebar />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <CashierHeader
+        <StaffHeader
           title="Bekleyen Siparişler"
           locationName={locationName}
         />

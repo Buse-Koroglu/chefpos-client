@@ -5,7 +5,7 @@ import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { useLocationStore } from '@/shared/stores/locationStore'
 import { useLocations } from '@/shared/hooks/useLocations'
-import { CashierHeader } from '@/shared/components/CashierHeader'
+import { StaffHeader } from '@/shared/components/StaffHeader'
 import { CashierSidebar } from '@/shared/components/CashierSidebar'
 import { Pagination } from '@/shared/components/Pagination'
 import { OrderCard } from '../components/OrderCard'
@@ -127,7 +127,7 @@ export function PendingOrdersPage() {
       <CashierSidebar />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
-        <CashierHeader title="Bekleyen Siparişler" locationName={locationName} />
+        <StaffHeader title="Bekleyen Siparişler" locationName={locationName} />
 
         <main className="flex min-h-0 flex-1 flex-col gap-4 p-4">
           <div className="flex border border-zinc-200 bg-white">

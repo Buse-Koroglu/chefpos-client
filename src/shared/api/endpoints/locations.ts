@@ -1,16 +1,13 @@
 import { apiClient } from '@/shared/api/client'
+import type { PagedResult } from '@/shared/types/pagination'
 import type {
   CreateLocationRequest,
-  GetLocationsPagedQueryParams,
+  GetLocationsPagedQueryRequest,
+  GetLocationsQueryRequest,
   LocationDto,
   LocationResponseDto,
-  PagedResult,
   UpdateLocationRequest,
 } from '@/shared/types/location'
-
-export interface GetLocationsQueryParams {
-  includeInactive?: boolean
-}
 
 const MAX_PAGE_SIZE = 100
 
@@ -18,8 +15,7 @@ function toLocationDto(location: LocationResponseDto): LocationDto {
   return { id: location.id, name: location.name, isActive: location.isActive }
 }
 
-/** Convenience wrapper over `getLocationsPaged` for callers that just need a flat list (dropdowns, chip pickers). */
-export function getLocations(params: GetLocationsQueryParams = {}) {
+export function getLocations(params: GetLocationsQueryRequest = {}) {
   return getLocationsPaged({
     isActive: params.includeInactive ? undefined : true,
     pageNumber: 1,
@@ -27,7 +23,7 @@ export function getLocations(params: GetLocationsQueryParams = {}) {
   }).then((result) => result.items.map(toLocationDto))
 }
 
-export function getLocationsPaged(params: GetLocationsPagedQueryParams) {
+export function getLocationsPaged(params: GetLocationsPagedQueryRequest) {
   return apiClient.get<PagedResult<LocationResponseDto>>('/api/locations', { params }).then((res) => res.data)
 }
 

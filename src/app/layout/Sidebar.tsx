@@ -1,8 +1,8 @@
 import { NavLink } from 'react-router-dom'
-import type { RouteConfig } from '@/routes-config/permissions'
+import type { RouteConfiguration } from '@/routes-config/permissions'
 
 interface SidebarProps {
-  routes: RouteConfig[]
+  routes: RouteConfiguration[]
 }
 
 export function Sidebar({ routes }: SidebarProps) {
@@ -16,12 +16,8 @@ export function Sidebar({ routes }: SidebarProps) {
             to={route.path}
             className={({ isActive }) =>
               `rounded-md px-3 py-2 text-sm ${
-                isActive
-                  ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                  : 'hover:bg-sidebar-accent/50'
-              }`
-            }
-          >
+                isActive ? 'bg-sidebar-accent text-sidebar-accent-foreground' : 'hover:bg-sidebar-accent/50'
+              }`} >
             {route.label}
           </NavLink>
         ))}

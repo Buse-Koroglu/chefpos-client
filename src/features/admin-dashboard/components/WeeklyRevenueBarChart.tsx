@@ -1,9 +1,9 @@
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
-import type { DailyRevenueEntry } from '@/shared/types/admin-dashboard'
+import type { DailyRevenueDto } from '@/shared/types/admin-dashboard'
 import { Skeleton } from '@/shared/components/Skeleton'
 
 interface WeeklyRevenueBarChartProps {
-  data: DailyRevenueEntry[]
+  data: DailyRevenueDto[]
   isLoading?: boolean
   isError?: boolean
 }
@@ -42,7 +42,7 @@ function isToday(isoDate: string) {
   )
 }
 
-interface ChartEntry extends DailyRevenueEntry {
+interface ChartEntry extends DailyRevenueDto {
   dayName: string
 }
 

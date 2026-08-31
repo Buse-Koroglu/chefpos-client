@@ -1,16 +1,9 @@
 import { apiClient } from '@/shared/api/client'
 import { kioskClient } from '@/shared/api/kioskClient'
 import { STOCK_UNITS } from '@/shared/types/ingredient'
-import type {
-  AddProductIngredientRequest,
-  CreateProductRequest,
-  GetProductsPagedQueryParams,
-  GetProductsQueryParams,
-  PagedResult,
-  ProductAdminResponseDto,
-  ProductResponse,
-  UpdateProductRequest,
-} from '@/shared/types/product'
+import type { PagedResult } from '@/shared/types/pagination'
+import type {AddProductIngredientRequest,CreateProductRequest,GetProductsPagedQueryRequest,GetProductsQueryRequest,ProductAdminResponseDto,ProductResponse,UpdateProductRequest,} from '@/shared/types/product'
+import type { ExportProductsQueryRequest } from '@/shared/types/products'
 
 interface RawProductItemPayload {
   id: string
@@ -40,23 +33,18 @@ interface RawProductPayload {
 
 function normalizeProduct(raw: RawProductPayload): ProductResponse {
   return {
-    ...raw,
-    locations: raw.locations.map((location) => ({
-      locationId: location.locationId,
-      ingredients: location.ingredients.map((item) => ({ ...item, unit: STOCK_UNITS[item.unit] })),
+    ...raw,locations: raw.locations.map((location) => ({ locationId: location.locationId, ingredients: location.ingredients.map((item) => ({ ...item, unit: STOCK_UNITS[item.unit] })),
     })),
   }
 }
 
-export function getProducts(params: GetProductsQueryParams) {
-  return apiClient
-    .get<RawProductPayload[]>('/api/products', { params })
+export function getProducts(params: GetProductsQueryRequest) {
+  return apiClient.get<RawProductPayload[]>('/api/products', { params })
     .then((res) => res.data.map(normalizeProduct))
 }
 
-export function getKioskProducts(params: GetProductsQueryParams) {
-  return kioskClient
-    .get<RawProductPayload[]>('/api/products', { params })
+export function getKioskProducts(params: GetProductsQueryRequest) {
+  return kioskClient.get<RawProductPayload[]>('/api/products', { params })
     .then((res) => res.data.map(normalizeProduct))
 }
 
@@ -64,17 +52,14 @@ export function getProductById(id: string) {
   return apiClient.get<RawProductPayload>(`/api/products/${id}`).then((res) => normalizeProduct(res.data))
 }
 
-export function getProductsPaged(params: GetProductsPagedQueryParams) {
-  return apiClient
-    .get<PagedResult<ProductAdminResponseDto>>('/api/products/paged', { params })
+export function getProductsPaged(params: GetProductsPagedQueryRequest) {
+  return apiClient.get<PagedResult<ProductAdminResponseDto>>('/api/products/paged', { params })
     .then((res) => res.data)
 }
 
-export type ExportProductsQueryParams = Omit<GetProductsPagedQueryParams, 'pageNumber' | 'pageSize'>
 
-export function exportProducts(params: ExportProductsQueryParams): Promise<Blob> {
-  return apiClient
-    .get<Blob>('/api/products/export', { params, responseType: 'blob' })
+export function exportProducts(params: ExportProductsQueryRequest): Promise<Blob> {
+  return apiClient.get<Blob>('/api/products/export', { params, responseType: 'blob' })
     .then((res) => res.data)
 }
 
@@ -89,8 +74,7 @@ export function updateProduct(id: string, payload: UpdateProductRequest) {
 export function uploadProductImage(id: string, file: File, onProgress?: (percent: number) => void) {
   const formData = new FormData()
   formData.append('file', file)
-  return apiClient
-    .post<RawProductPayload>(`/api/products/${id}/image`, formData, {
+  return apiClient.post<RawProductPayload>(`/api/products/${id}/image`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
       onUploadProgress: (event) => {
         if (onProgress && event.total) {
@@ -106,8 +90,7 @@ export function deleteProductImage(id: string) {
 }
 
 export function updateProductPrice(id: string, newPrice: number) {
-  return apiClient
-    .patch<RawProductPayload>(`/api/products/${id}/price`, { newPrice })
+  return apiClient.patch<RawProductPayload>(`/api/products/${id}/price`, { newPrice })
     .then((res) => normalizeProduct(res.data))
 }
 
@@ -116,31 +99,26 @@ export function activateProduct(id: string, locationId: string) {
 }
 
 export function deactivateProduct(id: string, locationId: string) {
-  return apiClient
-    .post<RawProductPayload>('/api/products/deactivate', { id, locationId })
+  return apiClient.post<RawProductPayload>('/api/products/deactivate', { id, locationId })
     .then((res) => normalizeProduct(res.data))
 }
 
 export function addProductIngredient(productId: string, payload: AddProductIngredientRequest) {
-  return apiClient
-    .post<RawProductPayload>(`/api/products/${productId}/ingredients`, payload)
+  return apiClient.post<RawProductPayload>(`/api/products/${productId}/ingredients`, payload)
     .then((res) => normalizeProduct(res.data))
 }
 
 export function removeProductIngredient(productId: string, productItemId: string, locationId: string) {
-  return apiClient
-    .delete<RawProductPayload>(`/api/products/${productId}/ingredients/${productItemId}`, { params: { locationId } })
+  return apiClient.delete<RawProductPayload>(`/api/products/${productId}/ingredients/${productItemId}`, { params: { locationId } })
     .then((res) => normalizeProduct(res.data))
 }
 
 export function addProductLocation(productId: string, locationId: string) {
-  return apiClient
-    .post<RawProductPayload>(`/api/products/${productId}/locations`, { locationId })
+  return apiClient.post<RawProductPayload>(`/api/products/${productId}/locations`, { locationId })
     .then((res) => normalizeProduct(res.data))
 }
 
 export function removeProductLocation(productId: string, locationId: string) {
-  return apiClient
-    .delete<RawProductPayload>(`/api/products/${productId}/locations/${locationId}`)
+  return apiClient.delete<RawProductPayload>(`/api/products/${productId}/locations/${locationId}`)
     .then((res) => normalizeProduct(res.data))
 }

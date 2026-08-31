@@ -2,10 +2,7 @@ export const STOCK_UNITS = ['KG', 'LT'] as const
  
 export type StockUnit = (typeof STOCK_UNITS)[number]
  
-export const STOCK_UNIT_LABELS: Record<StockUnit, string> = {
-  KG: 'KG',
-  LT: 'L',
-}
+export const STOCK_UNIT_LABELS: Record<StockUnit, string> = { KG: 'KG', LT: 'L',}
  
 export interface IngredientResponseDto {
   id: string
@@ -20,7 +17,7 @@ export interface IngredientResponseDto {
   locationId: string
 }
  
-export interface GetIngredientsQueryParams {
+export interface GetIngredientsQueryRequest {
   locationId: string
   includeInactive?: boolean
 }
@@ -29,20 +26,12 @@ export interface IngredientAdminResponseDto extends IngredientResponseDto {
   locationName: string
 }
  
-export interface GetIngredientsPagedQueryParams {
+export interface GetIngredientsPagedQueryRequest {
   searchTerm?: string
   locationId?: string
   isActive?: boolean
   pageNumber?: number
   pageSize?: number
-}
- 
-export interface PagedResult<T> {
-  items: T[]
-  totalCount: number
-  pageNumber: number
-  pageSize: number
-  totalPages: number
 }
  
 export interface CreateIngredientRequest {
@@ -79,3 +68,5 @@ export interface ProductProductionRequest {
   quantity: number
   note?: string
 }
+
+export type ExportIngredientsQueryRequest = Omit<GetIngredientsPagedQueryRequest, 'pageNumber' | 'pageSize'>

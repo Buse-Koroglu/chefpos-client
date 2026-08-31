@@ -6,7 +6,7 @@ import {
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
-import { CashierHeader } from '@/shared/components/CashierHeader'
+import { StaffHeader } from '@/shared/components/StaffHeader'
 import { useLocations } from '@/shared/hooks/useLocations'
 import { useLocationStore } from '@/shared/stores/locationStore'
 
@@ -71,7 +71,7 @@ export function InventoryDashboardPage() {
       <InventorySidebar />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
-        <CashierHeader
+        <StaffHeader
           title="Genel Bakış"
           locationName={locationName}
         />

@@ -5,6 +5,7 @@ const ORDER_TYPE_LABEL: Record<OrderType, string> = {
   WAITER: 'Garson',
   SELF_SERVICE: 'Kiosk',
 }
+// Order Tiplerini etiketlemek için
 
 export function OrderTypeBadge({ type }: { type: OrderType }) {
   return (

@@ -7,6 +7,8 @@ interface AdminHeaderProps {
   actions?: ReactNode
 }
 
+// Admin header başlık, zaman ve gerekli action'ları içeriyor.
+
 export function AdminHeader({ title, actions }: AdminHeaderProps) {
   const { date, time } = useLiveClock()
 

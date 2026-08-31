@@ -11,7 +11,8 @@ import type { Role } from '@/shared/types/auth'
 import { getDefaultRouteForRole } from '@/routes-config/permissions'
 
 const SELECT_CLASSNAME = 'w-full bg-transparent text-sm text-zinc-900 outline-none disabled:text-zinc-400'
-
+ 
+// SidebarUserCard componenti personel bilgisini ve rol/yerleşke seçimini gösterir
 export function SidebarUserCard() {
   const user = useAuthStore((state) => state.user)
   const logout = useAuthStore((state) => state.logout)
@@ -28,18 +29,18 @@ export function SidebarUserCard() {
   const roles = user?.roles ?? []
   const currentRole: Role | undefined = (activeRole && roles.includes(activeRole) ? activeRole : roles[0]) ?? undefined
 
-  const userLocations = useMemo(
+  const userLocations = useMemo( // personel hangi yerleşkelerde görevliyse sadece onları görebilmeli
     () => allLocations.filter((location) => user?.locationIds.includes(location.id)),
-    [allLocations, user],
+    [allLocations, user], 
   )
 
   useEffect(() => {
     if (currentRole && currentRole !== 'ADMIN' && currentRole !== 'SUPER_ADMIN' && !selectedLocationId && userLocations.length > 0) {
-      setSelectedLocationId(userLocations[0].id)
+      setSelectedLocationId(userLocations[0].id) // user locationlardan ilki olan default olarak gelir
     }
   }, [currentRole, selectedLocationId, userLocations, setSelectedLocationId])
 
-  function handleRoleChange(role: Role) {
+  function handleRoleChange(role: Role) {  // dropdown üzerinden rol değişimi için gerekli fonk
     setActiveRole(role)
     navigate(getDefaultRouteForRole(role))
   }
@@ -82,10 +83,7 @@ export function SidebarUserCard() {
                   {ROLE_LABELS[role]}
                 </option>
               ))}
-            </select>
-          ) : (
-            <span>{currentRole ? ROLE_LABELS[currentRole] : ''}</span>
-          )}
+            </select> ) : (<span>{currentRole ? ROLE_LABELS[currentRole] : ''}</span>)}
         </div>
       </div>
 

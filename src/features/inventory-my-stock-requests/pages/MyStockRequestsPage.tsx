@@ -5,7 +5,7 @@ import { useLocationStore } from '@/shared/stores/locationStore'
 import { useLocations } from '@/shared/hooks/useLocations'
 import { useDebouncedValue } from '@/shared/hooks/useDebouncedValue'
 import { InventorySidebar } from '@/shared/components/InventorySidebar'
-import { CashierHeader } from '@/shared/components/CashierHeader'
+import { StaffHeader } from '@/shared/components/StaffHeader'
 import { Pagination } from '@/shared/components/Pagination'
 import { StockRequestsSearchInput } from '@/features/admin-stock-requests/components/StockRequestsSearchInput'
 import { StockRequestsTable } from '@/features/admin-stock-requests/components/StockRequestsTable'
@@ -66,7 +66,7 @@ export function MyStockRequestsPage() {
       <InventorySidebar />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
-        <CashierHeader title="Stok Taleplerim" locationName={locationName} />
+        <StaffHeader title="Stok Taleplerim" locationName={locationName} />
 
         <main className="flex min-h-0 flex-1 flex-col gap-4 p-4">
           <div className="flex border border-zinc-200 bg-white">

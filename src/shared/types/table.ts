@@ -5,7 +5,7 @@ export interface TableResponseDto {
   isActive: boolean
 }
 
-export interface GetTablesPagedQueryParams {
+export interface GetTablesPagedQueryRequest {
   searchTerm?: string
   locationId?: string
   isActive?: boolean
@@ -22,15 +22,7 @@ export interface UpdateTableRequest {
   tableNumber: number
 }
 
-export interface PagedResult<T> {
-  items: T[]
-  totalCount: number
-  pageNumber: number
-  pageSize: number
-  totalPages: number
-}
-
-export interface GetTablesByLocationQueryParams {
+export interface GetTablesByLocationQueryRequest {
   locationId: string
   includeInactive?: boolean
 }

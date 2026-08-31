@@ -1,6 +1,6 @@
 import type { StockUnit } from './ingredient'
 
-export interface GetProductsQueryParams {
+export interface GetProductsQueryRequest {
   locationId: string;
   categoryId?: string | null;
   includeInactive?: boolean;
@@ -15,7 +15,7 @@ export interface ProductItemResponse {
   quantityPerServing: number;
 }
 
-export interface ProductLocationRecipe {
+export interface ProductLocationIngredients {
   locationId: string;
   ingredients: ProductItemResponse[];
 }
@@ -30,7 +30,7 @@ export interface ProductResponse {
   isAvailable: boolean;
   categoryId: string | null;
   locationIds: string[];
-  locations: ProductLocationRecipe[];
+  locations: ProductLocationIngredients[];
 }
 
 export interface ProductAdminResponseDto {
@@ -45,7 +45,7 @@ export interface ProductAdminResponseDto {
   locationNames: string[];
 }
 
-export interface GetProductsPagedQueryParams {
+export interface GetProductsPagedQueryRequest {
   searchTerm?: string;
   locationId?: string;
   categoryId?: string;
@@ -74,10 +74,3 @@ export interface AddProductIngredientRequest {
   quantityPerServing: number;
 }
 
-export interface PagedResult<T> {
-  items: T[];
-  totalCount: number;
-  pageNumber: number;
-  pageSize: number;
-  totalPages: number;
-}

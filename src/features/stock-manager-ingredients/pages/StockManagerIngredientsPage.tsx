@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 
-import { CashierHeader } from '@/shared/components/CashierHeader'
+import { StaffHeader } from '@/shared/components/StaffHeader'
 import { StockManagerSidebar } from '@/shared/components/StockManagerSidebar'
 import { IngredientCard } from '@/shared/components/IngredientCard'
 import { Skeleton } from '@/shared/components/Skeleton'
@@ -44,7 +44,7 @@ export function StockManagerIngredientsPage() {
       <StockManagerSidebar />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
-        <CashierHeader title="Ham Maddeler" locationName={locationName} />
+        <StaffHeader title="Ham Maddeler" locationName={locationName} />
 
         <main className="flex flex-1 flex-col gap-4 p-6">
           <p className="text-xs text-zinc-500">

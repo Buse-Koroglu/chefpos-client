@@ -1,4 +1,4 @@
-export interface DailyRevenueEntry {
+export interface DailyRevenueDto {
   date: string
   profit: number
 }
@@ -12,6 +12,6 @@ export interface LocationOrderCount {
 export interface DashboardSummary {
   totalStaffCount: number
   topSellingProductName: string | null
-  weeklyRevenue: DailyRevenueEntry[]
+  weeklyRevenue: DailyRevenueDto[]
   todayOrdersByLocation: LocationOrderCount[]
 }

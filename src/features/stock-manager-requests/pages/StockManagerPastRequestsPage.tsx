@@ -4,7 +4,7 @@ import { useLocationStore } from '@/shared/stores/locationStore'
 import { useLocations } from '@/shared/hooks/useLocations'
 import { useDebouncedValue } from '@/shared/hooks/useDebouncedValue'
 import { StockManagerSidebar } from '@/shared/components/StockManagerSidebar'
-import { CashierHeader } from '@/shared/components/CashierHeader'
+import { StaffHeader } from '@/shared/components/StaffHeader'
 import { StockRequestsSearchInput } from '@/features/admin-stock-requests/components/StockRequestsSearchInput'
 import { StockRequestsTable } from '@/features/admin-stock-requests/components/StockRequestsTable'
 import { StockRequestsPagination } from '@/features/admin-stock-requests/components/StockRequestsPagination'
@@ -55,7 +55,7 @@ export function StockManagerPastRequestsPage() {
       <StockManagerSidebar />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
-        <CashierHeader title="Geçmiş Stok Talepleri" locationName={locationName} />
+        <StaffHeader title="Geçmiş Stok Talepleri" locationName={locationName} />
 
         <main className="flex min-h-0 flex-1 flex-col gap-4 p-4">
           <StockRequestsSearchInput value={searchInput} onChange={handleSearchChange} />

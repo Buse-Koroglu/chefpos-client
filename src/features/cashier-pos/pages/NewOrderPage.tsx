@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useLocationStore } from '@/shared/stores/locationStore'
 import { useLocations } from '@/shared/hooks/useLocations'
-import { CashierHeader } from '@/shared/components/CashierHeader'
+import { StaffHeader } from '@/shared/components/StaffHeader'
 import { CashierSidebar } from '@/shared/components/CashierSidebar'
 import type { OrderItem, Product } from '../types'
 import { ProductCatalog } from '../components/ProductCatalog'
@@ -123,7 +123,7 @@ export function NewOrderPage() {
       <CashierSidebar />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
-        <CashierHeader title="Yeni Sipariş" locationName={locationName} />
+        <StaffHeader title="Yeni Sipariş" locationName={locationName} />
 
         <main className="flex min-h-0 flex-1 flex-col gap-4 p-4">
           <div className="flex items-end gap-3">

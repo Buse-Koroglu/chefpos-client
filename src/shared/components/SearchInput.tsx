@@ -1,7 +1,6 @@
 import { Search, X } from 'lucide-react'
 
-const SEARCH_INPUT_CLASSNAME =
-  'h-10 w-full max-w-sm rounded-none border border-zinc-200 bg-zinc-50 pl-9 pr-9 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
+const SEARCH_INPUT_CLASSNAME = 'h-10 w-full max-w-sm rounded-none border border-zinc-200 bg-zinc-50 pl-9 pr-9 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
 
 interface SearchInputProps {
   value: string

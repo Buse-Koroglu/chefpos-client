@@ -3,7 +3,7 @@ import { Minus, PackagePlus } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 import { InventorySidebar } from '@/shared/components/InventorySidebar'
-import { CashierHeader } from '@/shared/components/CashierHeader'
+import { StaffHeader } from '@/shared/components/StaffHeader'
 import { Pagination } from '@/shared/components/Pagination'
 import { useLocations } from '@/shared/hooks/useLocations'
 import { useLocationStore } from '@/shared/stores/locationStore'
@@ -46,7 +46,7 @@ export function StockMovementsPage() {
       <InventorySidebar />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
-        <CashierHeader title="Stok Hareketleri" locationName={locationName} />
+        <StaffHeader title="Stok Hareketleri" locationName={locationName} />
 
         <main className="flex min-h-0 flex-1 flex-col gap-4 p-4">
           <div className="flex flex-col gap-4 sm:flex-row">

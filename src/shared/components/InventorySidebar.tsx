@@ -1,23 +1,20 @@
 import type { LucideIcon } from 'lucide-react'
-import {
-  ClipboardList,
-  History,
-  Home,
-  Wheat,
-} from 'lucide-react'
+import {ClipboardList, History, Home, Wheat,} from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 
 import { cn } from '@/lib/utils'
 import { SidebarUserCard } from '@/shared/components/SidebarUserCard'
 
-interface NavItem {
+interface SidebarItem {
   label: string
   icon: LucideIcon
   to: string
   end?: boolean
 }
 
-const NAV_ITEMS: NavItem[] = [
+// Inventory Sidebar ve içinde SidebarUserCard compoentini de içerir
+
+const SIDEBAR_ITEMS: SidebarItem[] = [
   { label: 'Ana Sayfa', icon: Home, to: '/app/inventory', end: true },
   { label: 'Stok Taleplerim', icon: ClipboardList, to: '/app/inventory/stock-requests' },
   { label: 'Stok Hareketleri', icon: History, to: '/app/inventory/stock-movements' },
@@ -34,7 +31,7 @@ export function InventorySidebar() {
       </div>
 
       <nav className="flex flex-1 flex-col gap-1 px-3 py-3">
-        {NAV_ITEMS.map(({ label, icon: Icon, to, end }) => (
+        {SIDEBAR_ITEMS.map(({ label, icon: Icon, to, end }) => (
           <NavLink
             key={label}
             to={to}
@@ -42,9 +39,7 @@ export function InventorySidebar() {
             className={({ isActive }) =>
               cn(
                 'flex items-center gap-2.5 border-l-2 px-3 py-2 text-sm font-medium transition-colors',
-                isActive
-                  ? 'border-[#133458] bg-zinc-200 text-zinc-900'
-                  : 'border-transparent text-zinc-500 hover:bg-zinc-200/60 hover:text-zinc-900',
+                isActive ? 'border-[#133458] bg-zinc-200 text-zinc-900'  : 'border-transparent text-zinc-500 hover:bg-zinc-200/60 hover:text-zinc-900',
               )
             }
           >

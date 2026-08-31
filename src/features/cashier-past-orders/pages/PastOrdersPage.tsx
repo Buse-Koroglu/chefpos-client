@@ -4,7 +4,7 @@ import { RefreshCw, Search } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useLocationStore } from '@/shared/stores/locationStore'
 import { useLocations } from '@/shared/hooks/useLocations'
-import { CashierHeader } from '@/shared/components/CashierHeader'
+import { StaffHeader } from '@/shared/components/StaffHeader'
 import { CashierSidebar } from '@/shared/components/CashierSidebar'
 import { Pagination } from '@/shared/components/Pagination'
 import { PastOrderCard } from '../components/PastOrderCard'
@@ -63,7 +63,7 @@ export function PastOrdersPage() {
       <CashierSidebar />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
-        <CashierHeader title="Geçmiş Siparişler" locationName={locationName} />
+        <StaffHeader title="Geçmiş Siparişler" locationName={locationName} />
 
         <main className="flex min-h-0 flex-1 flex-col gap-4 p-4">
           <div className="flex border border-zinc-200 bg-white">
