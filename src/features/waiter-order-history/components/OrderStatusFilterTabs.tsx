@@ -1,21 +1,20 @@
 import { cn } from '@/lib/utils'
-import type { PaymentFilter } from '../types'
+import type { OrderHistoryFilter } from '../types'
 
-const PAYMENT_FILTER_TABS: Array<{ value: PaymentFilter; label: string }> = [
-  { value: 'ALL', label: 'Tümü' },
-  { value: 'UNPAID', label: 'Ödenmedi' },
-  { value: 'PAID', label: 'Ödendi' },
+const STATUS_FILTER_TABS: Array<{ value: OrderHistoryFilter; label: string }> = [
+  { value: 'PENDING', label: 'Hazırlanan Siparişler' },
+  { value: 'COMPLETED', label: 'Tamamlanan Siparişler' },
 ]
 
-interface PaymentFilterTabsProps {
-  value: PaymentFilter
-  onChange: (value: PaymentFilter) => void
+interface OrderStatusFilterTabsProps {
+  value: OrderHistoryFilter
+  onChange: (value: OrderHistoryFilter) => void
 }
 
-export function PaymentFilterTabs({ value, onChange }: PaymentFilterTabsProps) {
+export function OrderStatusFilterTabs({ value, onChange }: OrderStatusFilterTabsProps) {
   return (
     <div className="flex border border-zinc-200 bg-white">
-      {PAYMENT_FILTER_TABS.map((tab) => (
+      {STATUS_FILTER_TABS.map((tab) => (
         <button
           key={tab.value}
           type="button"

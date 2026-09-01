@@ -31,12 +31,12 @@ export function OrderHistoryCard({ order, onClick }: OrderHistoryCardProps) {
     >
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <p className="text-sm font-semibold text-zinc-900">
+          <p className="text-base font-semibold text-zinc-900">
             {order.tableNumber ? `Masa ${order.tableNumber}` : `#${order.orderNumber}`}
           </p>
-          <span className="text-xs text-zinc-400">#{order.orderNumber}</span>
+          <span className="text-sm text-zinc-400">#{order.orderNumber}</span>
         </div>
-        <p className="mt-0.5 text-xs text-zinc-500">{dateFormatter.format(new Date(order.createdAt))}</p>
+        <p className="mt-0.5 text-sm text-zinc-500">{dateFormatter.format(new Date(order.createdAt))}</p>
         <div className="mt-1.5 flex items-center gap-1.5">
           <OrderStatusBadge status={order.status} />
           <PaymentStatusBadge status={order.paymentStatus} />
@@ -44,10 +44,10 @@ export function OrderHistoryCard({ order, onClick }: OrderHistoryCardProps) {
       </div>
 
       <div className="flex shrink-0 items-center gap-2">
-        <span className="text-sm font-semibold tabular-nums text-zinc-900">
+        <span className="text-base font-semibold tabular-nums text-zinc-900">
           {currencyFormatter.format(order.totalPrice)}
         </span>
-        <ChevronRight className="size-4 text-zinc-300" />
+        <ChevronRight className="size-5 text-zinc-300" />
       </div>
     </button>
   )

@@ -20,7 +20,7 @@ export function MenuTabs({ menus, selectedMenuId, onSelect }: MenuTabsProps) {
           key={menu.id}
           type="button"
           onClick={() => onSelect(menu.id)}
-          className={`shrink-0 whitespace-nowrap border px-3 py-1.5 text-xs font-medium ${
+          className={`shrink-0 whitespace-nowrap border px-4 py-2 text-sm font-medium ${
             selectedMenuId === menu.id ? 'border-zinc-700 bg-[#133458] text-white' : 'border-zinc-200 bg-white text-zinc-600' }`}>
           {menu.name}
         </button>

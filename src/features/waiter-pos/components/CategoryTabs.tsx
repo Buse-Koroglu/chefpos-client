@@ -18,7 +18,7 @@ export function CategoryTabs({ categories, selectedCategoryId, onSelect }: Categ
           key={cat.id}
           type="button"
           onClick={() => onSelect(cat.id)}
-          className={`shrink-0 whitespace-nowrap border px-3 py-1.5 text-xs font-medium ${
+          className={`shrink-0 whitespace-nowrap border px-4 py-2 text-sm font-medium ${
             selectedCategoryId === cat.id ? 'border-zinc-700 bg-[#133458] text-white'  : 'border-zinc-200 bg-white text-zinc-600' }`}>
           {cat.name}
         </button>

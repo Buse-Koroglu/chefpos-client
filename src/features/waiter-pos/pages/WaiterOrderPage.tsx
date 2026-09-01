@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { Search } from 'lucide-react'
+import { ChevronDown, ChevronUp, Search } from 'lucide-react'
 import { useLocationStore } from '@/shared/stores/locationStore'
 import { useLocations } from '@/shared/hooks/useLocations'
 import { useDebouncedValue } from '@/shared/hooks/useDebouncedValue'
@@ -35,7 +35,9 @@ export function WaiterOrderPage() {
   const [searchInput, setSearchInput] = useState('')
   const debouncedSearch = useDebouncedValue(searchInput, 400) // 400 ms debounce
   const [menuOpen, setMenuOpen] = useState(false)
+  const [orderInfoOpen, setOrderInfoOpen] = useState(true)
   const { data: tables = [] } = useActiveTables(locationId)
+  const selectedTable = tables.find((t) => t.id === tableId)
   const { data: categories = [] } = useCategories(locationId)
   const { data: menus = [] } = useMenus(locationId)
   const activeMenu = menus.find((menu) => menu.id === selectedMenuId)
@@ -134,51 +136,71 @@ export function WaiterOrderPage() {
   return (
     <div className="mx-auto flex h-screen max-w-md flex-col bg-zinc-50">
  <WaiterHeader locationName={locationName} onMenuClick={() => setMenuOpen(true)} />
-      <div className="border-b border-zinc-200 bg-white p-3">
-        <TableSelector
-          tables={tables}
-          selectedTableId={tableId}
-          isPackage={isPackage}
-          onSelect={(id) => {
-            setTableId(id)
-            setIsPackage(false)
-          }}
-          onSelectPackage={() => {
-            setIsPackage(true)
-            setTableId(null)
-          }}
-        />
+      <div className="border-b border-zinc-200 bg-white">
+        <button
+          type="button"
+          onClick={() => setOrderInfoOpen((current) => !current)}
+          className="flex w-full items-center justify-between gap-2 px-3 py-3 text-left"
+        >
+          <span className="truncate text-sm font-semibold text-[#133458]">
+            {isPackage ? 'Paket' : selectedTable ? `Masa ${selectedTable.tableNumber}` : 'Masa Seçin'}
+            {customerName ? ` · ${customerName}` : ''}
+          </span>
+          {orderInfoOpen ? (
+            <ChevronUp className="size-5 shrink-0 text-zinc-400" />
+          ) : (
+            <ChevronDown className="size-5 shrink-0 text-zinc-400" />
+          )}
+        </button>
 
-        <div className="mt-3">
-          <label
-            htmlFor="customer-name"
-            className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-zinc-500"
-          >
-            Müşteri Adı
-          </label>
+        {orderInfoOpen && (
+          <div className="px-3 pb-3">
+            <TableSelector
+              tables={tables}
+              selectedTableId={tableId}
+              isPackage={isPackage}
+              onSelect={(id) => {
+                setTableId(id)
+                setIsPackage(false)
+              }}
+              onSelectPackage={() => {
+                setIsPackage(true)
+                setTableId(null)
+              }}
+            />
 
-          <input
-            id="customer-name"
-            type="text"
-            value={customerName}
-            onChange={(event) =>
-              setCustomerName(event.target.value)
-            }
-            placeholder="Örn. Buse Köroğlu"
-            maxLength={100}
-            className="h-11 w-full border border-zinc-300 bg-white px-3 text-sm text-zinc-900 outline-none placeholder:text-zinc-400 focus:border-zinc-900"
-          />
-        </div>
+            <div className="mt-3">
+              <label
+                htmlFor="customer-name"
+                className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-zinc-500"
+              >
+                Müşteri Adı
+              </label>
+
+              <input
+                id="customer-name"
+                type="text"
+                value={customerName}
+                onChange={(event) =>
+                  setCustomerName(event.target.value)
+                }
+                placeholder="Örn. Buse Köroğlu"
+                maxLength={100}
+                className="h-14 w-full border border-zinc-300 bg-white px-4 text-base text-zinc-900 outline-none placeholder:text-zinc-400 focus:border-zinc-900"
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="border-b border-zinc-200 bg-white px-3 pb-3">
         <div className="relative">
-          <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-zinc-400" />
+          <Search className="pointer-events-none absolute top-1/2 left-4 size-5 -translate-y-1/2 text-zinc-400" />
           <input
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             placeholder="Ürün Ara..."
-            className="h-10 w-full border border-zinc-300 bg-white pl-9 pr-3 text-sm outline-none focus-visible:border-zinc-900"
+            className="h-14 w-full border border-zinc-300 bg-white pl-11 pr-4 text-base outline-none focus-visible:border-zinc-900"
           />
         </div>
       </div>

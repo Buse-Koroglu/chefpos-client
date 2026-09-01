@@ -3,10 +3,10 @@ import axios from 'axios'
 import { ArrowLeft } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useLocationStore } from '@/shared/stores/locationStore'
-import { PaymentFilterTabs } from '../components/PaymentFilterTabs'
+import { OrderStatusFilterTabs } from '../components/OrderStatusFilterTabs'
 import { OrderHistoryCard } from '../components/OrderHistoryCard'
 import { useOrderHistory } from '../hooks/useOrderHistory'
-import type { Order, PaymentFilter } from '../types'
+import type { Order, OrderHistoryFilter } from '../types'
 
 function getErrorMessage(error: unknown): string {
   if (axios.isAxiosError(error)) {
@@ -22,7 +22,7 @@ export function OrderHistoryPage() {
   const navigate = useNavigate()
   const locationId = useLocationStore((s) => s.selectedLocationId) ?? undefined
 
-  const [filter, setFilter] = useState<PaymentFilter>('ALL')
+  const [filter, setFilter] = useState<OrderHistoryFilter>('PENDING')
   const [pageNumber, setPageNumber] = useState(1)
   const [collectedItems, setCollectedItems] = useState<Order[]>([])
 
@@ -34,7 +34,7 @@ export function OrderHistoryPage() {
     setCollectedItems((current) => (data.pageNumber === 1 ? data.items : [...current, ...data.items]))
   }
 
-  function handleFilterChange(nextFilter: PaymentFilter) {
+  function handleFilterChange(nextFilter: OrderHistoryFilter) {
     setFilter(nextFilter)
     setPageNumber(1)
     setCollectedItems([])
@@ -58,7 +58,7 @@ export function OrderHistoryPage() {
       </header>
 
       <div className="border-b border-zinc-200 bg-white p-3">
-        <PaymentFilterTabs value={filter} onChange={handleFilterChange} />
+        <OrderStatusFilterTabs value={filter} onChange={handleFilterChange} />
       </div>
 
       <main className="flex-1 overflow-y-auto p-3 pb-6">

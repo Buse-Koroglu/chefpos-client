@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { ChevronDown } from 'lucide-react'
 import { toast } from 'sonner'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -10,12 +9,13 @@ import { CashierSidebar } from '@/shared/components/CashierSidebar'
 import type { OrderItem, Product } from '../types'
 import { ProductCatalog } from '../components/ProductCatalog'
 import { SelectedItemsPanel } from '../components/SelectedItemsPanel'
+import { TouchSelect } from '../components/TouchSelect'
 import { useProducts } from '../hooks/useProducts'
 import { useCategories } from '../hooks/useCategories'
 import { useCreateOrder } from '../hooks/useCreateOrder'
 import { useMenus } from '../hooks/useMenus'
 
-const FORM_INPUT_CLASSNAME = 'h-11 rounded-none border-zinc-200 bg-white text-zinc-900 placeholder:text-zinc-400 focus-visible:border-zinc-400 focus-visible:ring-zinc-200'
+const FORM_INPUT_CLASSNAME = 'h-14 rounded-none border-zinc-200 bg-white text-base text-zinc-900 placeholder:text-zinc-400 focus-visible:border-zinc-400 focus-visible:ring-zinc-200'
 
 export function NewOrderPage() {
   const locationId = useLocationStore((state) => state.selectedLocationId) ?? undefined
@@ -125,7 +125,7 @@ export function NewOrderPage() {
         <main className="flex min-h-0 flex-1 flex-col gap-4 p-4">
           <div className="flex items-end gap-3">
             <div className="max-w-sm flex-1 space-y-1.5">
-              <Label htmlFor="customerName" className="text-zinc-700">
+              <Label htmlFor="customerName" className="text-base text-zinc-700">
                 Müşteri
               </Label>
               <Input
@@ -137,49 +137,31 @@ export function NewOrderPage() {
               />
             </div>
 
-            <div className="w-48 space-y-1.5">
-              <Label htmlFor="categoryFilter" className="text-zinc-700">
+            <div className="w-56 space-y-1.5">
+              <Label htmlFor="categoryFilter" className="text-base text-zinc-700">
                 Kategori
               </Label>
-              <div className="relative">
-                <select
-                  id="categoryFilter"
-                  value={categoryId}
-                  onChange={(event) => handleCategoryChange(event.target.value)}
-                  className={`${FORM_INPUT_CLASSNAME} w-full appearance-none border pr-9 pl-3 text-sm outline-none`}
-                >
-                  <option value="">Tümü</option>
-                  {categories.map((category) => (
-                    <option key={category.id} value={category.id}>
-                      {category.name}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-zinc-400" />
-              </div>
+              <TouchSelect
+                id="categoryFilter"
+                value={categoryId}
+                onChange={handleCategoryChange}
+                placeholder="Tümü"
+                options={categories.map((category) => ({ value: category.id, label: category.name }))}
+              />
             </div>
 
             {menus.length > 0 && (
-              <div className="w-48 space-y-1.5">
-                <Label htmlFor="menuFilter" className="text-zinc-700">
+              <div className="w-56 space-y-1.5">
+                <Label htmlFor="menuFilter" className="text-base text-zinc-700">
                   Menü
                 </Label>
-                <div className="relative">
-                  <select
-                    id="menuFilter"
-                    value={menuId}
-                    onChange={(event) => handleMenuChange(event.target.value)}
-                    className={`${FORM_INPUT_CLASSNAME} w-full appearance-none border pr-9 pl-3 text-sm outline-none`}
-                  >
-                    <option value="">Menü Seçilmedi</option>
-                    {menus.map((menu) => (
-                      <option key={menu.id} value={menu.id}>
-                        {menu.name}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-zinc-400" />
-                </div>
+                <TouchSelect
+                  id="menuFilter"
+                  value={menuId}
+                  onChange={handleMenuChange}
+                  placeholder="Menü Seçilmedi"
+                  options={menus.map((menu) => ({ value: menu.id, label: menu.name }))}
+                />
               </div>
             )}
           </div>

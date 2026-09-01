@@ -32,48 +32,52 @@ export function CardItemsSheet({ open, onClose, items, onIncrease, onDecrease, o
           <p className="px-4 py-8 text-center text-sm text-zinc-400">Sepet boş</p>
         ) : (
           items.map((item) => (
-            <div key={item.productId} className="flex items-center gap-3 border-b border-zinc-100 px-4 py-3">
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-zinc-900">{item.name}</p>
-                <p className="text-xs tabular-nums text-zinc-500">
-                  {currencyFormatter.format(item.price)} / adet
-                </p>
-              </div>
+            <div key={item.productId} className="border-b border-zinc-100 px-4 py-4">
+              <div className="flex items-start gap-3">
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-base font-medium text-zinc-900">{item.name}</p>
+                  <p className="text-sm tabular-nums text-zinc-500">
+                    {currencyFormatter.format(item.price)} / adet
+                  </p>
+                </div>
 
-              <div className="flex shrink-0 items-center border border-zinc-300">
                 <button
                   type="button"
-                  onClick={() => onDecrease(item.productId)}
-                  aria-label={`${item.name} adedini azalt`}
-                  className="flex size-8 items-center justify-center text-zinc-700 hover:bg-zinc-100"
+                  onClick={() => onRemove(item.productId)}
+                  aria-label={`${item.name} ürününü kaldır`}
+                  className="shrink-0 text-zinc-300 transition-colors hover:text-red-500"
                 >
-                  <Minus className="size-3.5" />
+                  <X className="size-6" />
                 </button>
-                <span className="w-7 text-center text-sm font-semibold tabular-nums text-zinc-900">
-                  {item.quantity}
+              </div>
+
+              <div className="mt-3 flex items-center">
+                <div className="flex shrink-0 items-center border border-zinc-300">
+                  <button
+                    type="button"
+                    onClick={() => onDecrease(item.productId)}
+                    aria-label={`${item.name} adedini azalt`}
+                    className="flex size-10 items-center justify-center text-zinc-700 hover:bg-zinc-100"
+                  >
+                    <Minus className="size-5" />
+                  </button>
+                  <span className="w-8 text-center text-base font-semibold tabular-nums text-zinc-900">
+                    {item.quantity}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => onIncrease(item.productId)}
+                    aria-label={`${item.name} adedini artır`}
+                    className="flex size-10 items-center justify-center text-zinc-700 hover:bg-zinc-100"
+                  >
+                    <Plus className="size-5" />
+                  </button>
+                </div>
+
+                <span className="flex-1 shrink-0 text-right text-base font-semibold tabular-nums text-zinc-900">
+                  {currencyFormatter.format(item.price * item.quantity)}
                 </span>
-                <button
-                  type="button"
-                  onClick={() => onIncrease(item.productId)}
-                  aria-label={`${item.name} adedini artır`}
-                  className="flex size-8 items-center justify-center text-zinc-700 hover:bg-zinc-100"
-                >
-                  <Plus className="size-3.5" />
-                </button>
               </div>
-
-              <span className="w-16 shrink-0 text-right text-sm font-semibold tabular-nums text-zinc-900">
-                {currencyFormatter.format(item.price * item.quantity)}
-              </span>
-
-              <button
-                type="button"
-                onClick={() => onRemove(item.productId)}
-                aria-label={`${item.name} ürününü kaldır`}
-                className="shrink-0 text-zinc-300 transition-colors hover:text-red-500"
-              >
-                <X className="size-4" />
-              </button>
             </div>
           ))
         )}
