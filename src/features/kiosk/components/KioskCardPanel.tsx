@@ -1,10 +1,10 @@
 import { Minus, Plus, X } from 'lucide-react'
-import type { KioskCartItem } from '../types'
+import type { KioskCardItem } from '../types'
 
 const currencyFormatter = new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' })
 
-interface KioskCartPanelProps {
-  items: KioskCartItem[]
+interface KioskCardPanelProps {
+  items: KioskCardItem[]
   totalAmount: number
   onIncrease: (productId: string) => void
   onDecrease: (productId: string) => void
@@ -12,14 +12,7 @@ interface KioskCartPanelProps {
   onCheckout: () => void
 }
 
-export function KioskCartPanel({
-  items,
-  totalAmount,
-  onIncrease,
-  onDecrease,
-  onRemove,
-  onCheckout,
-}: KioskCartPanelProps) {
+export function KioskCardPanel({items,totalAmount,onIncrease,onDecrease,onRemove,onCheckout,}: KioskCardPanelProps) {
   return (
     <div className="flex w-[380px] shrink-0 flex-col border-l border-zinc-200 bg-white">
       <p className="border-b border-zinc-200 px-5 py-4 text-lg font-semibold text-zinc-900">Sepetiniz</p>

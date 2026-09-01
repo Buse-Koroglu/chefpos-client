@@ -15,19 +15,10 @@ interface AuthState {
   completePasswordChange: () => void
 }
 
-export const useAuthStore = create<AuthState>((set, get) => ({
-  accessToken: null,
-  user: null,
-  isAuthenticated: false,
-  isFirstLogin: false,
-
+export const useAuthStore = create<AuthState>((set, get) => ({accessToken: null,user: null, isAuthenticated: false,isFirstLogin: false,
+  
   setSession: (accessToken, user) => {
-    set({
-      accessToken,
-      user,
-      isAuthenticated: true,
-      isFirstLogin: user.isFirstLogin,
-    })
+    set({ accessToken, user, isAuthenticated: true, isFirstLogin: user.isFirstLogin,})
   },
 
   login: async (personalId, password) => {
@@ -47,6 +38,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   completePasswordChange: () => {
     const { user } = get()
     if (!user) return
-    set({ user: { ...user, isFirstLogin: false }, isFirstLogin: false })
+    set({ user: { ...user, isFirstLogin: false }, isFirstLogin: false }) // change password sonrası isFirstLogin false set edilir
   },
 }))

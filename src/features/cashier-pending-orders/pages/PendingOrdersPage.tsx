@@ -5,7 +5,7 @@ import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { useLocationStore } from '@/shared/stores/locationStore'
 import { useLocations } from '@/shared/hooks/useLocations'
-import { CashierHeader } from '@/shared/components/CashierHeader'
+import { StaffHeader } from '@/shared/components/StaffHeader'
 import { CashierSidebar } from '@/shared/components/CashierSidebar'
 import { Pagination } from '@/shared/components/Pagination'
 import { OrderCard } from '../components/OrderCard'
@@ -17,11 +17,10 @@ import { useCancelOrder } from '../hooks/useCancelOrder'
 import { useMakePaidOrder } from '../hooks/useMakePaidOrder'
 import type { Order } from '../types'
 
-const FORM_INPUT_CLASSNAME =
-  'h-10 w-full rounded-none border border-zinc-200 bg-white pl-9 pr-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
+const FORM_INPUT_CLASSNAME = 'h-14 w-full rounded-none border border-zinc-200 bg-white pl-11 pr-3 text-lg text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
 
 const TABS: Array<{ value: PendingOrdersTab; label: string }> = [
-  { value: 'PREPARING', label: 'Bekleyen Siparişler' },
+  { value: 'PREPARING', label: 'Hazırlanan Siparişler' },
   { value: 'AWAITING_PAYMENT', label: 'Ödeme Bekleyen Siparişler' },
 ]
 
@@ -57,9 +56,7 @@ export function PendingOrdersPage() {
   const normalizedQuery = query.trim().toLocaleLowerCase('tr-TR')
   const filteredOrders = normalizedQuery
     ? orders.filter(
-        (order) =>
-          String(order.orderNumber).includes(normalizedQuery) ||
-          order.customerName.toLocaleLowerCase('tr-TR').includes(normalizedQuery),
+        (order) => String(order.orderNumber).includes(normalizedQuery) || order.customerName.toLocaleLowerCase('tr-TR').includes(normalizedQuery)
       )
     : orders
 
@@ -127,7 +124,7 @@ export function PendingOrdersPage() {
       <CashierSidebar />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
-        <CashierHeader title="Bekleyen Siparişler" locationName={locationName} />
+        <StaffHeader title="Bekleyen Siparişler" locationName={locationName} />
 
         <main className="flex min-h-0 flex-1 flex-col gap-4 p-4">
           <div className="flex border border-zinc-200 bg-white">
@@ -137,10 +134,8 @@ export function PendingOrdersPage() {
                 type="button"
                 onClick={() => handleTabChange(tabItem.value)}
                 className={cn(
-                  'flex-1 border-b-2 px-4 py-2.5 text-sm font-medium transition-colors',
-                  tab === tabItem.value
-                    ? 'border-[#133458] bg-zinc-50 text-zinc-900'
-                    : 'border-transparent text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900',
+                  'flex-1 border-b-2 px-4 py-2.5 text-lg font-medium transition-colors',
+                  tab === tabItem.value ? 'border-[#133458] bg-zinc-50 text-zinc-900' : 'border-transparent text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900',
                 )}
               >
                 {tabItem.label}
@@ -155,7 +150,7 @@ export function PendingOrdersPage() {
 
           <div className="flex items-center gap-3">
             <div className="relative max-w-sm flex-1">
-              <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-zinc-400" />
+              <Search className="pointer-events-none absolute top-1/2 left-3.5 size-5 -translate-y-1/2 text-zinc-400" />
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}

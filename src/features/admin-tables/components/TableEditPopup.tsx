@@ -1,16 +1,13 @@
 import { useState } from 'react'
-import { useQueryClient } from '@tanstack/react-query'
 import { Dialog } from '@base-ui/react/dialog'
 import { X } from 'lucide-react'
-import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { getApiErrorMessage } from '@/shared/api/apiError'
 import type { TableResponseDto } from '@/shared/types/table'
-import { activateTable, deactivateTable, updateTable } from '@/shared/api/endpoints/tables'
+import { useUpdateTable } from '@/features/admin-tables/hooks/useUpdateTable'
 
-const FIELD_CLASSNAME =
-  'h-10 w-full rounded-none border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
+const FIELD_CLASSNAME = 'h-10 w-full rounded-none border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
 
 interface TableEditFormProps {
   table: TableResponseDto
@@ -19,13 +16,13 @@ interface TableEditFormProps {
 }
 
 function TableEditForm({ table, locationName, onClose }: TableEditFormProps) {
-  const queryClient = useQueryClient()
+  const updateTableMutation = useUpdateTable()
 
   const [tableNumber, setTableNumber] = useState(String(table.tableNumber))
   const [isActive, setIsActive] = useState(table.isActive)
   const [error, setError] = useState<string | null>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
 
+  const isSubmitting = updateTableMutation.isPending
   const hasChanges = Number(tableNumber) !== table.tableNumber || isActive !== table.isActive
   const isFormValid = tableNumber.trim() !== '' && Number(tableNumber) > 0
 
@@ -35,23 +32,19 @@ function TableEditForm({ table, locationName, onClose }: TableEditFormProps) {
       return
     }
 
-    setIsSubmitting(true)
     setError(null)
 
     try {
-      if (Number(tableNumber) !== table.tableNumber) {
-        await updateTable(table.id, { tableNumber: Number(tableNumber) })
-      }
-      if (isActive !== table.isActive) {
-        await (isActive ? activateTable(table.id) : deactivateTable(table.id))
-      }
-
-      queryClient.invalidateQueries({ queryKey: ['tables'], exact: false })
-      toast.success('Masa bilgileri güncellendi.')
+      await updateTableMutation.mutateAsync({
+        id: table.id,
+        currentTableNumber: table.tableNumber,
+        nextTableNumber: Number(tableNumber),
+        currentIsActive: table.isActive,
+        nextIsActive: isActive,
+      })
       onClose()
     } catch (submitError) {
       setError(getApiErrorMessage(submitError, 'Değişiklikler kaydedilemedi. Lütfen tekrar deneyin.'))
-      setIsSubmitting(false)
     }
   }
 

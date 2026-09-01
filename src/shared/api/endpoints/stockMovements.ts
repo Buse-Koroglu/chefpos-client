@@ -1,11 +1,8 @@
 import { apiClient } from '@/shared/api/client'
 import { STOCK_UNITS } from '@/shared/types/ingredient'
 import { STOCK_MOVEMENT_TYPES } from '@/shared/types/stockMovement'
-import type {
-  GetStockMovementsPagedQueryParams,
-  PagedResult,
-  StockMovementResponseDto,
-} from '@/shared/types/stockMovement'
+import type { PagedResult } from '@/shared/types/pagination'
+import type {GetStockMovementsPagedQueryRequest,StockMovementResponseDto} from '@/shared/types/stockMovement'
 
 interface RawStockMovementPayload {
   id: string
@@ -28,8 +25,7 @@ function normalizeStockMovement(raw: RawStockMovementPayload): StockMovementResp
   return { ...raw, unit: STOCK_UNITS[raw.unit], type: STOCK_MOVEMENT_TYPES[raw.type] }
 }
 
-export function getStockMovementsPaged(params: GetStockMovementsPagedQueryParams) {
-  return apiClient
-    .get<PagedResult<RawStockMovementPayload>>('/api/stock-movements/paged', { params })
+export function getStockMovementsPaged(params: GetStockMovementsPagedQueryRequest) {
+  return apiClient.get<PagedResult<RawStockMovementPayload>>('/api/stock-movements/paged', { params })
     .then((res) => ({ ...res.data, items: res.data.items.map(normalizeStockMovement) }))
 }

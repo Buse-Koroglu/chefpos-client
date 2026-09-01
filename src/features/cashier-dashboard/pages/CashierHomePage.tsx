@@ -2,7 +2,7 @@ import { Clock3, Flame, ListOrdered, ReceiptTurkishLira, ShoppingCart } from 'lu
 import { useNavigate } from 'react-router-dom'
 import { useLocationStore } from '@/shared/stores/locationStore'
 import { useLocations } from '@/shared/hooks/useLocations'
-import { CashierHeader } from '@/shared/components/CashierHeader'
+import { StaffHeader } from '@/shared/components/StaffHeader'
 import { CashierSidebar } from '@/shared/components/CashierSidebar'
 import { usePendingOrdersCount } from '@/shared/hooks/usePendingOrdersCount'
 import { DashInfoCard } from '@/features/cashier-dashboard/components/DashInfoCard'
@@ -37,21 +37,17 @@ export function CashierHomePage() {
   const pendingOrdersValue = isPendingOrdersCountLoading ? '…' : String(pendingOrdersCount)
   const todayRevenueValue = isLoading
     ? '…'
-    : isError
-      ? '—'
-      : currencyFormatter.format(dashboard?.todayRevenue ?? 0)
+    : isError ? '—'  : currencyFormatter.format(dashboard?.todayRevenue ?? 0)
   const bestSellingValue = isLoading
     ? '…'
-    : isError
-      ? '—'
-      : (dashboard?.bestSellingProduct?.productName ?? 'Henüz satış verisi yok')
+    : isError ? '—' : (dashboard?.bestSellingProduct?.productName ?? 'Henüz satış verisi yok')
 
   return (
     <div className="flex h-screen bg-zinc-50">
       <CashierSidebar />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
-        <CashierHeader title="Genel Bakış" locationName={locationName} />
+        <StaffHeader title="Genel Bakış" locationName={locationName} />
 
         <main className="flex flex-1 flex-col gap-6 p-6">
           <div className="flex flex-col gap-4 sm:flex-row">

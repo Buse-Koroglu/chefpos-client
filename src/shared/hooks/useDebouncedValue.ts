@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react'
 
-export function useDebouncedValue<T>(value: T, delayMs: number): T {
+// search işlemleri için değişen input değerlerine özel debounce sistemi
+export function useDebouncedValue<T>(value: T, delay: number): T {
   const [debounced, setDebounced] = useState(value)
 
   useEffect(() => {
-    const timeoutId = window.setTimeout(() => setDebounced(value), delayMs)
+    const timeoutId = window.setTimeout(() => setDebounced(value), delay)
     return () => window.clearTimeout(timeoutId)
-  }, [value, delayMs])
+  }, [value, delay])
 
   return debounced
 }

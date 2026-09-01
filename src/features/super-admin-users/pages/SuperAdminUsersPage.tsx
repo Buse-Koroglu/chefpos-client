@@ -1,21 +1,18 @@
 import { useMemo, useState } from 'react'
 import axios from 'axios'
-import { useQueryClient } from '@tanstack/react-query'
 import { Plus } from 'lucide-react'
-import { toast } from 'sonner'
 import { SuperAdminSidebar } from '@/shared/components/SuperAdminSidebar'
 import { AdminHeader } from '@/shared/components/AdminHeader'
 import { SearchInput } from '@/shared/components/SearchInput'
 import { useLocations } from '@/shared/hooks/useLocations'
 import { useDebouncedValue } from '@/shared/hooks/useDebouncedValue'
-import { removeRole } from '@/shared/api/endpoints/users'
-import { getApiErrorMessage } from '@/shared/api/apiError'
 import { SuperAdminUsersTable } from '@/features/super-admin-users/components/SuperAdminUsersTable'
 import { SuperAdminUsersPagination } from '@/features/super-admin-users/components/SuperAdminUsersPagination'
 import { PromoteToAdminPopup } from '@/features/super-admin-users/components/PromoteToAdminPopup'
 import { AddAdminPopup } from '@/features/super-admin-users/components/AddAdminPopup'
 import { UserDetailPopup } from '@/features/super-admin-users/components/UserDetailPopup'
 import { usePagedSuperAdminUsers } from '@/features/super-admin-users/hooks/usePagedSuperAdminUsers'
+import { useDemoteAdmin } from '@/features/super-admin-users/hooks/useDemoteAdmin'
 
 const SEARCH_DEBOUNCE_MS = 400
 
@@ -30,11 +27,9 @@ function getUsersErrorMessage(error: unknown): string {
 }
 
 export function SuperAdminUsersPage() {
-  const queryClient = useQueryClient()
   const [searchInput, setSearchInput] = useState('')
   const [pageNumber, setPageNumber] = useState(1)
   const [promoteUserId, setPromoteUserId] = useState<string | null>(null)
-  const [demotingUserId, setDemotingUserId] = useState<string | null>(null)
   const [isAddAdminOpen, setIsAddAdminOpen] = useState(false)
   const [detailUserId, setDetailUserId] = useState<string | null>(null)
 
@@ -47,22 +42,16 @@ export function SuperAdminUsersPage() {
   const promoteUser = items.find((user) => user.id === promoteUserId) ?? null
   const detailUser = items.find((user) => user.id === detailUserId) ?? null
 
+  const demoteMutation = useDemoteAdmin()
+  const demotingUserId = demoteMutation.isPending ? (demoteMutation.variables ?? null) : null
+
   function handleSearchChange(value: string) {
     setSearchInput(value)
     setPageNumber(1)
   }
 
-  async function handleDemote(userId: string) {
-    setDemotingUserId(userId)
-    try {
-      await removeRole(userId, 'ADMIN')
-      queryClient.invalidateQueries({ queryKey: ['users'], exact: false })
-      toast.success('Kullanıcı yöneticilik indirildi.')
-    } catch (err) {
-      toast.error(getApiErrorMessage(err, 'Kullanıcı yöneticilik indirilemedi.'))
-    } finally {
-      setDemotingUserId(null)
-    }
+  function handleDemote(userId: string) {
+    demoteMutation.mutate(userId)
   }
 
   return (

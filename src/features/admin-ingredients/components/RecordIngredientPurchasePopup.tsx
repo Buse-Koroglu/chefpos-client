@@ -1,16 +1,12 @@
 import { useState } from 'react'
-import { useQueryClient } from '@tanstack/react-query'
 import { Dialog } from '@base-ui/react/dialog'
 import { X } from 'lucide-react'
-import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { getApiErrorMessage } from '@/shared/api/apiError'
-import { recordIngredientPurchase } from '@/shared/api/endpoints/ingredients'
-
-const FIELD_CLASSNAME =
-  'h-10 w-full rounded-none border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
+import { useRecordIngredientPurchase } from '@/features/admin-ingredients/hooks/useRecordIngredientPurchase'
+import { FIELD_CLASSNAME } from './MultiSelectDropdown'
 
 interface FormErrors {
   quantity?: string
@@ -31,20 +27,15 @@ function validate(quantity: string, unitPrice: string): FormErrors {
   return errors
 }
 
-export function RecordIngredientPurchasePopup({
-  open,
-  ingredientId,
-  ingredientName,
-  onClose,
-}: RecordIngredientPurchasePopupProps) {
-  const queryClient = useQueryClient()
+export function RecordIngredientPurchasePopup({ open, ingredientId, ingredientName, onClose}: RecordIngredientPurchasePopupProps) {
+  const recordPurchaseMutation = useRecordIngredientPurchase()
 
   const [quantity, setQuantity] = useState('')
   const [unitPrice, setUnitPrice] = useState('')
   const [note, setNote] = useState('')
   const [errors, setErrors] = useState<FormErrors>({})
   const [submitError, setSubmitError] = useState<string | null>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const isSubmitting = recordPurchaseMutation.isPending
 
   function reset() {
     setQuantity('')
@@ -52,7 +43,6 @@ export function RecordIngredientPurchasePopup({
     setNote('')
     setErrors({})
     setSubmitError(null)
-    setIsSubmitting(false)
   }
 
   function handleClose() {
@@ -61,31 +51,30 @@ export function RecordIngredientPurchasePopup({
     onClose()
   }
 
-  async function handleSubmit() {
+  function handleSubmit() {
     const nextErrors = validate(quantity, unitPrice)
     setErrors(nextErrors)
     if (Object.keys(nextErrors).length > 0) return
 
-    setIsSubmitting(true)
     setSubmitError(null)
 
-    try {
-      await recordIngredientPurchase(ingredientId, {
+    recordPurchaseMutation.mutate(
+      {
+        ingredientId,
         quantity: Number(quantity),
         unitPrice: Number(unitPrice),
         note: note.trim() || undefined,
-      })
-
-      await queryClient.invalidateQueries({ queryKey: ['ingredients'] })
-      await queryClient.invalidateQueries({ queryKey: ['stockMovements'] })
-
-      toast.success('Fiyat güncellendi ve parti alışı kaydedildi.')
-      reset()
-      onClose()
-    } catch (error) {
-      setSubmitError(getApiErrorMessage(error, 'Parti alışı kaydedilemedi. Lütfen tekrar deneyin.'))
-      setIsSubmitting(false)
-    }
+      },
+      {
+        onSuccess: () => {
+          reset()
+          onClose()
+        },
+        onError: (error) => {
+          setSubmitError(getApiErrorMessage(error, 'Parti alışı kaydedilemedi. Lütfen tekrar deneyin.'))
+        },
+      },
+    )
   }
 
   return (

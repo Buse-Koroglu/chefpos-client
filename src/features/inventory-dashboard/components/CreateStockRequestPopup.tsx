@@ -1,15 +1,13 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import axios from 'axios'
-import { useQueryClient } from '@tanstack/react-query'
 import { Dialog } from '@base-ui/react/dialog'
 import { X } from 'lucide-react'
-import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { useLocationStore } from '@/shared/stores/locationStore'
-import { createStockRequest } from '@/shared/api/endpoints/stockRequests'
 import { useIngredients } from '../hooks/useIngredients'
+import { useCreateStockRequest } from '../hooks/useCreateStockRequest'
 
 const FIELD_CLASSNAME =
   'h-10 w-full rounded-none border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
@@ -65,12 +63,8 @@ function getCreateErrorMessage(error: unknown): string {
   return 'Stok talebi oluşturulamadı. Lütfen tekrar deneyin.'
 }
 
-export function CreateStockRequestPopup({
-  open,
-  onClose,
-  initialIngredientId,
-}: CreateStockRequestPopupProps) {
-  const queryClient = useQueryClient()
+export function CreateStockRequestPopup({open,onClose,initialIngredientId}: CreateStockRequestPopupProps) {
+  const createStockRequestMutation = useCreateStockRequest()
 
   const locationId =
     useLocationStore(
@@ -83,15 +77,11 @@ export function CreateStockRequestPopup({
     isError: isIngredientsError,
   } = useIngredients(locationId)
 
-  const [ingredientId, setIngredientId] = useState('')
+  const [ingredientId, setIngredientId] = useState(
+    initialIngredientId ?? '',
+  )
   const [requestedQuantity, setRequestedQuantity] =
     useState('')
-
-  useEffect(() => {
-    if (open && initialIngredientId) {
-      setIngredientId(initialIngredientId)
-    }
-  }, [open, initialIngredientId])
 
   const selectedIngredient = ingredients.find(
     (ingredient) => ingredient.id === ingredientId,
@@ -142,32 +132,24 @@ export function CreateStockRequestPopup({
     setIsSubmitting(true)
     setSubmitError(null)
 
-    try {
-      await createStockRequest({
+    createStockRequestMutation.mutate(
+      {
         ingredientId,
         requestedQuantity: Number(requestedQuantity),
-      })
-
-      await queryClient.invalidateQueries({
-        queryKey: ['stock-requests'],
-      })
-
-      await queryClient.invalidateQueries({
-        queryKey: ['inventory-dashboard'],
-      })
-
-      toast.success(
-        'Stok talebi başarıyla oluşturuldu.',
-      )
-
-      reset()
-      onClose()
-    } catch (error) {
-      setSubmitError(
-        getCreateErrorMessage(error),
-      )
-      setIsSubmitting(false)
-    }
+      },
+      {
+        onSuccess: () => {
+          reset()
+          onClose()
+        },
+        onError: (error) => {
+          setSubmitError(
+            getCreateErrorMessage(error),
+          )
+          setIsSubmitting(false)
+        },
+      },
+    )
   }
 
   return (

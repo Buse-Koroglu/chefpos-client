@@ -9,12 +9,7 @@ function toIsActiveParam(status: CategoryStatusFilter): boolean | undefined {
   return undefined
 }
 
-export function usePagedCategoriesAdmin(
-  searchTerm: string,
-  locationId: string,
-  status: CategoryStatusFilter,
-  pageNumber: number,
-) {
+export function usePagedCategoriesAdmin(searchTerm: string, locationId: string, status: CategoryStatusFilter, pageNumber: number,) {
   return useQuery({
     queryKey: ['categories', 'admin', searchTerm, locationId, status, pageNumber],
     queryFn: () =>

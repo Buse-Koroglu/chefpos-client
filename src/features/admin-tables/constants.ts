@@ -1,2 +1,2 @@
 export const TABLES_PAGE_SIZE = 20
-export const TABLES_SEARCH_DEBOUNCE_MS = 400
+export const TABLES_SEARCH_DEBOUNCE_TIME = 400

@@ -4,13 +4,15 @@ import { NavLink } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { SidebarUserCard } from './SidebarUserCard'
 
-interface NavItem {
+interface SidebarItem {
   label: string
   icon: LucideIcon
   to: string
 }
 
-const NAV_ITEMS: NavItem[] = [
+// Super Admin Sidebar
+
+const SIDEBAR_ITEMS: SidebarItem[] = [
   { label: 'Personeller', icon: Users, to: '/app/super-admin/users' },
   { label: 'Yerleşkeler', icon: MapPin, to: '/app/locations' },
   { label: 'Kategoriler', icon: Layers, to: '/app/super-admin/categories' },
@@ -28,19 +30,14 @@ export function SuperAdminSidebar() {
       </div>
 
       <nav className="flex flex-1 flex-col gap-1 px-3 py-3">
-        {NAV_ITEMS.map(({ label, icon: Icon, to }) => (
+        {SIDEBAR_ITEMS.map(({ label, icon: Icon, to }) => (
           <NavLink
             key={label}
             to={to}
             className={({ isActive }) =>
-              cn(
-                'flex items-center gap-2.5 border-l-2 px-3 py-2 text-sm font-medium transition-colors',
-                isActive
-                  ? 'border-[#133458] bg-zinc-200 text-zinc-900'
-                  : 'border-transparent text-zinc-500 hover:bg-zinc-200/60 hover:text-zinc-900',
-              )
-            }
-          >
+              cn('flex items-center gap-2.5 border-l-2 px-3 py-2 text-sm font-medium transition-colors',
+                isActive ? 'border-[#133458] bg-zinc-200 text-zinc-900' : 'border-transparent text-zinc-500 hover:bg-zinc-200/60 hover:text-zinc-900',
+              )} >
             <Icon className="size-4" />
             {label}
           </NavLink>

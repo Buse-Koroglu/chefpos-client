@@ -30,7 +30,7 @@ export function SelectedItemsPanel({
   const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
 
   return (
-    <div className="flex w-72 shrink-0 flex-col border border-zinc-200 bg-white">
+    <div className="flex w-96 shrink-0 flex-col border border-zinc-200 bg-white">
       <p className="border-b border-zinc-200 px-3 py-2.5 text-xs font-semibold tracking-wide text-zinc-500 uppercase">
         Seçilen Ürünler
       </p>
@@ -42,11 +42,11 @@ export function SelectedItemsPanel({
           items.map((item) => (
             <div
               key={item.id}
-              className="flex items-center gap-2 border-b border-zinc-100 px-3 py-2.5 text-sm last:border-b-0"
+              className="flex items-center gap-3 border-b border-zinc-100 px-3 py-3 text-sm last:border-b-0"
             >
               <div className="min-w-0 flex-1">
-                <p className="truncate text-zinc-900">{item.name}</p>
-                <p className="text-xs tabular-nums text-zinc-500">
+                <p className="truncate text-base font-medium text-zinc-900">{item.name}</p>
+                <p className="text-sm tabular-nums text-zinc-500">
                   {currencyFormatter.format(item.price * item.quantity)}
                 </p>
               </div>
@@ -56,20 +56,20 @@ export function SelectedItemsPanel({
                   type="button"
                   onClick={() => onDecrease(item.id)}
                   aria-label={`${item.name} adedini azalt`}
-                  className="flex size-7 items-center justify-center text-zinc-700 hover:bg-zinc-100"
+                  className="flex size-11 items-center justify-center text-zinc-700 hover:bg-zinc-100"
                 >
-                  <Minus className="size-3.5" />
+                  <Minus className="size-6" />
                 </button>
-                <span className="w-6 text-center text-xs font-semibold tabular-nums text-zinc-900">
+                <span className="w-8 text-center text-sm font-semibold tabular-nums text-zinc-900">
                   {item.quantity}
                 </span>
                 <button
                   type="button"
                   onClick={() => onIncrease(item.id)}
                   aria-label={`${item.name} adedini artır`}
-                  className="flex size-7 items-center justify-center text-zinc-700 hover:bg-zinc-100"
+                  className="flex size-11 items-center justify-center text-zinc-700 hover:bg-zinc-100"
                 >
-                  <Plus className="size-3.5" />
+                  <Plus className="size-6" />
                 </button>
               </div>
 
@@ -79,7 +79,7 @@ export function SelectedItemsPanel({
                 aria-label={`${item.name} ürününü kaldır`}
                 className="shrink-0 text-zinc-300 transition-colors hover:text-red-500"
               >
-                <X className="size-3.5" />
+                <X className="size-6" />
               </button>
             </div>
           ))

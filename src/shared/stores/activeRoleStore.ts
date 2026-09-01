@@ -8,13 +8,15 @@ interface ActiveRoleState {
   reset: () => void
 }
 
+// bir personelin birden fazla rolü olma ve roller arası geçiş yapabilmesi için store ile tutuluyor
+
 export const useActiveRoleStore = create<ActiveRoleState>()(
-  persist(
+  persist(  // aktif rol bilgisini local storage içinde tutuyoruz
     (set) => ({
       activeRole: null,
       setActiveRole: (role) => set({ activeRole: role }),
       reset: () => set({ activeRole: null }),
     }),
-    { name: 'chefpos-active-role' },
+    { name: 'chefpos-active-role' }, 
   ),
 )

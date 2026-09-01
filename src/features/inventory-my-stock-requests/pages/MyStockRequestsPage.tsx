@@ -5,12 +5,12 @@ import { useLocationStore } from '@/shared/stores/locationStore'
 import { useLocations } from '@/shared/hooks/useLocations'
 import { useDebouncedValue } from '@/shared/hooks/useDebouncedValue'
 import { InventorySidebar } from '@/shared/components/InventorySidebar'
-import { CashierHeader } from '@/shared/components/CashierHeader'
+import { StaffHeader } from '@/shared/components/StaffHeader'
 import { Pagination } from '@/shared/components/Pagination'
 import { StockRequestsSearchInput } from '@/features/admin-stock-requests/components/StockRequestsSearchInput'
 import { StockRequestsTable } from '@/features/admin-stock-requests/components/StockRequestsTable'
 import { StockRequestDetailPopup } from '@/features/admin-stock-requests/components/StockRequestDetailPopup'
-import { STOCK_REQUESTS_SEARCH_DEBOUNCE_MS } from '@/features/admin-stock-requests/constants'
+import { STOCK_REQUESTS_SEARCH_DEBOUNCE_TIME } from '@/features/admin-stock-requests/constants'
 import { useMyStockRequests } from '../hooks/useMyStockRequests'
 import type { MyStockRequestsTab } from '../types'
 import { useMyStockRequestsCount } from '../hooks/useMyStockRequestCount'
@@ -40,7 +40,7 @@ export function MyStockRequestsPage() {
   const [pageNumber, setPageNumber] = useState(1)
   const [selectedStockRequestId, setSelectedStockRequestId] = useState<string | null>(null)
 
-  const searchTerm = useDebouncedValue(searchInput, STOCK_REQUESTS_SEARCH_DEBOUNCE_MS)
+  const searchTerm = useDebouncedValue(searchInput, STOCK_REQUESTS_SEARCH_DEBOUNCE_TIME)
 
   const { data, isLoading, isFetching, isError, error } = useMyStockRequests(locationId, tab, searchTerm, pageNumber)
   const { total: tabRequestCount } = useMyStockRequestsCount(locationId, tab)
@@ -66,7 +66,7 @@ export function MyStockRequestsPage() {
       <InventorySidebar />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
-        <CashierHeader title="Stok Taleplerim" locationName={locationName} />
+        <StaffHeader title="Stok Taleplerim" locationName={locationName} />
 
         <main className="flex min-h-0 flex-1 flex-col gap-4 p-4">
           <div className="flex border border-zinc-200 bg-white">
@@ -77,9 +77,7 @@ export function MyStockRequestsPage() {
                 onClick={() => handleTabChange(tabItem.value)}
                 className={cn(
                   'flex-1 border-b-2 px-4 py-2.5 text-sm font-medium transition-colors',
-                  tab === tabItem.value
-                    ? 'border-[#133458] bg-zinc-50 text-zinc-900'
-                    : 'border-transparent text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900',
+                  tab === tabItem.value ? 'border-[#133458] bg-zinc-50 text-zinc-900' : 'border-transparent text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900',
                 )}
               >
                 {tabItem.label}

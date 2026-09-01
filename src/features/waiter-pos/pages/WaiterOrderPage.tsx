@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { Search } from 'lucide-react'
+import { ChevronDown, ChevronUp, Search } from 'lucide-react'
 import { useLocationStore } from '@/shared/stores/locationStore'
 import { useLocations } from '@/shared/hooks/useLocations'
 import { useDebouncedValue } from '@/shared/hooks/useDebouncedValue'
@@ -9,15 +9,15 @@ import { TableSelector } from '../components/TableSelector'
 import { CategoryTabs } from '../components/CategoryTabs'
 import { MenuTabs } from '../components/MenuTabs'
 import { ProductCard } from '../components/ProductCard'
-import { CartBar } from '../components/CartBar'
+import { CardBar } from '../components/CardBar'
 import { useActiveTables } from '../hooks/useActiveTables'
 import { useCategories } from '../hooks/useCategories'
 import { useMenus } from '../hooks/useMenus'
 import { useProducts } from '../hooks/useProducts'
-import { useCart } from '../hooks/useCart'
+import { useCard } from '../hooks/useCard'
 import { useCreateOrder } from '../hooks/useCreateOrder'
-import { MobileUserMenu } from '@/shared/components/MobileUserMenu'
-import { CartItemsSheet } from '../components/CartItemsSheet'
+import { WaiterSidebar } from '@/shared/components/WaiterSidebar'
+import { CardItemsSheet } from '../components/CardItemsSheet'
 import { getApiErrorMessage } from '@/shared/api/apiError'
 import { isTableOccupiedConflict } from '../utils'
 import type { Product } from '../types'
@@ -33,22 +33,24 @@ export function WaiterOrderPage() {
   const [selectedMenuId, setSelectedMenuId] = useState('')
   const [customerName, setCustomerName] = useState('')
   const [searchInput, setSearchInput] = useState('')
-  const debouncedSearch = useDebouncedValue(searchInput, 400)
+  const debouncedSearch = useDebouncedValue(searchInput, 400) // 400 ms debounce
   const [menuOpen, setMenuOpen] = useState(false)
+  const [orderInfoOpen, setOrderInfoOpen] = useState(true)
   const { data: tables = [] } = useActiveTables(locationId)
+  const selectedTable = tables.find((t) => t.id === tableId)
   const { data: categories = [] } = useCategories(locationId)
   const { data: menus = [] } = useMenus(locationId)
   const activeMenu = menus.find((menu) => menu.id === selectedMenuId)
 
   const [pageNumber, setPageNumber] = useState(1)
-  const [accumulatedItems, setAccumulatedItems] = useState<Product[]>([])
+  const [collectedItems, setCollectedItems] = useState<Product[]>([]) //  gelen tüm ürünleri toplamak için state
 
   const filterKey = `${locationId ?? ''}|${categoryId}|${selectedMenuId}|${debouncedSearch}`
   const [lastFilterKey, setLastFilterKey] = useState(filterKey)
   if (filterKey !== lastFilterKey) {
     setLastFilterKey(filterKey)
     setPageNumber(1)
-    setAccumulatedItems([])
+    setCollectedItems([])
   }
 
   const { data: productsPage, isLoading, isFetching } = useProducts({
@@ -63,7 +65,7 @@ export function WaiterOrderPage() {
   const [lastMergedPage, setLastMergedPage] = useState<typeof productsPage>(undefined)
   if (productsPage && productsPage !== lastMergedPage && filterKey === lastFilterKey) {
     setLastMergedPage(productsPage)
-    setAccumulatedItems((current) =>
+    setCollectedItems((current) =>
       productsPage.pageNumber === 1 ? productsPage.items : [...current, ...productsPage.items],
     )
   }
@@ -71,8 +73,8 @@ export function WaiterOrderPage() {
   const canLoadMore = !selectedMenuId && Boolean(productsPage) && productsPage!.pageNumber < productsPage!.totalPages
 
   const displayProducts = activeMenu
-    ? accumulatedItems.filter((product) => activeMenu.products.some((menuProduct) => menuProduct.productId === product.id))
-    : accumulatedItems
+    ? collectedItems.filter((product) => activeMenu.products.some((menuProduct) => menuProduct.productId === product.id))
+    : collectedItems
 
   function handleCategorySelect(value: string) {
     setCategoryId(value)
@@ -84,7 +86,7 @@ export function WaiterOrderPage() {
     setCategoryId('')
   }
 
-  const { items, addItem, totalCount, increaseQuantity, decreaseQuantity, removeItem,totalAmount, clear } = useCart()
+  const { items, addItem, totalCount, increaseQuantity, decreaseQuantity, removeItem,totalAmount, clear } = useCard()
   const createOrder = useCreateOrder()
 
   const [lastSyncedLocationId, setLastSyncedLocationId] = useState(locationId)
@@ -121,12 +123,11 @@ export function WaiterOrderPage() {
           setCustomerName('')
         },
         onError: (error) => {
-          const message = getApiErrorMessage(error, 'Sipariş oluşturulamadı.')
-          if (isTableOccupiedConflict(message)) {
+          if (isTableOccupiedConflict(error)) {
             toast.error('Seçtiğiniz masa dolu. Ödeme alınmadan yeni sipariş oluşturulamaz.')
             return
           }
-          toast.error(message)
+          toast.error(getApiErrorMessage(error, 'Sipariş oluşturulamadı.'))
         },
       },
     )
@@ -135,51 +136,71 @@ export function WaiterOrderPage() {
   return (
     <div className="mx-auto flex h-screen max-w-md flex-col bg-zinc-50">
  <WaiterHeader locationName={locationName} onMenuClick={() => setMenuOpen(true)} />
-      <div className="border-b border-zinc-200 bg-white p-3">
-        <TableSelector
-          tables={tables}
-          selectedTableId={tableId}
-          isPackage={isPackage}
-          onSelect={(id) => {
-            setTableId(id)
-            setIsPackage(false)
-          }}
-          onSelectPackage={() => {
-            setIsPackage(true)
-            setTableId(null)
-          }}
-        />
+      <div className="border-b border-zinc-200 bg-white">
+        <button
+          type="button"
+          onClick={() => setOrderInfoOpen((current) => !current)}
+          className="flex w-full items-center justify-between gap-2 px-3 py-3 text-left"
+        >
+          <span className="truncate text-sm font-semibold text-[#133458]">
+            {isPackage ? 'Paket' : selectedTable ? `Masa ${selectedTable.tableNumber}` : 'Masa Seçin'}
+            {customerName ? ` · ${customerName}` : ''}
+          </span>
+          {orderInfoOpen ? (
+            <ChevronUp className="size-5 shrink-0 text-zinc-400" />
+          ) : (
+            <ChevronDown className="size-5 shrink-0 text-zinc-400" />
+          )}
+        </button>
 
-        <div className="mt-3">
-          <label
-            htmlFor="customer-name"
-            className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-zinc-500"
-          >
-            Müşteri Adı
-          </label>
+        {orderInfoOpen && (
+          <div className="px-3 pb-3">
+            <TableSelector
+              tables={tables}
+              selectedTableId={tableId}
+              isPackage={isPackage}
+              onSelect={(id) => {
+                setTableId(id)
+                setIsPackage(false)
+              }}
+              onSelectPackage={() => {
+                setIsPackage(true)
+                setTableId(null)
+              }}
+            />
 
-          <input
-            id="customer-name"
-            type="text"
-            value={customerName}
-            onChange={(event) =>
-              setCustomerName(event.target.value)
-            }
-            placeholder="Örn. Buse Köroğlu"
-            maxLength={100}
-            className="h-11 w-full border border-zinc-300 bg-white px-3 text-sm text-zinc-900 outline-none placeholder:text-zinc-400 focus:border-zinc-900"
-          />
-        </div>
+            <div className="mt-3">
+              <label
+                htmlFor="customer-name"
+                className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-zinc-500"
+              >
+                Müşteri Adı
+              </label>
+
+              <input
+                id="customer-name"
+                type="text"
+                value={customerName}
+                onChange={(event) =>
+                  setCustomerName(event.target.value)
+                }
+                placeholder="Örn. Buse Köroğlu"
+                maxLength={100}
+                className="h-14 w-full border border-zinc-300 bg-white px-4 text-base text-zinc-900 outline-none placeholder:text-zinc-400 focus:border-zinc-900"
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="border-b border-zinc-200 bg-white px-3 pb-3">
         <div className="relative">
-          <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-zinc-400" />
+          <Search className="pointer-events-none absolute top-1/2 left-4 size-5 -translate-y-1/2 text-zinc-400" />
           <input
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             placeholder="Ürün Ara..."
-            className="h-10 w-full border border-zinc-300 bg-white pl-9 pr-3 text-sm outline-none focus-visible:border-zinc-900"
+            className="h-14 w-full border border-zinc-300 bg-white pl-11 pr-4 text-base outline-none focus-visible:border-zinc-900"
           />
         </div>
       </div>
@@ -213,7 +234,7 @@ export function WaiterOrderPage() {
         )}
       </main>
 
-       <CartBar
+       <CardBar
         totalCount={totalCount}
         totalAmount={totalAmount}
         onSubmit={handleSubmit}
@@ -221,7 +242,7 @@ export function WaiterOrderPage() {
         isSubmitting={createOrder.isPending}
       />
 
-      <CartItemsSheet
+      <CardItemsSheet
         open={cartOpen}
         onClose={() => setCartOpen(false)}
         items={items}
@@ -230,7 +251,7 @@ export function WaiterOrderPage() {
         onRemove={removeItem}
       />
 
-      <MobileUserMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
+      <WaiterSidebar open={menuOpen} onClose={() => setMenuOpen(false)} />
 
     </div>
   )

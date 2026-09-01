@@ -1,8 +1,8 @@
 import type { StockUnit } from './ingredient'
 
-export const STOCK_REQUEST_STATUSES = ['PENDING', 'APPROVED', 'REJECTED'] as const
+export const STOCK_REQUEST_STATUS = ['PENDING', 'APPROVED', 'REJECTED'] as const
 
-export type StockRequestStatus = (typeof STOCK_REQUEST_STATUSES)[number]
+export type StockRequestStatus = (typeof STOCK_REQUEST_STATUS)[number] // stock status değerlerini backend ile aynı şekilde number halinde 
 
 export const STOCK_REQUEST_STATUS_LABELS: Record<StockRequestStatus, string> = {
   PENDING: 'Beklemede',
@@ -31,7 +31,7 @@ export interface AdminStockRequestResponseDto {
   ingredientWeightedAverageUnitPrice: number
 }
 
-export interface GetStockRequestsPagedQueryParams {
+export interface GetStockRequestsPagedQueryRequest {
   searchTerm?: string
   locationId?: string
   status?: StockRequestStatus
@@ -47,10 +47,29 @@ export interface RejectStockRequestRequest {
   reason: string
 }
 
-export interface PagedResult<T> {
-  items: T[]
-  totalCount: number
-  pageNumber: number
-  pageSize: number
-  totalPages: number
+export type ExportStockRequestsQueryRequest = Omit<
+  GetStockRequestsPagedQueryRequest,
+  'pageNumber' | 'pageSize' | 'onlyMyRequests'
+>
+
+export interface StockRequestResponse {
+  id: string
+  ingredientId: string
+  ingredientName: string
+  locationId: string
+  requestedByUserId: string
+  requestedQuantity: number
+  status: StockRequestStatus
+  decidedByUserId: string | null
+  rejectionReason: string | null
+  decidedAt: string | null
+}
+
+export interface ApproveStockRequestRequest {
+  unitPrice: number
+}
+
+export interface CreateStockRequestRequest {
+  ingredientId: string
+  requestedQuantity: number
 }

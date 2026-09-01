@@ -1,12 +1,10 @@
 import { useState } from 'react'
-import { useQueryClient } from '@tanstack/react-query'
 import { ChevronDown, ChevronUp, Trash2 } from 'lucide-react'
-import { toast } from 'sonner'
 import type { MenuProductDto } from '@/shared/types/menu'
-import { removeProductFromMenu } from '@/shared/api/endpoints/menus'
 import { ProductImagePreview } from '@/features/admin-products/components/ProductImagePreview'
 import { ProductRecipeSection } from '@/features/admin-products/components/ProductRecipeSection'
 import { useProductDetail } from '@/features/admin-products/hooks/useProductDetail'
+import { useRemoveProductFromMenu } from '@/features/admin-menus/hooks/useRemoveProductFromMenu'
 
 interface MenuProductRowProps {
   menuId: string
@@ -15,24 +13,14 @@ interface MenuProductRowProps {
 }
 
 function MenuProductRow({ menuId, locationId, product }: MenuProductRowProps) {
-  const queryClient = useQueryClient()
+  const removeProductFromMenu = useRemoveProductFromMenu()
   const [isExpanded, setIsExpanded] = useState(false)
-  const [isRemoving, setIsRemoving] = useState(false)
 
   const { data: productDetail } = useProductDetail(isExpanded ? product.productId : undefined)
   const locationRecipe = productDetail?.locations.find((location) => location.locationId === locationId)
 
-  async function handleRemove() {
-    setIsRemoving(true)
-    try {
-      await removeProductFromMenu(menuId, product.productId)
-      queryClient.invalidateQueries({ queryKey: ['menus', 'detail', menuId] })
-      queryClient.invalidateQueries({ queryKey: ['menus'], exact: false })
-      toast.success('Ürün menüden çıkarıldı.')
-    } catch {
-      toast.error('Ürün menüden çıkarılamadı.')
-      setIsRemoving(false)
-    }
+  function handleRemove() {
+    removeProductFromMenu.mutate({ menuId, productId: product.productId })
   }
 
   return (
@@ -54,7 +42,7 @@ function MenuProductRow({ menuId, locationId, product }: MenuProductRowProps) {
         <button
           type="button"
           onClick={handleRemove}
-          disabled={isRemoving}
+          disabled={removeProductFromMenu.isPending}
           className="text-zinc-400 transition-colors hover:text-destructive disabled:opacity-40"
         >
           <Trash2 className="size-3.5" />

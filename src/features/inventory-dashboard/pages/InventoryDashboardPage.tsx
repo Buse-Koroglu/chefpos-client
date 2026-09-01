@@ -6,7 +6,7 @@ import {
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
-import { CashierHeader } from '@/shared/components/CashierHeader'
+import { StaffHeader } from '@/shared/components/StaffHeader'
 import { useLocations } from '@/shared/hooks/useLocations'
 import { useLocationStore } from '@/shared/stores/locationStore'
 
@@ -44,34 +44,22 @@ export function InventoryDashboardPage() {
 
   const pendingRequestsValue = isLoading
     ? '…'
-    : isError
-      ? '—'
-      : String(
-          dashboard?.pendingRequestsCount ?? 0,
-        )
+    : isError ? '—'  : String (  dashboard?.pendingRequestsCount ?? 0 )
 
   const pastRequestsValue = isLoading
     ? '…'
-    : isError
-      ? '—'
-      : String(
-          dashboard?.pastRequestsCount ?? 0,
-        )
+    : isError? '—' : String( dashboard?.pastRequestsCount ?? 0 )
 
   const totalRequestsValue = isLoading
     ? '…'
-    : isError
-      ? '—'
-      : String(
-          dashboard?.totalStockRequestsCount ?? 0,
-        )
+    : isError ? '—' : String(dashboard?.totalStockRequestsCount ?? 0)
 
   return (
     <div className="flex h-screen bg-zinc-50">
       <InventorySidebar />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
-        <CashierHeader
+        <StaffHeader
           title="Genel Bakış"
           locationName={locationName}
         />
@@ -152,10 +140,10 @@ export function InventoryDashboardPage() {
         </main>
       </div>
 
-<CreateStockRequestPopup
-  open={isCreateRequestOpen}
-  onClose={() => setIsCreateRequestOpen(false)}
-/>
+    <CreateStockRequestPopup
+      open={isCreateRequestOpen}
+      onClose={() => setIsCreateRequestOpen(false)}
+    />
       
     </div>
   )

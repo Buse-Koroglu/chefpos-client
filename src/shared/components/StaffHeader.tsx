@@ -1,12 +1,14 @@
 import { Clock3, MapPin } from 'lucide-react'
 import { useLiveClock } from '@/shared/hooks/useLiveClock'
 
-interface CashierHeaderProps {
+interface StaffHeaderProps {
   title: string
   locationName: string
 }
 
-export function CashierHeader({ title, locationName }: CashierHeaderProps) {
+// Staff header başlık, konum ve zaman bilgilerini içeriyor.
+
+export function StaffHeader({ title, locationName }: StaffHeaderProps) {
   const { date, time } = useLiveClock()
 
   return (

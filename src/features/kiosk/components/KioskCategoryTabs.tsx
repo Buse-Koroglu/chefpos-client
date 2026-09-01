@@ -19,9 +19,7 @@ export function KioskCategoryTabs({ categories, selectedCategoryId, onSelect }: 
           onClick={() => onSelect(cat.id)}
           className={cn(
             'shrink-0 whitespace-nowrap border-2 px-6 py-4 text-lg font-semibold transition-colors',
-            selectedCategoryId === cat.id
-              ? 'border-[#133458] bg-[#133458] text-white'
-              : 'border-zinc-200 bg-white text-zinc-700',
+            selectedCategoryId === cat.id ? 'border-[#133458] bg-[#133458] text-white' : 'border-zinc-200 bg-white text-zinc-700',
           )}
         >
           {cat.name}

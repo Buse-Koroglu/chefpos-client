@@ -1,18 +1,15 @@
 import { useMemo, useState } from 'react'
-import { useQueryClient } from '@tanstack/react-query'
 import { Dialog } from '@base-ui/react/dialog'
 import { X } from 'lucide-react'
-import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { getApiErrorMessage } from '@/shared/api/apiError'
-import { recordProductProduction } from '@/shared/api/endpoints/ingredients'
 import { useLocationStore } from '@/shared/stores/locationStore'
 import { useProducts } from '../hooks/useProducts'
+import { useRecordProduction } from '../hooks/useRecordProduction'
 
-const FIELD_CLASSNAME =
-  'h-10 w-full rounded-none border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
+const FIELD_CLASSNAME = 'h-10 w-full rounded-none border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
 
 interface FormErrors {
   productId?: string
@@ -34,7 +31,7 @@ function validate(productId: string, quantity: string): FormErrors {
 }
 
 export function RecordProductionPopup({ open, onClose }: RecordProductionPopupProps) {
-  const queryClient = useQueryClient()
+  const recordProductionMutation = useRecordProduction()
 
   const locationId = useLocationStore((state) => state.selectedLocationId) ?? undefined
 
@@ -48,8 +45,7 @@ export function RecordProductionPopup({ open, onClose }: RecordProductionPopupPr
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const selectedProduct = useMemo(() => products.find((product) => product.id === productId), [products, productId])
-  const hasRecipeAtLocation =
-    !selectedProduct || (selectedProduct.locations.find((location) => location.locationId === locationId)?.ingredients.length ?? 0) > 0
+  const hasRecipeAtLocation = !selectedProduct || (selectedProduct.locations.find((location) => location.locationId === locationId)?.ingredients.length ?? 0) > 0
 
   function reset() {
     setProductId('')
@@ -84,24 +80,24 @@ export function RecordProductionPopup({ open, onClose }: RecordProductionPopupPr
     setIsSubmitting(true)
     setSubmitError(null)
 
-    try {
-      await recordProductProduction({
+    recordProductionMutation.mutate(
+      {
         productId,
         locationId,
         quantity: Number(quantity),
         note: note.trim() || undefined,
-      })
-
-      await queryClient.invalidateQueries({ queryKey: ['ingredients'] })
-      await queryClient.invalidateQueries({ queryKey: ['stockMovements'] })
-
-      toast.success('Üretim başarıyla kaydedildi.')
-      reset()
-      onClose()
-    } catch (error) {
-      setSubmitError(getApiErrorMessage(error, 'Üretim kaydedilemedi. Lütfen tekrar deneyin.'))
-      setIsSubmitting(false)
-    }
+      },
+      {
+        onSuccess: () => {
+          reset()
+          onClose()
+        },
+        onError: (error) => {
+          setSubmitError(getApiErrorMessage(error, 'Üretim kaydedilemedi. Lütfen tekrar deneyin.'))
+          setIsSubmitting(false)
+        },
+      },
+    )
   }
 
   return (

@@ -8,3 +8,4 @@ export function downloadBlob(blob: Blob, fileName: string) {
   document.body.removeChild(link)
   URL.revokeObjectURL(url)
 }
+// backend'den gelen blob'u bilgisayar dosya olarak indirmek için

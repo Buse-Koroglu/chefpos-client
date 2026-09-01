@@ -75,8 +75,7 @@ export function StockRequestsTable({ stockRequests, onSelect, isLoading }: Stock
               <td className="px-4 py-3 tabular-nums text-zinc-500">{formatStockRequestDateTime(stockRequest.createdAt)}</td>
               <td className="px-4 py-3">
                 <div className="flex justify-center">
-                  <button
-                    type="button"
+                  <button type="button"
                     onClick={(event) => {
                       event.stopPropagation()
                       onSelect(stockRequest.id)

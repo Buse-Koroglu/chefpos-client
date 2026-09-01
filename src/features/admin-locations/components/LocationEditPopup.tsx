@@ -1,15 +1,12 @@
 import { useState } from 'react'
-import { useQueryClient } from '@tanstack/react-query'
 import { Dialog } from '@base-ui/react/dialog'
 import { X } from 'lucide-react'
-import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import type { LocationResponseDto } from '@/shared/types/location'
-import { activateLocation, deactivateLocation, updateLocation } from '@/shared/api/endpoints/locations'
+import { useUpdateLocation } from '@/features/admin-locations/hooks/useUpdateLocation'
 
-const FIELD_CLASSNAME =
-  'h-10 w-full rounded-none border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
+const FIELD_CLASSNAME = 'h-10 w-full rounded-none border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
 
 interface LocationEditFormProps {
   location: LocationResponseDto
@@ -17,7 +14,7 @@ interface LocationEditFormProps {
 }
 
 function LocationEditForm({ location, onClose }: LocationEditFormProps) {
-  const queryClient = useQueryClient()
+  const updateLocationMutation = useUpdateLocation()
 
   const [name, setName] = useState(location.name)
   const [isActive, setIsActive] = useState(location.isActive)
@@ -36,15 +33,11 @@ function LocationEditForm({ location, onClose }: LocationEditFormProps) {
     setError(null)
 
     try {
-      if (name.trim() !== location.name) {
-        await updateLocation(location.id, { name: name.trim() })
-      }
-      if (isActive !== location.isActive) {
-        await (isActive ? activateLocation(location.id) : deactivateLocation(location.id))
-      }
-
-      queryClient.invalidateQueries({ queryKey: ['locations'], exact: false })
-      toast.success('Yerleşke bilgileri güncellendi.')
+      await updateLocationMutation.mutateAsync({
+        locationId: location.id,
+        name: name.trim() !== location.name ? name.trim() : undefined,
+        isActive: isActive !== location.isActive ? isActive : undefined,
+      })
       onClose()
     } catch {
       setError('Değişiklikler kaydedilemedi. Lütfen tekrar deneyin.')

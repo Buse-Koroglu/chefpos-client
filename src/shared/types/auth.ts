@@ -1,16 +1,8 @@
-export const ROLES = [
-  'ADMIN',
-  'CASHIER',
-  'WAITER',
-  'STOCK_MANAGER',
-  'INVENTORY_STAFF',
-  'KITCHEN',
-  'SUPER_ADMIN'
-] as const
+export const ROLES = ['ADMIN','CASHIER','WAITER','STOCK_MANAGER','INVENTORY_STAFF','KITCHEN','SUPER_ADMIN'] as const
 
 export type Role = (typeof ROLES)[number]
 
-export const ROLE_LABELS: Record<Role, string> = {
+export const ROLE_LABELS: Record<Role, string> = { // rol etiketleri
   ADMIN: 'Yönetici',
   CASHIER: 'Kasiyer',
   WAITER: 'Garson',
@@ -53,7 +45,7 @@ export interface RawLoginResponse extends Omit<LoginResponse, 'user'> {
 }
 
 export function mapUserResponse(raw: RawUserResponseDto): UserResponseDto {
-  return { ...raw, roles: raw.roles.map((code) => ROLES[code]) }
+  return { ...raw, roles: raw.roles.map((code) => ROLES[code]) }  // rol kodlarını rol isimlerine dönüştürür
 }
 
 export interface ChangePasswordRequest {
@@ -65,4 +57,5 @@ export interface ApiProblemDetails {
   title: string
   detail: string
   instance?: string
+  errorCode?: string
 }

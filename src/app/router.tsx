@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { useAuthStore } from '@/shared/stores/authStore'
 import { useRole } from '@/shared/hooks/useRole'
-import { findRouteConfig, getDefaultRouteForRoles } from '@/routes-config/permissions'
+import { findRouteConfiguration, getDefaultRouteForRoles } from '@/routes-config/permissions'
 import { AppLayout } from '@/app/layout/AppLayout'
 import { KioskLayout } from '@/app/layout/KioskLayout'
 import { LoginPage } from '@/features/auth/pages/LoginPage'
@@ -36,30 +36,30 @@ import { StockManagerPastRequestsPage } from '@/features/stock-manager-requests/
 import { StockManagerIngredientsPage } from '@/features/stock-manager-ingredients/pages/StockManagerIngredientsPage'
 import { KioskPage } from '@/features/kiosk/pages/KioskPage'
 
-const EMPTY_ROLES: Role[] = []
+const DEFAULT_EMPTY_ROLES: Role[] = []
 
 function RequireAuth({ children }: { children: ReactNode }) {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
   const isFirstLogin = useAuthStore((state) => state.isFirstLogin)
   const location = useLocation()
 
-  if (!isAuthenticated) return <Navigate to="/login" replace />
+  if (!isAuthenticated) return <Navigate to="/login" replace /> // giriş yapmmaışsa login navigation
   if (isFirstLogin && location.pathname !== '/app/change-password') {
-    return <Navigate to="/app/change-password" replace />
+    return <Navigate to="/app/change-password" replace /> // eğer ilk girişiyse ve o anki route'u change password değilse chane password için zorlanacak
   }
   return <>{children}</>
 }
 
-function RequireGuest({ children }: { children: ReactNode }) {
+function RequireGuest({ children }: { children: ReactNode }) { // eğer giriş  yapmış kullanıcı ise route'lar arasında rolüne uygun olarak default route'una yönlendirme alıyor.
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
-  const roles = useAuthStore((state) => state.user?.roles ?? EMPTY_ROLES)
+  const roles = useAuthStore((state) => state.user?.roles ?? DEFAULT_EMPTY_ROLES)
   if (isAuthenticated) return <Navigate to={getDefaultRouteForRoles(roles)} replace />
   return <>{children}</>
 }
 
-function RequireRole({ path, children }: { path: string; children: ReactNode }) {
+function RequireRole({ path, children }: { path: string; children: ReactNode }) { // eğer kullanıcı yetkisi olmayan bir route'a erişmeye çalışırsa 403 sayfasına yönelndirilir
   const { hasAnyRole } = useRole()
-  const allowedRoles = findRouteConfig(path)?.allowedRoles ?? 'ANY'
+  const allowedRoles = findRouteConfiguration(path)?.allowedRoles ?? 'ANY'
   if (allowedRoles !== 'ANY' && !hasAnyRole(allowedRoles)) {
     return <Navigate to="/403" replace />
   }
@@ -68,6 +68,11 @@ function RequireRole({ path, children }: { path: string; children: ReactNode }) 
 
 function Placeholder({ label }: { label: string }) {
   return <div className="text-sm text-muted-foreground">{label}</div>
+}
+
+function DefaultAppRoute() {
+  const roles = useAuthStore((state) => state.user?.roles ?? DEFAULT_EMPTY_ROLES)
+  return <Navigate to={getDefaultRouteForRoles(roles)} replace />
 }
 
 export function AppRouter() {
@@ -271,7 +276,7 @@ export function AppRouter() {
           }
         />
 
-                  <Route
+         <Route
             path="/app/kitchen-orders"
             element={
               <RequireAuth>
@@ -326,7 +331,7 @@ export function AppRouter() {
           }
         />
 
-          <Route
+        <Route
           path="/app/inventory/stock-requests"
           element={
             <RequireAuth>
@@ -402,23 +407,18 @@ export function AppRouter() {
             </RequireAuth>
           }
         />
+       
+       <Route path="/kiosk/:locationId" element={<KioskLayout />}>
+          <Route index element={<KioskPage />} />
+        </Route>
 
         <Route path="/403" element={<Placeholder label="403 — Bu sayfaya erişim yetkiniz yok" />} />
         <Route path="*" element={<Placeholder label="404 — Sayfa bulunamadı" />} />
 
-        <Route path="/kiosk/:locationId" element={<KioskLayout />}>
-          <Route index element={<KioskPage />} />
-        </Route>
 
-        <Route
-          path="/app"
-          element={
-            <RequireAuth>
-              <AppLayout />
-            </RequireAuth>
-          }
-        >
-          <Route index element={<Navigate to="dashboard" replace />} />
+      {/* app yoluna gidilirse her rol kendi default sayfasına yönlendirilecel */}
+      <Route path="/app" element={ <RequireAuth> <AppLayout /> </RequireAuth> }>
+      <Route index element={<DefaultAppRoute />} />
 
         </Route>
       </Routes>

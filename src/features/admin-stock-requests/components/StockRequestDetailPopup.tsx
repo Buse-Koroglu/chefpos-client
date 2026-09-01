@@ -1,23 +1,19 @@
 import { useState } from 'react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Dialog } from '@base-ui/react/dialog'
 import { X } from 'lucide-react'
-import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { getApiErrorMessage } from '@/shared/api/apiError'
 import { STOCK_UNIT_LABELS } from '@/shared/types/ingredient'
 import type { AdminStockRequestResponseDto } from '@/shared/types/stockRequest'
-import { approveStockRequest, rejectStockRequest } from '@/shared/api/endpoints/stockRequests'
 import { useRole } from '@/shared/hooks/useRole'
 import { formatStockRequestDateTime } from '@/features/admin-stock-requests/utils'
+import { useApproveStockRequest } from '@/features/admin-stock-requests/hooks/useApproveStockRequest'
+import { useRejectStockRequest } from '@/features/admin-stock-requests/hooks/useRejectStockRequest'
 import { StockRequestStatusBadge } from './StockRequestStatusBadge'
 
-const FIELD_CLASSNAME =
-  'h-10 w-full rounded-none border border-zinc-200 bg-zinc-50 px-3 text-sm text-zinc-700 outline-none'
+const FIELD_CLASSNAME = 'h-10 w-full rounded-none border border-zinc-200 bg-zinc-50 px-3 text-sm text-zinc-700 outline-none'
 
-const TEXTAREA_CLASSNAME =
-  'w-full rounded-none border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
+const TEXTAREA_CLASSNAME ='w-full rounded-none border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
 
 function formatUnitPrice(value: number): string {
   return value.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
@@ -38,7 +34,6 @@ interface StockRequestDetailFormProps {
 }
 
 function StockRequestDetailForm({ stockRequest, onClose }: StockRequestDetailFormProps) {
-  const queryClient = useQueryClient()
   const { hasRole } = useRole()
   const canDecide = hasRole('STOCK_MANAGER') && stockRequest.status === 'PENDING'
 
@@ -47,23 +42,8 @@ function StockRequestDetailForm({ stockRequest, onClose }: StockRequestDetailFor
   const [isApproving, setIsApproving] = useState(false)
   const [unitPrice, setUnitPrice] = useState('')
 
-  function invalidateAndClose(message: string) {
-    queryClient.invalidateQueries({ queryKey: ['stockRequests'], exact: false })
-    toast.success(message)
-    onClose()
-  }
-
-  const approveMutation = useMutation({
-    mutationFn: () => approveStockRequest(stockRequest.id, { unitPrice: Number(unitPrice) }),
-    onSuccess: () => invalidateAndClose('Stok talebi onaylandı.'),
-    onError: (error) => toast.error(getApiErrorMessage(error, 'Stok talebi onaylanamadı.')),
-  })
-
-  const rejectMutation = useMutation({
-    mutationFn: () => rejectStockRequest(stockRequest.id, { reason: rejectionReason.trim() }),
-    onSuccess: () => invalidateAndClose('Stok talebi reddedildi.'),
-    onError: (error) => toast.error(getApiErrorMessage(error, 'Stok talebi reddedilemedi.')),
-  })
+  const approveMutation = useApproveStockRequest(() => onClose())
+  const rejectMutation = useRejectStockRequest(() => onClose())
 
   const isSubmitting = approveMutation.isPending || rejectMutation.isPending
 
@@ -176,7 +156,7 @@ function StockRequestDetailForm({ stockRequest, onClose }: StockRequestDetailFor
               <Button
                 type="button"
                 className="h-11 flex-1 rounded-none bg-destructive text-sm text-white hover:bg-destructive/90"
-                onClick={() => rejectMutation.mutate()}
+                onClick={() => rejectMutation.mutate({ id: stockRequest.id, reason: rejectionReason.trim() })}
                 disabled={isSubmitting || rejectionReason.trim() === ''}
               >
                 {rejectMutation.isPending ? 'Reddediliyor...' : 'Reddi Onayla'}
@@ -199,7 +179,7 @@ function StockRequestDetailForm({ stockRequest, onClose }: StockRequestDetailFor
               <Button
                 type="button"
                 className={cn('h-11 flex-1 rounded-none bg-[#133458] text-sm text-white hover:bg-[#0f2843]')}
-                onClick={() => approveMutation.mutate()}
+                onClick={() => approveMutation.mutate({ id: stockRequest.id, unitPrice: Number(unitPrice) })}
                 disabled={isSubmitting || unitPrice.trim() === '' || Number(unitPrice) < 0}
               >
                 {approveMutation.isPending ? 'Onaylanıyor...' : 'Onayı Tamamla'}

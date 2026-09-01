@@ -1,15 +1,12 @@
 import { useState } from 'react'
 import axios from 'axios'
-import { useQueryClient } from '@tanstack/react-query'
 import { Dialog } from '@base-ui/react/dialog'
 import { X } from 'lucide-react'
-import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { createMenu } from '@/shared/api/endpoints/menus'
+import { useCreateMenu } from '@/features/admin-menus/hooks/useCreateMenu'
 
-const FIELD_CLASSNAME =
-  'h-10 w-full rounded-none border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
+const FIELD_CLASSNAME = 'h-10 w-full rounded-none border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
 
 interface FormErrors {
   name?: string
@@ -37,20 +34,18 @@ interface AddMenuPopupProps {
 }
 
 export function AddMenuPopup({ open, locationId, onClose }: AddMenuPopupProps) {
-  const queryClient = useQueryClient()
+  const createMenu = useCreateMenu()
 
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [errors, setErrors] = useState<FormErrors>({})
   const [submitError, setSubmitError] = useState<string | null>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
 
   function reset() {
     setName('')
     setDescription('')
     setErrors({})
     setSubmitError(null)
-    setIsSubmitting(false)
   }
 
   function handleClose() {
@@ -58,23 +53,24 @@ export function AddMenuPopup({ open, locationId, onClose }: AddMenuPopupProps) {
     onClose()
   }
 
-  async function handleSubmit() {
+  function handleSubmit() {
     const nextErrors = validate(name)
     setErrors(nextErrors)
     if (Object.keys(nextErrors).length > 0 || !locationId) return
 
-    setIsSubmitting(true)
     setSubmitError(null)
 
-    try {
-      await createMenu({ name: name.trim(), description: description.trim() || null, locationId })
-      queryClient.invalidateQueries({ queryKey: ['menus'], exact: false })
-      toast.success('Menü başarıyla oluşturuldu.')
-      handleClose()
-    } catch (error) {
-      setSubmitError(getCreateErrorMessage(error))
-      setIsSubmitting(false)
-    }
+    createMenu.mutate(
+      { name: name.trim(), description: description.trim() || null, locationId },
+      {
+        onSuccess: () => {
+          handleClose()
+        },
+        onError: (error) => {
+          setSubmitError(getCreateErrorMessage(error))
+        },
+      },
+    )
   }
 
   return (
@@ -125,7 +121,7 @@ export function AddMenuPopup({ open, locationId, onClose }: AddMenuPopupProps) {
               variant="outline"
               className="h-11 flex-1 rounded-none text-sm"
               onClick={handleClose}
-              disabled={isSubmitting}
+              disabled={createMenu.isPending}
             >
               İptal
             </Button>
@@ -133,9 +129,9 @@ export function AddMenuPopup({ open, locationId, onClose }: AddMenuPopupProps) {
               type="button"
               className="h-11 flex-1 rounded-none bg-[#133458] text-sm text-white hover:bg-[#0f2843]"
               onClick={handleSubmit}
-              disabled={isSubmitting}
+              disabled={createMenu.isPending}
             >
-              {isSubmitting ? 'Kaydediliyor...' : 'Kaydet'}
+              {createMenu.isPending ? 'Kaydediliyor...' : 'Kaydet'}
             </Button>
           </div>
         </Dialog.Popup>

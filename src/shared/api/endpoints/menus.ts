@@ -1,19 +1,12 @@
 import { apiClient } from '@/shared/api/client'
-import type {
-  AddProductToMenuRequest,
-  CreateMenuRequest,
-  CreateProductForMenuRequest,
-  GetMenusQueryParams,
-  MenuResponseDto,
-  UpdateMenuRequest,
-} from '@/shared/types/menu'
+import type {AddProductToMenuRequest, CreateMenuRequest, CreateProductForMenuRequest, GetMenusQueryRequest, MenuResponseDto, UpdateMenuRequest} from '@/shared/types/menu'
 import type { ProductResponse } from '@/shared/types/product'
 
-export function getMenus(params: GetMenusQueryParams) {
+export function getMenus(params: GetMenusQueryRequest) {
   return apiClient.get<MenuResponseDto[]>('/api/menus', { params }).then((res) => res.data)
 }
 
-export function exportMenus(params: GetMenusQueryParams): Promise<Blob> {
+export function exportMenus(params: GetMenusQueryRequest): Promise<Blob> {
   return apiClient.get<Blob>('/api/menus/export', { params, responseType: 'blob' }).then((res) => res.data)
 }
 

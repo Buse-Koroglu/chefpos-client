@@ -14,16 +14,7 @@ interface InfoDialogProps {
   isConfirming?: boolean
 }
 
-export function InfoDialog({
-  open,
-  title,
-  message,
-  onClose,
-  onConfirm,
-  confirmLabel = 'Onayla',
-  cancelLabel = 'Vazgeç',
-  isConfirming,
-}: InfoDialogProps) {
+export function InfoDialog({open,title,message,onClose,onConfirm,confirmLabel = 'Onayla',cancelLabel = 'Vazgeç',isConfirming,}: InfoDialogProps) {
   return (
     <Dialog.Root open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()}>
       <Dialog.Portal>

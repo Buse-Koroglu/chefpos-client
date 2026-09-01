@@ -1,153 +1,20 @@
-import { useState, useRef, useEffect } from 'react'
-import { useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
 import { Dialog } from '@base-ui/react/dialog'
-import { AlertTriangle, Check, ChevronDown, X } from 'lucide-react'
-import { toast } from 'sonner'
+import { AlertTriangle, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import type { LocationDto } from '@/shared/types/location'
 import type { CategoryAdminResponseDto } from '@/shared/types/category'
 import type { ProductResponse } from '@/shared/types/product'
-import {
-  activateProduct,
-  addProductLocation,
-  deactivateProduct,
-  deleteProductImage,
-  removeProductLocation,
-  updateProduct,
-  updateProductPrice,
-  uploadProductImage,
-} from '@/shared/api/endpoints/products'
 import { Skeleton } from '@/shared/components/Skeleton'
 import { ImageUploadInput } from '@/shared/components/ImageUploadInput'
 import { useProductDetail } from '@/features/admin-products/hooks/useProductDetail'
+import { useUpdateProduct } from '@/features/admin-products/hooks/useUpdateProduct'
 import { ProductRecipeSection } from './ProductRecipeSection'
-
-const FIELD_CLASSNAME =
-  'h-10 w-full rounded-none border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
+import { FIELD_CLASSNAME, MultiSelectDropdown } from './MultiSelectDropdown'
 
 function getDetailErrorMessage(): string {
   return 'Ürün bilgileri yüklenemedi.'
-}
-
-interface MultiSelectDropdownProps {
-  label: string
-  placeholder: string
-  options: { id: string; label: string }[]
-  selectedIds: string[]
-  onToggle: (id: string) => void
-  disabled?: boolean
-  minRequired?: number
-}
-
-function MultiSelectDropdown({
-  label,
-  placeholder,
-  options,
-  selectedIds,
-  onToggle,
-  disabled,
-  minRequired = 0,
-}: MultiSelectDropdownProps) {
-  const [isOpen, setIsOpen] = useState(false)
-  const dropdownRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false)
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
-
-  return (
-    <div className="relative space-y-1.5" ref={dropdownRef}>
-      <label className="block text-xs font-medium text-zinc-600">{label}</label>
-
-      {/* Tetikleyici Buton */}
-      <button
-        type="button"
-        disabled={disabled}
-        onClick={() => setIsOpen((prev) => !prev)}
-        className={cn(
-          FIELD_CLASSNAME,
-          'flex items-center justify-between text-left cursor-pointer transition-all',
-          isOpen && 'border-[#133458] ring-1 ring-[#133458]',
-          disabled && 'opacity-60 cursor-not-allowed bg-zinc-50',
-        )}
-      >
-        <span className="truncate text-zinc-600">
-          {selectedIds.length === 0 ? placeholder : `${selectedIds.length} yerleşke seçildi`}
-        </span>
-        <ChevronDown
-          className={cn('size-4 text-zinc-400 transition-transform duration-200', isOpen && 'rotate-180')}
-        />
-      </button>
-
-      {/* Açılır Liste */}
-      {isOpen && (
-        <div className="absolute z-50 mt-1 max-h-56 w-full overflow-y-auto border border-zinc-200 bg-white shadow-lg">
-          <div className="p-1 space-y-0.5">
-            {options.map((option) => {
-              const isSelected = selectedIds.includes(option.id)
-              const isLastRemaining = isSelected && selectedIds.length <= minRequired
-
-              return (
-                <button
-                  key={option.id}
-                  type="button"
-                  onClick={() => !isLastRemaining && onToggle(option.id)}
-                  disabled={disabled || isLastRemaining}
-                  title={isLastRemaining ? `En az ${minRequired} yerleşke seçili kalmalıdır.` : undefined}
-                  className={cn(
-                    'flex w-full items-center justify-between px-3 py-2 text-xs font-medium transition-colors text-left',
-                    isSelected ? 'bg-[#133458]/10 text-[#133458]' : 'text-zinc-700 hover:bg-zinc-100',
-                    isLastRemaining && 'cursor-not-allowed opacity-60',
-                  )}
-                >
-                  <span className="truncate">{option.label}</span>
-                  {isSelected && <Check className="size-3.5 text-[#133458] shrink-0 ml-2" />}
-                </button>
-              )
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Seçili Rozetler (Chips) */}
-      {selectedIds.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 pt-1">
-          {selectedIds.map((id) => {
-            const opt = options.find((o) => o.id === id)
-            const isLastRemaining = selectedIds.length <= minRequired
-
-            return (
-              <span
-                key={id}
-                className={cn(
-                  'inline-flex items-center gap-1 border border-[#133458] bg-[#133458] px-2 py-0.5 text-xs font-medium text-white',
-                  isLastRemaining && 'opacity-90',
-                )}
-              >
-                {opt?.label ?? id}
-                <button
-                  type="button"
-                  onClick={() => !isLastRemaining && onToggle(id)}
-                  disabled={disabled || isLastRemaining}
-                  title={isLastRemaining ? `En az ${minRequired} yerleşke seçili kalmalıdır.` : undefined}
-                  className={cn('hover:opacity-75 focus:outline-none', isLastRemaining && 'hidden')}
-                >
-                  <X className="size-3" />
-                </button>
-              </span>
-            )
-          })}
-        </div>
-      )}
-    </div>
-  )
 }
 
 interface ProductEditFormProps {
@@ -159,7 +26,7 @@ interface ProductEditFormProps {
 }
 
 function ProductEditForm({ product, locations, categories, canEditLocations, onClose }: ProductEditFormProps) {
-  const queryClient = useQueryClient()
+  const updateProductMutation = useUpdateProduct()
 
   const [name, setName] = useState(product.name)
   const [description, setDescription] = useState(product.description ?? '')
@@ -170,8 +37,8 @@ function ProductEditForm({ product, locations, categories, canEditLocations, onC
   const [locationIds, setLocationIds] = useState<string[]>(product.locationIds)
   const [isActive, setIsActive] = useState(product.isActive)
   const [saveErrors, setSaveErrors] = useState<string[]>([])
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const [confirmingDeactivate, setConfirmingDeactivate] = useState(false)
+  const isSubmitting = updateProductMutation.isPending
 
   const categoryName = categories.find((category) => category.id === product.categoryId)?.name ?? product.categoryId ?? '—'
 
@@ -206,68 +73,29 @@ function ProductEditForm({ product, locations, categories, canEditLocations, onC
   }
 
   async function persistChanges() {
-    setIsSubmitting(true)
     setSaveErrors([])
+    setUploadProgress(undefined)
 
-    const errors: string[] = []
+    const result = await updateProductMutation.mutateAsync({
+      product,
+      locations,
+      name,
+      description,
+      price,
+      imageFile,
+      removeExistingImage,
+      isActive,
+      locationIds,
+      onUploadProgress: setUploadProgress,
+    })
 
-    const locationsToAdd = locationIds.filter((id) => !product.locationIds.includes(id))
-    const locationsToRemove = product.locationIds.filter((id) => !locationIds.includes(id))
-    let succeededLocationIds = product.locationIds
+    setLocationIds(result.succeededLocationIds)
 
-    for (const locationId of locationsToAdd) {
-      try {
-        await addProductLocation(product.id, locationId)
-        succeededLocationIds = [...succeededLocationIds, locationId]
-      } catch {
-        const name = locations.find((location) => location.id === locationId)?.name ?? locationId
-        errors.push(`${name} yerleşkesi eklenemedi.`)
-      }
-    }
-
-    for (const locationId of locationsToRemove) {
-      try {
-        await removeProductLocation(product.id, locationId)
-        succeededLocationIds = succeededLocationIds.filter((id) => id !== locationId)
-      } catch {
-        const name = locations.find((location) => location.id === locationId)?.name ?? locationId
-        errors.push(`${name} yerleşkesi kaldırılamadı.`)
-      }
-    }
-
-    try {
-      if (name.trim() !== product.name || description.trim() !== (product.description ?? '')) {
-        await updateProduct(product.id, {
-          name: name.trim(),
-          description: description.trim() || null,
-        })
-      }
-      if (imageFile) {
-        setUploadProgress(0)
-        await uploadProductImage(product.id, imageFile, setUploadProgress)
-      } else if (removeExistingImage) {
-        await deleteProductImage(product.id)
-      }
-      if (Number(price) !== product.price) {
-        await updateProductPrice(product.id, Number(price))
-      }
-      if (isActive !== product.isActive) {
-        await (isActive ? activateProduct(product.id, succeededLocationIds[0]) : deactivateProduct(product.id, succeededLocationIds[0]))
-      }
-    } catch {
-      errors.push('Ürün bilgileri güncellenemedi.')
-    }
-
-    setLocationIds(succeededLocationIds)
-    setIsSubmitting(false)
-
-    if (errors.length > 0) {
-      setSaveErrors(errors)
+    if (result.errors.length > 0) {
+      setSaveErrors(result.errors)
       return
     }
 
-    queryClient.invalidateQueries({ queryKey: ['products'], exact: false })
-    toast.success('Ürün bilgileri güncellendi.')
     onClose()
   }
 
@@ -371,7 +199,6 @@ function ProductEditForm({ product, locations, categories, canEditLocations, onC
           />
         </div>
 
-        {/* Yerleşkeler */}
         {canEditLocations ? (
           <MultiSelectDropdown
             label="Yerleşkeler"

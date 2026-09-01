@@ -6,6 +6,8 @@ interface MenuTabsProps {
   onSelect: (menuId: string) => void
 }
 
+// Sipariş verme ekranında bulunan menü tab'ları
+
 export function MenuTabs({ menus, selectedMenuId, onSelect }: MenuTabsProps) {
   if (menus.length === 0) return null
 
@@ -18,12 +20,8 @@ export function MenuTabs({ menus, selectedMenuId, onSelect }: MenuTabsProps) {
           key={menu.id}
           type="button"
           onClick={() => onSelect(menu.id)}
-          className={`shrink-0 whitespace-nowrap border px-3 py-1.5 text-xs font-medium ${
-            selectedMenuId === menu.id
-              ? 'border-zinc-700 bg-[#133458] text-white'
-              : 'border-zinc-200 bg-white text-zinc-600'
-          }`}
-        >
+          className={`shrink-0 whitespace-nowrap border px-4 py-2 text-sm font-medium ${
+            selectedMenuId === menu.id ? 'border-zinc-700 bg-[#133458] text-white' : 'border-zinc-200 bg-white text-zinc-600' }`}>
           {menu.name}
         </button>
       ))}

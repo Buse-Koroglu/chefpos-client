@@ -37,7 +37,7 @@ export function IngredientCard({ ingredient, hasPendingRequest, onClick }: Ingre
         'flex flex-col gap-3 border-2 p-4 text-left transition-colors',
         HEALTH_CARD_CLASSNAME[health],
       )}
-    >
+      >
       <div className="flex items-start justify-between gap-2">
         <p className="font-semibold text-zinc-900">{ingredient.name}</p>
         {health === 'CRITICAL' && <AlertTriangle className="size-4 shrink-0 text-red-600" />}
@@ -61,10 +61,7 @@ export function IngredientCard({ ingredient, hasPendingRequest, onClick }: Ingre
       <div className="flex items-center justify-between border-t border-zinc-200/70 pt-2 text-xs text-zinc-500">
         <span>Ağırlıklı Ort. Fiyat</span>
         <span className="font-medium text-zinc-700 tabular-nums">
-          {ingredient.weightedAverageUnitPrice.toLocaleString('tr-TR', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })}
+          {ingredient.weightedAverageUnitPrice.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2,})}
         </span>
       </div>
     </button>

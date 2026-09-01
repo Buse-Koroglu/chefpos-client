@@ -1,19 +1,11 @@
 import { apiClient } from '@/shared/api/client'
 import { kioskClient } from '@/shared/api/kioskClient'
 import { ROLES } from '@/shared/types/auth'
-import type {
-  AddOrderItemRequest,
-  CreateKioskOrderRequest,
-  CreateOrderRequest,
-  DecreaseOrderItemRequest,
-  GetOrdersQueryParams,
-  OrderResponse,
-  PagedResult,
-} from '@/shared/types/order'
+import type { PagedResult } from '@/shared/types/pagination'
+import type { AddOrderItemRequest, CreateKioskOrderRequest, CreateOrderRequest, DecreaseOrderItemRequest, GetOrdersQueryRequest, OrderResponse, } from '@/shared/types/order'
 
 export function createOrder(payload: CreateOrderRequest) {
-  return apiClient
-    .post<OrderResponse>('/api/orders', { ...payload, requestedAs: ROLES.indexOf(payload.requestedAs) })
+  return apiClient.post<OrderResponse>('/api/orders', { ...payload, requestedAs: ROLES.indexOf(payload.requestedAs) })
     .then((res) => res.data)
 }
 
@@ -25,7 +17,7 @@ export function makeKioskOrderPaid(orderId: string) {
   return kioskClient.post<OrderResponse>(`/api/orders/kiosk/${orderId}/paid`).then((res) => res.data)
 }
 
-export function getOrders(params: GetOrdersQueryParams) {
+export function getOrders(params: GetOrdersQueryRequest) {
   return apiClient.get<PagedResult<OrderResponse>>('/api/orders', { params }).then((res) => res.data)
 }
 
@@ -54,7 +46,6 @@ export function removeOrderItem(orderId: string, orderItemId: string) {
 }
 
 export function decreaseOrderItem(orderId: string, orderItemId: string, payload: DecreaseOrderItemRequest) {
-  return apiClient
-    .patch<OrderResponse>(`/api/orders/${orderId}/items/${orderItemId}/decrease`, payload)
+  return apiClient.patch<OrderResponse>(`/api/orders/${orderId}/items/${orderItemId}/decrease`, payload)
     .then((res) => res.data)
 }

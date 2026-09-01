@@ -3,7 +3,7 @@ import axios from 'axios'
 import { Search } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
-import { CashierHeader } from '@/shared/components/CashierHeader'
+import { StaffHeader } from '@/shared/components/StaffHeader'
 import { Pagination } from '@/shared/components/Pagination'
 import { useDebouncedValue } from '@/shared/hooks/useDebouncedValue'
 import { useLocations } from '@/shared/hooks/useLocations'
@@ -11,7 +11,7 @@ import { useLocationStore } from '@/shared/stores/locationStore'
 
 import type { OrderResponse } from '@/shared/types/order'
 
-import { KITCHEN_URGENCY_TICK_INTERVAL_MS } from '../constants'
+import { KITCHEN_URGENCY_FETCH_TIME} from '../constants'
 import { KitchenSidebar } from '../components/KitchenSidebar'
 import { OrderDetailModal } from '../components/OrderDetailModal'
 import { PreparingOrdersTable } from '../components/PreparingOrdersTable'
@@ -76,7 +76,7 @@ export function PreparingOrdersPage() {
   const { waiterCount, cashierCount } =
     useKitchenOrdersCount(locationId)
 
-  const now = useTickingNow(KITCHEN_URGENCY_TICK_INTERVAL_MS)
+  const now = useTickingNow(KITCHEN_URGENCY_FETCH_TIME)
 
   const tabOrderCount =
     tab === 'WAITER' ? waiterCount : cashierCount
@@ -107,7 +107,7 @@ export function PreparingOrdersPage() {
       <KitchenSidebar />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <CashierHeader
+        <StaffHeader
           title="Bekleyen Siparişler"
           locationName={locationName}
         />
@@ -122,9 +122,7 @@ export function PreparingOrdersPage() {
                 onClick={() => handleTabChange(tabItem.value)}
                 className={cn(
                   'flex-1 border-b-2 px-4 py-3 text-sm font-medium transition-colors',
-                  tab === tabItem.value
-                    ? 'border-[#133458] bg-zinc-50 text-zinc-900'
-                    : 'border-transparent text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900',
+                  tab === tabItem.value  ? 'border-[#133458] bg-zinc-50 text-zinc-900' : 'border-transparent text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900',
                 )}
               >
                 {tabItem.label}

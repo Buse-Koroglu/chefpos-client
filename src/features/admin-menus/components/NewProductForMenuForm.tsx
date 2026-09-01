@@ -1,15 +1,11 @@
 import { useState } from 'react'
 import axios from 'axios'
-import { useQueryClient } from '@tanstack/react-query'
-import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { createProductForMenu } from '@/shared/api/endpoints/menus'
-import { uploadProductImage } from '@/shared/api/endpoints/products'
 import { ImageUploadInput } from '@/shared/components/ImageUploadInput'
+import { useCreateProductForMenu } from '@/features/admin-menus/hooks/useCreateProductForMenu'
 
-const FIELD_CLASSNAME =
-  'h-9 w-full rounded-none border border-zinc-200 bg-white px-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
+const FIELD_CLASSNAME = 'h-9 w-full rounded-none border border-zinc-200 bg-white px-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
 
 interface FormErrors {
   name?: string
@@ -37,7 +33,7 @@ interface NewProductForMenuFormProps {
 }
 
 export function NewProductForMenuForm({ menuId }: NewProductForMenuFormProps) {
-  const queryClient = useQueryClient()
+  const createProductForMenu = useCreateProductForMenu()
 
   const [name, setName] = useState('')
   const [price, setPrice] = useState('')
@@ -45,7 +41,6 @@ export function NewProductForMenuForm({ menuId }: NewProductForMenuFormProps) {
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [errors, setErrors] = useState<FormErrors>({})
   const [submitError, setSubmitError] = useState<string | null>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const [uploadProgress, setUploadProgress] = useState<number | undefined>(undefined)
 
   function reset() {
@@ -58,39 +53,31 @@ export function NewProductForMenuForm({ menuId }: NewProductForMenuFormProps) {
     setUploadProgress(undefined)
   }
 
-  async function handleSubmit() {
+  function handleSubmit() {
     const nextErrors = validate(name, price)
     setErrors(nextErrors)
     if (Object.keys(nextErrors).length > 0) return
 
-    setIsSubmitting(true)
     setSubmitError(null)
 
-    try {
-      const product = await createProductForMenu(menuId, {
+    createProductForMenu.mutate(
+      {
+        menuId,
         name: name.trim(),
         price: Number(price),
         description: description.trim() || null,
-      })
-
-      if (imageFile) {
-        try {
-          setUploadProgress(0)
-          await uploadProductImage(product.id, imageFile, setUploadProgress)
-        } catch {
-          toast.error('Ürün oluşturuldu ancak görsel yüklenemedi. Düzenleme ekranından tekrar deneyebilirsiniz.')
-        }
-      }
-
-      queryClient.invalidateQueries({ queryKey: ['menus', 'detail', menuId] })
-      queryClient.invalidateQueries({ queryKey: ['menus'], exact: false })
-      toast.success('Ürün oluşturuldu ve menüye eklendi.')
-      reset()
-    } catch (error) {
-      setSubmitError(getCreateErrorMessage(error))
-    } finally {
-      setIsSubmitting(false)
-    }
+        imageFile,
+        onUploadProgress: setUploadProgress,
+      },
+      {
+        onSuccess: () => {
+          reset()
+        },
+        onError: (error) => {
+          setSubmitError(getCreateErrorMessage(error))
+        },
+      },
+    )
   }
 
   return (
@@ -104,7 +91,7 @@ export function NewProductForMenuForm({ menuId }: NewProductForMenuFormProps) {
           value={name}
           onChange={(event) => setName(event.target.value)}
           placeholder="Ürün adı"
-          disabled={isSubmitting}
+          disabled={createProductForMenu.isPending}
           className={cn(FIELD_CLASSNAME, errors.name && 'border-red-300')}
         />
         {errors.name && <p className="mt-1 text-xs text-red-600">{errors.name}</p>}
@@ -119,7 +106,7 @@ export function NewProductForMenuForm({ menuId }: NewProductForMenuFormProps) {
             min="0"
             step="0.01"
             placeholder="Satış fiyatı"
-            disabled={isSubmitting}
+            disabled={createProductForMenu.isPending}
             className={cn(FIELD_CLASSNAME, errors.price && 'border-red-300')}
           />
           {errors.price && <p className="mt-1 text-xs text-red-600">{errors.price}</p>}
@@ -128,7 +115,7 @@ export function NewProductForMenuForm({ menuId }: NewProductForMenuFormProps) {
           value={description}
           onChange={(event) => setDescription(event.target.value)}
           placeholder="Açıklama (opsiyonel)"
-          disabled={isSubmitting}
+          disabled={createProductForMenu.isPending}
           className={FIELD_CLASSNAME}
         />
       </div>
@@ -136,8 +123,8 @@ export function NewProductForMenuForm({ menuId }: NewProductForMenuFormProps) {
       <ImageUploadInput
         file={imageFile}
         onFileChange={setImageFile}
-        disabled={isSubmitting}
-        uploading={isSubmitting && uploadProgress !== undefined}
+        disabled={createProductForMenu.isPending}
+        uploading={createProductForMenu.isPending && uploadProgress !== undefined}
         uploadProgress={uploadProgress}
         size="sm"
       />
@@ -152,9 +139,9 @@ export function NewProductForMenuForm({ menuId }: NewProductForMenuFormProps) {
         variant="outline"
         className="h-9 w-full rounded-none text-xs"
         onClick={handleSubmit}
-        disabled={isSubmitting}
+        disabled={createProductForMenu.isPending}
       >
-        {isSubmitting ? 'Oluşturuluyor...' : 'Ürünü Oluştur ve Menüye Ekle'}
+        {createProductForMenu.isPending ? 'Oluşturuluyor...' : 'Ürünü Oluştur ve Menüye Ekle'}
       </Button>
     </div>
   )

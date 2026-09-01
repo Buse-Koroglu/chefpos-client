@@ -1,22 +1,15 @@
 import { apiClient } from '@/shared/api/client'
-import type {
-  CreateTableRequest,
-  GetTablesPagedQueryParams,
-  PagedResult,
-  TableResponseDto,
-  UpdateTableRequest,
-  GetTablesByLocationQueryParams
-} from '@/shared/types/table'
+import type { PagedResult } from '@/shared/types/pagination'
+import type {CreateTableRequest,GetTablesPagedQueryRequest,TableResponseDto,UpdateTableRequest,GetTablesByLocationQueryRequest} from '@/shared/types/table'
 
-export function getTablesPaged(params: GetTablesPagedQueryParams) {
+export function getTablesPaged(params: GetTablesPagedQueryRequest) {
   return apiClient.get<PagedResult<TableResponseDto>>('/api/tables/paged', { params }).then((res) => res.data)
 }
 
-export type ExportTablesQueryParams = Omit<GetTablesPagedQueryParams, 'pageNumber' | 'pageSize'>
+export type ExportTablesQueryRequest = Omit<GetTablesPagedQueryRequest, 'pageNumber' | 'pageSize'>
 
-export function exportTables(params: ExportTablesQueryParams): Promise<Blob> {
-  return apiClient
-    .get<Blob>('/api/tables/export', { params, responseType: 'blob' })
+export function exportTables(params: ExportTablesQueryRequest): Promise<Blob> {
+  return apiClient.get<Blob>('/api/tables/export', { params, responseType: 'blob' })
     .then((res) => res.data)
 }
 
@@ -36,6 +29,6 @@ export function deactivateTable(id: string) {
   return apiClient.post<TableResponseDto>(`/api/tables/${id}/deactivate`).then((res) => res.data)
 }
 
-export function getTablesByLocation(params: GetTablesByLocationQueryParams) {
+export function getTablesByLocation(params: GetTablesByLocationQueryRequest) {
   return apiClient.get<TableResponseDto[]>('/api/tables', { params }).then((res) => res.data)
 }

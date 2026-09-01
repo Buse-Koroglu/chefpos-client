@@ -6,6 +6,7 @@ interface PaginationProps {
   totalCount: number
   onPageChange: (page: number) => void
 }
+// Pagination componenti, toplam sayfa sayısı mavcut sayfa ve önceki sonraki sayfa butonları içerir
 
 export function Pagination({ pageNumber, totalPages, totalCount, onPageChange }: PaginationProps) {
   return (

@@ -1,8 +1,7 @@
 import type { LocationDto } from '@/shared/types/location'
 import type { CategoryStatusFilter } from '@/features/admin-categories/types'
 
-const SELECT_CLASSNAME =
-  'h-9 border border-zinc-200 bg-white px-2.5 text-sm text-zinc-700 outline-none transition-colors focus-visible:border-zinc-400'
+const SELECT_CLASSNAME = 'h-9 border border-zinc-200 bg-white px-2.5 text-sm text-zinc-700 outline-none transition-colors focus-visible:border-zinc-400'
 
 interface CategoriesFiltersBarProps {
   locationId: string
@@ -12,13 +11,7 @@ interface CategoriesFiltersBarProps {
   onStatusChange: (status: CategoryStatusFilter) => void
 }
 
-export function CategoriesFiltersBar({
-  locationId,
-  status,
-  locations,
-  onLocationChange,
-  onStatusChange,
-}: CategoriesFiltersBarProps) {
+export function CategoriesFiltersBar({locationId,status,locations,onLocationChange, onStatusChange,}: CategoriesFiltersBarProps) {
   return (
     <div className="flex items-center gap-2">
       <select

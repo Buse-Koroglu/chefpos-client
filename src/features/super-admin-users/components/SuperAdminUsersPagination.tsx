@@ -8,8 +8,7 @@ interface SuperAdminUsersPaginationProps {
   onPageChange: (page: number) => void
 }
 
-const NAV_BUTTON_CLASSNAME =
-  'flex size-8 items-center justify-center border border-zinc-200 text-zinc-500 transition-colors hover:border-zinc-300 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-40'
+const NAV_BUTTON_CLASSNAME ='flex size-8 items-center justify-center border border-zinc-200 text-zinc-500 transition-colors hover:border-zinc-300 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-40'
 
 function getPageNumbers(current: number, total: number): number[] {
   const maxButtons = 5
@@ -18,12 +17,7 @@ function getPageNumbers(current: number, total: number): number[] {
   return Array.from({ length: end - start + 1 }, (_, index) => start + index)
 }
 
-export function SuperAdminUsersPagination({
-  pageNumber,
-  totalPages,
-  totalCount,
-  onPageChange,
-}: SuperAdminUsersPaginationProps) {
+export function SuperAdminUsersPagination({pageNumber,totalPages,totalCount,onPageChange}: SuperAdminUsersPaginationProps) {
   const pages = getPageNumbers(pageNumber, totalPages)
 
   return (

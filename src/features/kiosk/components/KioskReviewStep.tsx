@@ -1,10 +1,10 @@
 import { Minus, Plus, X } from 'lucide-react'
-import type { KioskCartItem } from '../types'
+import type { KioskCardItem } from '../types'
 
 const currencyFormatter = new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' })
 
 interface KioskReviewStepProps {
-  items: KioskCartItem[]
+  items: KioskCardItem[]
   totalAmount: number
   customerName: string
   onCustomerNameChange: (value: string) => void

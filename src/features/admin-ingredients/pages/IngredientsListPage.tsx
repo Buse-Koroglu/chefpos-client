@@ -17,7 +17,7 @@ import { IngredientsPagination } from '@/features/admin-ingredients/components/I
 import { IngredientEditPopup } from '@/features/admin-ingredients/components/IngredientEditPopup'
 import { AddIngredientPopup } from '@/features/admin-ingredients/components/AddIngredientPopup'
 import { usePagedIngredientsAdmin } from '@/features/admin-ingredients/hooks/usePagedIngredientsAdmin'
-import { INGREDIENTS_SEARCH_DEBOUNCE_MS } from '@/features/admin-ingredients/constants'
+import { INGREDIENTS_SEARCH_DEBOUNCE_TIME } from '@/features/admin-ingredients/constants'
 import type { IngredientStatusFilter } from '@/features/admin-ingredients/types'
 
 function toIsActiveParam(status: IngredientStatusFilter): boolean | undefined {
@@ -50,14 +50,9 @@ export function IngredientsListPage({ variant = 'admin' }: IngredientsListPagePr
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
 
   const { data: locations = [] } = useLocations()
-  const searchTerm = useDebouncedValue(searchInput, INGREDIENTS_SEARCH_DEBOUNCE_MS)
+  const searchTerm = useDebouncedValue(searchInput, INGREDIENTS_SEARCH_DEBOUNCE_TIME)
 
-  const { data, isLoading, isFetching, isError, error } = usePagedIngredientsAdmin(
-    searchTerm,
-    locationId,
-    status,
-    pageNumber,
-  )
+  const { data, isLoading, isFetching, isError, error } = usePagedIngredientsAdmin(searchTerm,locationId,status,pageNumber)
   const items = useMemo(() => data?.items ?? [], [data])
   const selectedIngredient = useMemo(
     () => items.find((ingredient) => ingredient.id === selectedIngredientId) ?? null,

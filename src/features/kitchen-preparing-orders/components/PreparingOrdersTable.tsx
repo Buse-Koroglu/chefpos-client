@@ -4,19 +4,12 @@ import { PreparingOrderRow } from './PreparingOrderRow'
 
 interface PreparingOrdersTableProps {
   orders: OrderResponse[]
-  onSelectOrder: (
-    order: OrderResponse,
-  ) => void
+  onSelectOrder: (order: OrderResponse ) => void
   now: Date
   showUrgency: boolean
 }
 
-export function PreparingOrdersTable({
-  orders,
-  onSelectOrder,
-  now,
-  showUrgency,
-}: PreparingOrdersTableProps) {
+export function PreparingOrdersTable({orders,onSelectOrder,now,showUrgency}: PreparingOrdersTableProps) {
   return (
     <div className="overflow-x-auto">
       <table className="w-full border-collapse">

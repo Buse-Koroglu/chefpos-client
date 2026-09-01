@@ -8,3 +8,10 @@ export function getApiErrorMessage(error: unknown, fallback = 'Bir hata oluştu.
   }
   return fallback
 }
+
+export function getApiErrorCode(error: unknown): string | undefined {
+  if (isAxiosError<ApiProblemDetails>(error)) {
+    return error.response?.data?.errorCode
+  }
+  return undefined
+}

@@ -1,24 +1,13 @@
 import { useState } from 'react'
 import axios from 'axios'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Dialog } from '@base-ui/react/dialog'
 import { X } from 'lucide-react'
-import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { createLocation } from '@/shared/api/endpoints/locations'
-import { addRole, assignLocationAccess, getUsers } from '@/shared/api/endpoints/users'
-import { getApiErrorMessage } from '@/shared/api/apiError'
+import { useActiveUsers } from '@/features/admin-locations/hooks/useActiveUsers'
+import { useCreateLocation } from '@/features/admin-locations/hooks/useCreateLocation'
 
-function useActiveUsers() {
-  return useQuery({
-    queryKey: ['users', 'admin-picker'],
-    queryFn: () => getUsers({ isActive: true, pageSize: 100 }),
-  })
-}
-
-const FIELD_CLASSNAME =
-  'h-10 w-full rounded-none border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
+const FIELD_CLASSNAME = 'h-10 w-full rounded-none border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
 
 function getCreateErrorMessage(error: unknown): string {
   if (axios.isAxiosError(error)) {
@@ -35,8 +24,8 @@ interface AddLocationPopupProps {
 }
 
 export function AddLocationPopup({ open, onClose }: AddLocationPopupProps) {
-  const queryClient = useQueryClient()
   const { data: usersResult, isLoading: isUsersLoading } = useActiveUsers()
+  const createLocationMutation = useCreateLocation()
   const users = usersResult?.items ?? []
 
   const [name, setName] = useState('')
@@ -66,24 +55,7 @@ export function AddLocationPopup({ open, onClose }: AddLocationPopupProps) {
     setError(null)
 
     try {
-      const location = await createLocation({ name: name.trim() })
-      queryClient.invalidateQueries({ queryKey: ['locations'], exact: false })
-
-      if (adminUserId) {
-        try {
-          await addRole(adminUserId, 'ADMIN')
-          await assignLocationAccess(adminUserId, location.id)
-          queryClient.invalidateQueries({ queryKey: ['users'], exact: false })
-          toast.success('Yerleşke ve Yönetici ataması başarıyla tamamlandı.')
-        } catch (adminError) {
-          toast.warning(
-            `Yerleşke oluşturuldu ancak Yönetici ataması başarısız oldu: ${getApiErrorMessage(adminError)}`,
-          )
-        }
-      } else {
-        toast.success('Yerleşke başarıyla eklendi.')
-      }
-
+      await createLocationMutation.mutateAsync({ name: name.trim(), adminUserId: adminUserId || undefined })
       handleClose()
     } catch (err) {
       setError(getCreateErrorMessage(err))

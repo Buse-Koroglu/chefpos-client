@@ -1,23 +1,20 @@
 import type { LucideIcon } from 'lucide-react'
-import {
-  Archive,
-  Clock3,
-  Home,
-  Wheat,
-} from 'lucide-react'
+import {Archive,Clock3,Home,Wheat} from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 
 import { cn } from '@/lib/utils'
 import { SidebarUserCard } from '@/shared/components/SidebarUserCard'
 
-interface NavItem {
+interface SidebarItem {
   label: string
   icon: LucideIcon
   to: string
   end?: boolean
 }
 
-const NAV_ITEMS: NavItem[] = [
+// Stock Manager Sidebar
+
+const SIDEBAR_ITEMS: SidebarItem[] = [
   { label: 'Genel Bakış', icon: Home, to: '/app/stock-manager', end: true },
   { label: 'Bekleyen Stok Talepleri', icon: Clock3, to: '/app/stock-manager/pending-requests' },
   { label: 'Geçmiş Stok Talepleri', icon: Archive, to: '/app/stock-manager/past-requests' },
@@ -34,17 +31,13 @@ export function StockManagerSidebar() {
       </div>
 
       <nav className="flex flex-1 flex-col gap-1 px-3 py-3">
-        {NAV_ITEMS.map(({ label, icon: Icon, to, end }) => (
+        {SIDEBAR_ITEMS.map(({ label, icon: Icon, to, end }) => (
           <NavLink
             key={label}
             to={to}
             end={end}
-            className={({ isActive }) =>
-              cn(
-                'flex items-center gap-2.5 border-l-2 px-3 py-2 text-sm font-medium transition-colors',
-                isActive
-                  ? 'border-[#133458] bg-zinc-200 text-zinc-900'
-                  : 'border-transparent text-zinc-500 hover:bg-zinc-200/60 hover:text-zinc-900',
+            className={({ isActive }) =>cn('flex items-center gap-2.5 border-l-2 px-3 py-2 text-sm font-medium transition-colors',
+                isActive? 'border-[#133458] bg-zinc-200 text-zinc-900' : 'border-transparent text-zinc-500 hover:bg-zinc-200/60 hover:text-zinc-900',
               )
             }
           >

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Archive, Clock3, PackagePlus } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
-import { CashierHeader } from '@/shared/components/CashierHeader'
+import { StaffHeader } from '@/shared/components/StaffHeader'
 import { StockManagerSidebar } from '@/shared/components/StockManagerSidebar'
 import { useLocations } from '@/shared/hooks/useLocations'
 import { useLocationStore } from '@/shared/stores/locationStore'
@@ -35,7 +35,7 @@ export function StockManagerDashboardPage() {
       <StockManagerSidebar />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
-        <CashierHeader title="Genel Bakış" locationName={locationName} />
+        <StaffHeader title="Genel Bakış" locationName={locationName} />
 
         <main className="flex flex-1 flex-col gap-6 p-6">
           <section>

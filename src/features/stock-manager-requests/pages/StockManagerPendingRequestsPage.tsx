@@ -4,12 +4,12 @@ import { useLocationStore } from '@/shared/stores/locationStore'
 import { useLocations } from '@/shared/hooks/useLocations'
 import { useDebouncedValue } from '@/shared/hooks/useDebouncedValue'
 import { StockManagerSidebar } from '@/shared/components/StockManagerSidebar'
-import { CashierHeader } from '@/shared/components/CashierHeader'
+import { StaffHeader } from '@/shared/components/StaffHeader'
 import { StockRequestsSearchInput } from '@/features/admin-stock-requests/components/StockRequestsSearchInput'
 import { StockRequestsTable } from '@/features/admin-stock-requests/components/StockRequestsTable'
 import { StockRequestsPagination } from '@/features/admin-stock-requests/components/StockRequestsPagination'
 import { StockRequestDetailPopup } from '@/features/admin-stock-requests/components/StockRequestDetailPopup'
-import { STOCK_REQUESTS_SEARCH_DEBOUNCE_MS } from '@/features/admin-stock-requests/constants'
+import { STOCK_REQUESTS_SEARCH_DEBOUNCE_TIME } from '@/features/admin-stock-requests/constants'
 import { useStockManagerPendingRequests } from '../hooks/useStockManagerPendingRequests'
 
 function getErrorMessage(error: unknown): string {
@@ -31,7 +31,7 @@ export function StockManagerPendingRequestsPage() {
   const [pageNumber, setPageNumber] = useState(1)
   const [selectedStockRequestId, setSelectedStockRequestId] = useState<string | null>(null)
 
-  const searchTerm = useDebouncedValue(searchInput, STOCK_REQUESTS_SEARCH_DEBOUNCE_MS)
+  const searchTerm = useDebouncedValue(searchInput, STOCK_REQUESTS_SEARCH_DEBOUNCE_TIME)
 
   const { data, isLoading, isFetching, isError, error } = useStockManagerPendingRequests(
     locationId,
@@ -55,7 +55,7 @@ export function StockManagerPendingRequestsPage() {
       <StockManagerSidebar />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
-        <CashierHeader title="Bekleyen Stok Talepleri" locationName={locationName} />
+        <StaffHeader title="Bekleyen Stok Talepleri" locationName={locationName} />
 
         <main className="flex min-h-0 flex-1 flex-col gap-4 p-4">
           <StockRequestsSearchInput value={searchInput} onChange={handleSearchChange} />

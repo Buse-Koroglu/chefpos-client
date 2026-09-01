@@ -17,7 +17,7 @@ import { StockRequestsTable } from '@/features/admin-stock-requests/components/S
 import { StockRequestsPagination } from '@/features/admin-stock-requests/components/StockRequestsPagination'
 import { StockRequestDetailPopup } from '@/features/admin-stock-requests/components/StockRequestDetailPopup'
 import { usePagedStockRequestsAdmin } from '@/features/admin-stock-requests/hooks/usePagedStockRequestsAdmin'
-import { STOCK_REQUESTS_SEARCH_DEBOUNCE_MS } from '@/features/admin-stock-requests/constants'
+import { STOCK_REQUESTS_SEARCH_DEBOUNCE_TIME } from '@/features/admin-stock-requests/constants'
 import type { StockRequestStatusFilter } from '@/features/admin-stock-requests/types'
 
 function getStockRequestsErrorMessage(error: unknown): string {
@@ -48,7 +48,7 @@ export function StockRequestsListPage() {
   const [selectedStockRequestId, setSelectedStockRequestId] = useState<string | null>(null)
 
   const { data: locations = [] } = useLocations()
-  const searchTerm = useDebouncedValue(searchInput, STOCK_REQUESTS_SEARCH_DEBOUNCE_MS)
+  const searchTerm = useDebouncedValue(searchInput, STOCK_REQUESTS_SEARCH_DEBOUNCE_TIME)
 
   const effectiveLocationId = isAdminView ? locationId : (sidebarLocationId ?? 'ALL')
 

@@ -2,7 +2,7 @@ import { ChevronUp } from 'lucide-react'
 
 const currencyFormatter = new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' })
 
-interface CartBarProps {
+interface CardBarProps {
   totalCount: number
   totalAmount: number
   onSubmit: () => void
@@ -10,7 +10,9 @@ interface CartBarProps {
   isSubmitting: boolean
 }
 
-export function CartBar({ totalCount, totalAmount, onSubmit, onExpand, isSubmitting }: CartBarProps) {
+// Sipariş Özeti için Cart
+
+export function CardBar({ totalCount, totalAmount, onSubmit, onExpand, isSubmitting }: CardBarProps) {
   if (totalCount === 0) return null
 
   return (

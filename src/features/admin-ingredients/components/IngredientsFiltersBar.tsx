@@ -13,14 +13,7 @@ interface IngredientsFiltersBarProps {
   hideLocationFilter?: boolean
 }
 
-export function IngredientsFiltersBar({
-  locationId,
-  status,
-  locations,
-  onLocationChange,
-  onStatusChange,
-  hideLocationFilter,
-}: IngredientsFiltersBarProps) {
+export function IngredientsFiltersBar({ locationId, status, locations, onLocationChange, onStatusChange, hideLocationFilter }: IngredientsFiltersBarProps) {
   return (
     <div className="flex items-center gap-2">
       {!hideLocationFilter && (

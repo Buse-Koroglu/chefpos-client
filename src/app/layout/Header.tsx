@@ -9,7 +9,6 @@ interface HeaderProps {
 export function Header({ user, onLogout }: HeaderProps) {
   return (
     <header className="flex items-center justify-between border-b px-4 py-3">
-      <div className="text-sm text-muted-foreground">Şube: (seçilmedi)</div>
       <div className="flex items-center gap-3 text-sm">
         <span>
           {user?.firstName} {user?.lastName}

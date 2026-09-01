@@ -1,9 +1,8 @@
 import type { LocationDto } from '@/shared/types/location'
-import { STOCK_REQUEST_STATUS_LABELS, STOCK_REQUEST_STATUSES } from '@/shared/types/stockRequest'
+import { STOCK_REQUEST_STATUS, STOCK_REQUEST_STATUS_LABELS } from '@/shared/types/stockRequest'
 import type { StockRequestStatusFilter } from '@/features/admin-stock-requests/types'
 
-const SELECT_CLASSNAME =
-  'h-9 border border-zinc-200 bg-white px-2.5 text-sm text-zinc-700 outline-none transition-colors focus-visible:border-zinc-400'
+const SELECT_CLASSNAME = 'h-9 border border-zinc-200 bg-white px-2.5 text-sm text-zinc-700 outline-none transition-colors focus-visible:border-zinc-400'
 
 interface StockRequestsFiltersBarProps {
   locationId: string
@@ -18,18 +17,7 @@ interface StockRequestsFiltersBarProps {
   onEndDateChange?: (value: string) => void
 }
 
-export function StockRequestsFiltersBar({
-  locationId,
-  status,
-  locations,
-  onLocationChange,
-  onStatusChange,
-  hideLocationFilter,
-  startDate,
-  endDate,
-  onStartDateChange,
-  onEndDateChange,
-}: StockRequestsFiltersBarProps) {
+export function StockRequestsFiltersBar({ locationId, status, locations, onLocationChange, onStatusChange, hideLocationFilter, startDate, endDate, onStartDateChange, onEndDateChange}: StockRequestsFiltersBarProps) {
   return (
     <div className="flex items-center gap-2">
       {!hideLocationFilter && (
@@ -53,7 +41,7 @@ export function StockRequestsFiltersBar({
         className={SELECT_CLASSNAME}
       >
         <option value="ALL">Tümü</option>
-        {STOCK_REQUEST_STATUSES.map((value) => (
+        {STOCK_REQUEST_STATUS.map((value) => (
           <option key={value} value={value}>
             {STOCK_REQUEST_STATUS_LABELS[value]}
           </option>

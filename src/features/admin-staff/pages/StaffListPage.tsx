@@ -16,7 +16,7 @@ import { StaffPagination } from '@/features/admin-staff/components/StaffPaginati
 import { StaffEditPopup } from '@/features/admin-staff/components/StaffEditPopup'
 import { AddStaffPopup } from '@/features/admin-staff/components/AddStaffPopup'
 import { usePagedStaffAdmin } from '@/features/admin-staff/hooks/usePagedStaffAdmin'
-import { STAFF_SEARCH_DEBOUNCE_MS } from '@/features/admin-staff/constants'
+import { STAFF_SEARCH_DEBOUNCE_TIME } from '@/features/admin-staff/constants'
 import type { RoleFilter, StaffFilters, StatusFilter } from '@/features/admin-staff/types'
 
 function toIsActiveParam(status: StaffFilters['status']): boolean | undefined {
@@ -47,7 +47,7 @@ export function StaffListPage() {
   const { data: locations = [] } = useLocations()
   const locationsById = useMemo(() => new Map(locations.map((location) => [location.id, location.name])), [locations])
 
-  const searchTerm = useDebouncedValue(searchInput, STAFF_SEARCH_DEBOUNCE_MS)
+  const searchTerm = useDebouncedValue(searchInput, STAFF_SEARCH_DEBOUNCE_TIME)
   const { data, isLoading, isFetching, isError, error } = usePagedStaffAdmin(searchTerm, filters, pageNumber)
   const items = useMemo(() => data?.items ?? [], [data])
 

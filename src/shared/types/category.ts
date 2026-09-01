@@ -1,4 +1,4 @@
-export interface GetCategoriesQueryParams {
+export interface GetCategoriesQueryRequest {
   locationId: string
   includeInactive?: boolean
 }
@@ -21,7 +21,7 @@ export interface CategoryAdminResponseDto {
   productCount: number
 }
 
-export interface GetCategoriesAdminQueryParams {
+export interface GetCategoriesAdminQueryRequest {
   searchTerm?: string
   locationId?: string
   isActive?: boolean
@@ -29,13 +29,6 @@ export interface GetCategoriesAdminQueryParams {
   pageSize?: number
 }
 
-export interface PagedResult<T> {
-  items: T[]
-  totalCount: number
-  pageNumber: number
-  pageSize: number
-  totalPages: number
-}
 
 export interface CreateCategoryRequest {
   name: string
@@ -47,3 +40,5 @@ export interface UpdateCategoryRequest {
   name: string
   icon?: string | null
 }
+
+export type ExportCategoriesQueryRequest = Omit<GetCategoriesAdminQueryRequest, 'pageNumber' | 'pageSize'>

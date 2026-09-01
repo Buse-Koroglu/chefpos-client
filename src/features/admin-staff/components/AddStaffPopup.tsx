@@ -1,134 +1,20 @@
-import { useMemo, useState, useRef, useEffect } from 'react'
+import { useMemo, useState } from 'react'
 import axios from 'axios'
-import { useQueryClient } from '@tanstack/react-query'
 import { Dialog } from '@base-ui/react/dialog'
-import { AlertTriangle, Check, ChevronDown, Copy, RotateCcw, X } from 'lucide-react'
+import { AlertTriangle, Check, Copy, RotateCcw, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/shared/stores/authStore'
 import type { Role, UserResponseDto } from '@/shared/types/auth'
 import type { LocationDto } from '@/shared/types/location'
-import { assignLocationAccess, createUser, getStockManagerByLocation } from '@/shared/api/endpoints/users'
-import { getApiErrorMessage } from '@/shared/api/apiError'
 import { InfoDialog } from '@/shared/components/InfoDialog'
+import { getApiErrorMessage } from '@/shared/api/apiError'
 import { ROLE_LABELS, ROLE_OPTIONS } from '@/features/admin-staff/constants'
-import { isStockManagerConflict } from '@/features/admin-staff/utils'
-
-const FIELD_CLASSNAME =
-  'h-10 w-full rounded-none border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
-
-interface MultiSelectDropdownProps<T extends string> {
-  label: string
-  placeholder: string
-  itemLabelSingular?: string
-  options: { id: T; label: string }[]
-  selectedIds: T[]
-  onToggle: (id: T) => void
-  disabled?: boolean
-  hasError?: boolean
-}
-
-function MultiSelectDropdown<T extends string>({
-  label,
-  placeholder,
-  itemLabelSingular = 'öğe',
-  options,
-  selectedIds,
-  onToggle,
-  disabled,
-  hasError,
-}: MultiSelectDropdownProps<T>) {
-  const [isOpen, setIsOpen] = useState(false)
-  const dropdownRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false)
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
-
-  return (
-    <div className="relative space-y-1.5" ref={dropdownRef}>
-      <label className="block text-xs font-medium text-zinc-600">{label}</label>
-
-      {/* Tetikleyici Buton */}
-      <button
-        type="button"
-        disabled={disabled}
-        onClick={() => setIsOpen((prev) => !prev)}
-        className={cn(
-          FIELD_CLASSNAME,
-          'flex items-center justify-between text-left cursor-pointer transition-all',
-          hasError && 'border-red-300',
-          isOpen && 'border-[#133458] ring-1 ring-[#133458]',
-          disabled && 'opacity-60 cursor-not-allowed bg-zinc-50',
-        )}
-      >
-        <span className="truncate text-zinc-600">
-          {selectedIds.length === 0 ? placeholder : `${selectedIds.length} ${itemLabelSingular} seçildi`}
-        </span>
-        <ChevronDown
-          className={cn('size-4 text-zinc-400 transition-transform duration-200', isOpen && 'rotate-180')}
-        />
-      </button>
-
-      {/* Açılır Liste */}
-      {isOpen && (
-        <div className="absolute z-50 mt-1 max-h-56 w-full overflow-y-auto border border-zinc-200 bg-white shadow-lg">
-          <div className="p-1 space-y-0.5">
-            {options.map((option) => {
-              const isSelected = selectedIds.includes(option.id)
-              return (
-                <button
-                  key={option.id}
-                  type="button"
-                  onClick={() => onToggle(option.id)}
-                  className={cn(
-                    'flex w-full items-center justify-between px-3 py-2 text-xs font-medium transition-colors text-left',
-                    isSelected ? 'bg-[#133458]/10 text-[#133458]' : 'text-zinc-700 hover:bg-zinc-100',
-                  )}
-                >
-                  <span className="truncate">{option.label}</span>
-                  {isSelected && <Check className="size-3.5 text-[#133458] shrink-0 ml-2" />}
-                </button>
-              )
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Seçili Rozetler (Chips) */}
-      {selectedIds.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 pt-1">
-          {selectedIds.map((id) => {
-            const opt = options.find((o) => o.id === id)
-            return (
-              <span
-                key={id}
-                className="inline-flex items-center gap-1 border border-[#133458] bg-[#133458] px-2 py-0.5 text-xs font-medium text-white"
-              >
-                {opt?.label ?? id}
-                <button
-                  type="button"
-                  onClick={() => onToggle(id)}
-                  disabled={disabled}
-                  className="hover:opacity-75 focus:outline-none"
-                >
-                  <X className="size-3" />
-                </button>
-              </span>
-            )
-          })}
-        </div>
-      )}
-    </div>
-  )
-}
+import { isStockManagerConflict, StockManagerPrecheckError } from '@/features/admin-staff/utils'
+import { FIELD_CLASSNAME, MultiSelectDropdown } from './MultiSelectDropdown'
+import { useCreateStaffMember } from '@/features/admin-staff/hooks/useCreateStaffMember'
+import { useAssignLocationAccess } from '@/features/admin-staff/hooks/useAssignLocationAccess'
 
 interface FormErrors {
   firstName?: string
@@ -153,18 +39,6 @@ function getCreateErrorMessage(error: unknown): string {
     if (status === 401 || status === 403) return 'Bu işlem için yönetici yetkisine sahip olmalısınız.'
   }
   return 'Personel oluşturulamadı. Lütfen tekrar deneyin.'
-}
-
-function addUserToCache(queryClient: ReturnType<typeof useQueryClient>, user: UserResponseDto) {
-  queryClient.setQueriesData<UserResponseDto[]>({ queryKey: ['users'], exact: false }, (old) =>
-    Array.isArray(old) ? [user, ...old.filter((member) => member.id !== user.id)] : old,
-  )
-}
-
-function updateUserInCache(queryClient: ReturnType<typeof useQueryClient>, user: UserResponseDto) {
-  queryClient.setQueriesData<UserResponseDto[]>({ queryKey: ['users'], exact: false }, (old) =>
-    Array.isArray(old) ? old.map((member) => (member.id === user.id ? user : member)) : old,
-  )
 }
 
 interface StaffFormStepProps {
@@ -301,15 +175,7 @@ interface StaffResultStepProps {
   onFinish: () => void
 }
 
-function StaffResultStep({
-  user,
-  generatedPassword,
-  failedLocationIds,
-  locationsById,
-  onRetryLocation,
-  retryingLocationId,
-  onFinish,
-}: StaffResultStepProps) {
+function StaffResultStep({user,generatedPassword,failedLocationIds,locationsById,onRetryLocation,retryingLocationId,onFinish}:StaffResultStepProps) {
   function handleCopy() {
     if (!generatedPassword) return
     navigator.clipboard.writeText(generatedPassword).then(() => toast.success('Şifre kopyalandı.'))
@@ -386,12 +252,13 @@ interface AddStaffPopupProps {
 }
 
 export function AddStaffPopup({ open, locations, onClose }: AddStaffPopupProps) {
-  const queryClient = useQueryClient()
   const adminLocationId = useAuthStore((state) => state.user?.locationIds[0])
   const locationsById = useMemo(() => new Map(locations.map((location) => [location.id, location.name])), [locations])
 
+  const createStaffMember = useCreateStaffMember()
+  const assignLocation = useAssignLocationAccess()
+
   const [step, setStep] = useState<'form' | 'result'>('form')
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [createdUser, setCreatedUser] = useState<UserResponseDto | null>(null)
   const [generatedPassword, setGeneratedPassword] = useState<string | null>(null)
@@ -401,7 +268,6 @@ export function AddStaffPopup({ open, locations, onClose }: AddStaffPopupProps) 
 
   function reset() {
     setStep('form')
-    setIsSubmitting(false)
     setSubmitError(null)
     setCreatedUser(null)
     setGeneratedPassword(null)
@@ -422,64 +288,23 @@ export function AddStaffPopup({ open, locations, onClose }: AddStaffPopupProps) 
     roles: Role[]
     locationIds: string[]
   }) {
-    setIsSubmitting(true)
     setSubmitError(null)
 
-    if (data.roles.includes('STOCK_MANAGER') && data.locationIds.length > 0) {
-      const existingManagers = await Promise.all(
-        data.locationIds.map((locationId) => getStockManagerByLocation(locationId)),
-      )
-      const conflictIndex = existingManagers.findIndex((manager) => manager !== null)
-      if (conflictIndex !== -1) {
-        const manager = existingManagers[conflictIndex]!
-        const locationName = locationsById.get(data.locationIds[conflictIndex]) ?? ''
-        setStockManagerConflictMessage(
-          `${locationName} yerleşkesinde zaten bir Stok Yöneticisi atanmış: ${manager.firstName} ${manager.lastName}. Personeli oluşturmadan önce ilgili kullanıcının rolünü değiştirin veya farklı bir yerleşke seçin.`,
-        )
-        setIsSubmitting(false)
-        return
-      }
-    }
-
     try {
-      const { user, generatedPassword: password } = await createUser({
-        personalId: data.personalId,
-        firstName: data.firstName,
-        lastName: data.lastName,
-        roles: data.roles,
-      })
-
-      let finalUser = user
-      const failed: string[] = []
-
-      for (const locationId of data.locationIds) {
-        try {
-          finalUser = await assignLocationAccess(user.id, locationId)
-        } catch (error) {
-          failed.push(locationId)
-          const message = getApiErrorMessage(error)
-          if (isStockManagerConflict(message)) {
-            setStockManagerConflictMessage(message)
-          }
-        }
-      }
-
-      addUserToCache(queryClient, finalUser)
-      setCreatedUser(finalUser)
-      setGeneratedPassword(password)
-      setFailedLocationIds(failed)
+      const result = await createStaffMember.mutateAsync({ ...data, locationsById })
+      setCreatedUser(result.user)
+      setGeneratedPassword(result.generatedPassword)
+      setFailedLocationIds(result.failedLocationIds)
       setStep('result')
-
-      if (failed.length > 0) {
-        const failedNames = failed.map((id) => locationsById.get(id) ?? id).join(', ')
-        toast.warning(`${finalUser.firstName} ${finalUser.lastName} oluşturuldu ancak ${failedNames} lokasyonu atanamadı.`)
-      } else {
-        toast.success('Personel başarıyla eklendi.')
+      if (result.stockManagerConflictMessage) {
+        setStockManagerConflictMessage(result.stockManagerConflictMessage)
       }
     } catch (error) {
-      setSubmitError(getCreateErrorMessage(error))
-    } finally {
-      setIsSubmitting(false)
+      if (error instanceof StockManagerPrecheckError) {
+        setStockManagerConflictMessage(error.message)
+      } else {
+        setSubmitError(getCreateErrorMessage(error))
+      }
     }
   }
 
@@ -487,17 +312,15 @@ export function AddStaffPopup({ open, locations, onClose }: AddStaffPopupProps) 
     if (!createdUser) return
     setRetryingLocationId(locationId)
     try {
-      const updatedUser = await assignLocationAccess(createdUser.id, locationId)
+      const updatedUser = await assignLocation.mutateAsync({ userId: createdUser.id, locationId })
       setCreatedUser(updatedUser)
       setFailedLocationIds((prev) => prev.filter((id) => id !== locationId))
-      updateUserInCache(queryClient, updatedUser)
       toast.success('Lokasyon ataması tamamlandı.')
     } catch (error) {
-      const message = getApiErrorMessage(error, 'Lokasyon ataması yine başarısız oldu.')
-      if (isStockManagerConflict(message)) {
-        setStockManagerConflictMessage(message)
+      if (isStockManagerConflict(error)) {
+        setStockManagerConflictMessage(getApiErrorMessage(error))
       } else {
-        toast.error(message)
+        toast.error(getApiErrorMessage(error, 'Lokasyon ataması yine başarısız oldu.'))
       }
     } finally {
       setRetryingLocationId(null)
@@ -515,7 +338,7 @@ export function AddStaffPopup({ open, locations, onClose }: AddStaffPopupProps) 
               key={open ? 'open' : 'closed'}
               locations={locations}
               adminLocationId={adminLocationId}
-              isSubmitting={isSubmitting}
+              isSubmitting={createStaffMember.isPending}
               submitError={submitError}
               onCancel={handleClose}
               onSubmit={handleSubmit}

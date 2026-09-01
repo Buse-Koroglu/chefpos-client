@@ -18,8 +18,7 @@ export function useLiveClock() {
 
   useEffect(() => {
     const intervalId = window.setInterval(() => setNow(new Date()), 1000)
-    return () => window.clearInterval(intervalId)
-  }, [])
+    return () => window.clearInterval(intervalId)}, [])
 
   return {
     date: dateFormatter.format(now),

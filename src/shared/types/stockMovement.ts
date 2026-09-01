@@ -28,7 +28,7 @@ export interface StockMovementResponseDto {
   createdAt: string
 }
 
-export interface GetStockMovementsPagedQueryParams {
+export interface GetStockMovementsPagedQueryRequest {
   ingredientId?: string
   locationId?: string
   type?: StockMovementType
@@ -36,10 +36,3 @@ export interface GetStockMovementsPagedQueryParams {
   pageSize?: number
 }
 
-export interface PagedResult<T> {
-  items: T[]
-  totalCount: number
-  pageNumber: number
-  pageSize: number
-  totalPages: number
-}

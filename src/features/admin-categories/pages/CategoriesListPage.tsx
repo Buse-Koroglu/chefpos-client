@@ -17,7 +17,7 @@ import { CategoriesPagination } from '@/features/admin-categories/components/Cat
 import { CategoryEditPopup } from '@/features/admin-categories/components/CategoryEditPopup'
 import { AddCategoryPopup } from '@/features/admin-categories/components/AddCategoryPopup'
 import { usePagedCategoriesAdmin } from '@/features/admin-categories/hooks/usePagedCategoriesAdmin'
-import { CATEGORIES_SEARCH_DEBOUNCE_MS } from '@/features/admin-categories/constants'
+import { CATEGORIES_SEARCH_DEBOUNCE_TIME } from '@/features/admin-categories/constants'
 import type { CategoryStatusFilter } from '@/features/admin-categories/types'
 
 function toIsActiveParam(status: CategoryStatusFilter): boolean | undefined {
@@ -50,7 +50,7 @@ export function CategoriesListPage({ variant = 'admin' }: CategoriesListPageProp
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
 
   const { data: locations = [] } = useLocations()
-  const searchTerm = useDebouncedValue(searchInput, CATEGORIES_SEARCH_DEBOUNCE_MS)
+  const searchTerm = useDebouncedValue(searchInput, CATEGORIES_SEARCH_DEBOUNCE_TIME)
 
   const { data, isLoading, isFetching, isError, error } = usePagedCategoriesAdmin(
     searchTerm,

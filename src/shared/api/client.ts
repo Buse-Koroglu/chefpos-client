@@ -33,12 +33,8 @@ function forceLogout() {
   window.location.href = '/login'
 }
 
-apiClient.interceptors.response.use(
-  (response) => response,
-  async (error: AxiosError) => {
-    const originalRequest = error.config as
-      | (InternalAxiosRequestConfig & { _retry?: boolean })
-      | undefined
+apiClient.interceptors.response.use((response) => response, async (error: AxiosError) => {
+    const originalRequest = error.config as | (InternalAxiosRequestConfig & { _retry?: boolean }) | undefined
 
     const isAuthPath = AUTH_PATHS.some((path) =>
       originalRequest?.url?.includes(path),
