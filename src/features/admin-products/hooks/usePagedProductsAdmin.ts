@@ -9,12 +9,7 @@ function toIsActiveParam(status: ProductStatusFilter): boolean | undefined {
   return undefined
 }
 
-export function usePagedProductsAdmin(
-  searchTerm: string,
-  locationId: string,
-  status: ProductStatusFilter,
-  pageNumber: number,
-) {
+export function usePagedProductsAdmin(searchTerm: string,locationId: string,status: ProductStatusFilter,pageNumber: number) {
   return useQuery({
     queryKey: ['products', 'admin', searchTerm, locationId, status, pageNumber],
     queryFn: () =>

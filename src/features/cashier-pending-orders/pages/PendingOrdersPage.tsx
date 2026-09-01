@@ -17,8 +17,7 @@ import { useCancelOrder } from '../hooks/useCancelOrder'
 import { useMakePaidOrder } from '../hooks/useMakePaidOrder'
 import type { Order } from '../types'
 
-const FORM_INPUT_CLASSNAME =
-  'h-10 w-full rounded-none border border-zinc-200 bg-white pl-9 pr-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
+const FORM_INPUT_CLASSNAME = 'h-10 w-full rounded-none border border-zinc-200 bg-white pl-9 pr-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
 
 const TABS: Array<{ value: PendingOrdersTab; label: string }> = [
   { value: 'PREPARING', label: 'Bekleyen Siparişler' },
@@ -57,9 +56,7 @@ export function PendingOrdersPage() {
   const normalizedQuery = query.trim().toLocaleLowerCase('tr-TR')
   const filteredOrders = normalizedQuery
     ? orders.filter(
-        (order) =>
-          String(order.orderNumber).includes(normalizedQuery) ||
-          order.customerName.toLocaleLowerCase('tr-TR').includes(normalizedQuery),
+        (order) => String(order.orderNumber).includes(normalizedQuery) || order.customerName.toLocaleLowerCase('tr-TR').includes(normalizedQuery)
       )
     : orders
 
@@ -138,9 +135,7 @@ export function PendingOrdersPage() {
                 onClick={() => handleTabChange(tabItem.value)}
                 className={cn(
                   'flex-1 border-b-2 px-4 py-2.5 text-sm font-medium transition-colors',
-                  tab === tabItem.value
-                    ? 'border-[#133458] bg-zinc-50 text-zinc-900'
-                    : 'border-transparent text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900',
+                  tab === tabItem.value ? 'border-[#133458] bg-zinc-50 text-zinc-900' : 'border-transparent text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900',
                 )}
               >
                 {tabItem.label}

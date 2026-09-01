@@ -15,8 +15,7 @@ import { useCategories } from '../hooks/useCategories'
 import { useCreateOrder } from '../hooks/useCreateOrder'
 import { useMenus } from '../hooks/useMenus'
 
-const FORM_INPUT_CLASSNAME =
-  'h-11 rounded-none border-zinc-200 bg-white text-zinc-900 placeholder:text-zinc-400 focus-visible:border-zinc-400 focus-visible:ring-zinc-200'
+const FORM_INPUT_CLASSNAME = 'h-11 rounded-none border-zinc-200 bg-white text-zinc-900 placeholder:text-zinc-400 focus-visible:border-zinc-400 focus-visible:ring-zinc-200'
 
 export function NewOrderPage() {
   const locationId = useLocationStore((state) => state.selectedLocationId) ?? undefined
@@ -34,9 +33,7 @@ export function NewOrderPage() {
     isLoading,
     isError,
   } = useProducts(locationId, menuId ? undefined : categoryId || undefined, Boolean(menuId))
-  const displayProducts = activeMenu
-    ? products.filter((product) => activeMenu.products.some((menuProduct) => menuProduct.productId === product.id))
-    : products
+  const displayProducts = activeMenu ? products.filter((product) => activeMenu.products.some((menuProduct) => menuProduct.productId === product.id)) : products
   const createOrder = useCreateOrder()
 
   function handleCategoryChange(value: string) {

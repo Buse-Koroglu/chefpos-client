@@ -1,21 +1,18 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState } from 'react'
 import axios from 'axios'
-import { useQueryClient } from '@tanstack/react-query'
 import { Dialog } from '@base-ui/react/dialog'
-import { AlertTriangle, Eye, EyeOff, X, ChevronDown, Check } from 'lucide-react'
-import { toast } from 'sonner'
+import { AlertTriangle, Eye, EyeOff, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import type { Role, UserResponseDto } from '@/shared/types/auth'
 import type { LocationDto } from '@/shared/types/location'
-import { activateUser, addRole, deactivateUser, getStockManagerByLocation, removeRole } from '@/shared/api/endpoints/users'
 import { Skeleton } from '@/shared/components/Skeleton'
 import { InfoDialog } from '@/shared/components/InfoDialog'
 import { ROLE_LABELS, ROLE_OPTIONS } from '@/features/admin-staff/constants'
+import { StockManagerPrecheckError } from '@/features/admin-staff/utils'
 import { useUserDetail } from '@/features/admin-staff/hooks/useUserDetail'
-
-const FIELD_CLASSNAME =
-  'h-10 w-full rounded-none border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
+import { useUpdateStaffMember } from '@/features/admin-staff/hooks/useUpdateStaffMember'
+import { FIELD_CLASSNAME, MultiSelectDropdown } from './MultiSelectDropdown'
 
 function getDetailErrorMessage(error: unknown): string {
   if (axios.isAxiosError(error)) {
@@ -27,119 +24,6 @@ function getDetailErrorMessage(error: unknown): string {
   return 'Personel bilgileri yüklenemedi.'
 }
 
-function updateUserInCache(queryClient: ReturnType<typeof useQueryClient>, user: UserResponseDto) {
-  queryClient.setQueryData(['users', 'detail', user.id], user)
-  queryClient.setQueriesData<UserResponseDto[]>({ queryKey: ['users'], exact: false }, (old) =>
-    Array.isArray(old) ? old.map((member) => (member.id === user.id ? user : member)) : old,
-  )
-}
-
-interface MultiSelectDropdownProps<T extends string> {
-  label: string
-  placeholder: string
-  options: { id: T; label: string }[]
-  selectedIds: T[]
-  onToggle: (id: T) => void
-  disabled?: boolean
-}
-
-function MultiSelectDropdown<T extends string>({
-  label,
-  placeholder,
-  options,
-  selectedIds,
-  onToggle,
-  disabled,
-}: MultiSelectDropdownProps<T>) {
-  const [isOpen, setIsOpen] = useState(false)
-  const dropdownRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false)
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
-
-  return (
-    <div className="relative space-y-1.5" ref={dropdownRef}>
-      <label className="block text-xs font-medium text-zinc-600">{label}</label>
-
-      <button
-        type="button"
-        disabled={disabled}
-        onClick={() => setIsOpen((prev) => !prev)}
-        className={cn(
-          FIELD_CLASSNAME,
-          'flex items-center justify-between text-left cursor-pointer transition-all',
-          isOpen && 'border-[#133458] ring-1 ring-[#133458]',
-          disabled && 'opacity-60 cursor-not-allowed bg-zinc-50'
-        )}
-      >
-        <span className="truncate text-zinc-600">
-          {selectedIds.length === 0 ? placeholder : `${selectedIds.length} öğe seçildi`}
-        </span>
-        <ChevronDown
-          className={cn('size-4 text-zinc-400 transition-transform duration-200', isOpen && 'rotate-180')}
-        />
-      </button>
-
-      {isOpen && (
-        <div className="absolute z-50 mt-1 max-h-56 w-full overflow-y-auto border border-zinc-200 bg-white shadow-lg">
-          <div className="p-1 space-y-0.5">
-            {options.map((option) => {
-              const isSelected = selectedIds.includes(option.id)
-              return (
-                <button
-                  key={option.id}
-                  type="button"
-                  onClick={() => onToggle(option.id)}
-                  className={cn(
-                    'flex w-full items-center justify-between px-3 py-2 text-xs font-medium transition-colors text-left',
-                    isSelected
-                      ? 'bg-[#133458]/10 text-[#133458]'
-                      : 'text-zinc-700 hover:bg-zinc-100'
-                  )}
-                >
-                  <span className="truncate">{option.label}</span>
-                  {isSelected && <Check className="size-3.5 text-[#133458] shrink-0 ml-2" />}
-                </button>
-              )
-            })}
-          </div>
-        </div>
-      )}
-
-      {selectedIds.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 pt-1">
-          {selectedIds.map((id) => {
-            const opt = options.find((o) => o.id === id)
-            return (
-              <span
-                key={id}
-                className="inline-flex items-center gap-1 border border-[#133458] bg-[#133458] px-2 py-0.5 text-xs font-medium text-white"
-              >
-                {opt?.label ?? id}
-                <button
-                  type="button"
-                  onClick={() => onToggle(id)}
-                  disabled={disabled}
-                  className="hover:opacity-75 focus:outline-none"
-                >
-                  <X className="size-3" />
-                </button>
-              </span>
-            )
-          })}
-        </div>
-      )}
-    </div>
-  )
-}
-
 interface StaffEditFormProps {
   staff: UserResponseDto
   locations: LocationDto[]
@@ -147,86 +31,44 @@ interface StaffEditFormProps {
 }
 
 function StaffEditForm({ staff, locations, onClose }: StaffEditFormProps) {
-  const queryClient = useQueryClient()
+  const updateStaffMember = useUpdateStaffMember()
 
   const [baseline, setBaseline] = useState(staff)
   const [roles, setRoles] = useState<Role[]>(staff.roles)
   const [locationIds, setLocationIds] = useState<string[]>(staff.locationIds)
   const [isActive, setIsActive] = useState(staff.isActive)
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const [saveErrors, setSaveErrors] = useState<string[]>([])
   const [showPersonalId, setShowPersonalId] = useState(false)
   const [stockManagerConflictMessage, setStockManagerConflictMessage] = useState<string | null>(null)
+
+  const locationsById = new Map(locations.map((location) => [location.id, location.name]))
 
   function toggleRole(role: Role) {
     setRoles((prev) => (prev.includes(role) ? prev.filter((value) => value !== role) : [...prev, role]))
   }
 
   async function handleSave() {
-    setIsSubmitting(true)
     setSaveErrors([])
     setStockManagerConflictMessage(null)
 
-    let current = baseline
-    const errors: string[] = []
+    try {
+      const result = await updateStaffMember.mutateAsync({ baseline, roles, locationIds, isActive, locationsById })
+      setBaseline(result.user)
+      setRoles(result.user.roles)
+      setLocationIds(result.user.locationIds)
+      setIsActive(result.user.isActive)
 
-    const rolesToAdd = roles.filter((role) => !baseline.roles.includes(role))
-    const rolesToRemove = baseline.roles.filter((role) => !roles.includes(role))
-
-    if (roles.includes('STOCK_MANAGER') && locationIds.length > 0) {
-      const existingManagers = await Promise.all(
-        locationIds.map((locationId) => getStockManagerByLocation(locationId)),
-      )
-      const conflictIndex = existingManagers.findIndex((manager) => manager !== null && manager.id !== staff.id)
-      if (conflictIndex !== -1) {
-        const manager = existingManagers[conflictIndex]!
-        const locationName = locations.find((location) => location.id === locationIds[conflictIndex])?.name ?? ''
-        setStockManagerConflictMessage(
-          `${locationName} yerleşkesinde zaten bir Stok Yöneticisi atanmış: ${manager.firstName} ${manager.lastName}. Değişiklikleri kaydetmeden önce ilgili kullanıcının rolünü değiştirin veya farklı bir yerleşke seçin.`,
-        )
-        setIsSubmitting(false)
+      if (result.errors.length > 0) {
+        setSaveErrors(result.errors)
         return
       }
-    }
 
-    for (const role of rolesToAdd) {
-      try {
-        current = await addRole(current.id, role)
-      } catch {
-        errors.push(`${ROLE_LABELS[role]} rolü eklenemedi.`)
+      onClose()
+    } catch (error) {
+      if (error instanceof StockManagerPrecheckError) {
+        setStockManagerConflictMessage(error.message)
       }
     }
-
-    for (const role of rolesToRemove) {
-      try {
-        current = await removeRole(current.id, role)
-      } catch {
-        errors.push(`${ROLE_LABELS[role]} rolü kaldırılamadı.`)
-      }
-    }
-
-    if (isActive !== baseline.isActive) {
-      try {
-        current = isActive ? await activateUser(current.id) : await deactivateUser(current.id)
-      } catch {
-        errors.push('Durum güncellenemedi.')
-      }
-    }
-
-    updateUserInCache(queryClient, current)
-    setBaseline(current)
-    setRoles(current.roles)
-    setLocationIds(current.locationIds)
-    setIsActive(current.isActive)
-    setIsSubmitting(false)
-
-    if (errors.length > 0) {
-      setSaveErrors(errors)
-      return
-    }
-
-    toast.success('Personel bilgileri güncellendi.')
-    onClose()
   }
 
   const hasChanges =
@@ -294,7 +136,7 @@ function StaffEditForm({ staff, locations, onClose }: StaffEditFormProps) {
           options={roleOptions}
           selectedIds={roles}
           onToggle={toggleRole}
-          disabled={isSubmitting}
+          disabled={updateStaffMember.isPending}
         />
 
         <div>
@@ -312,7 +154,7 @@ function StaffEditForm({ staff, locations, onClose }: StaffEditFormProps) {
             <button
               type="button"
               onClick={() => setIsActive(true)}
-              disabled={isSubmitting}
+              disabled={updateStaffMember.isPending}
               className={cn(
                 'flex-1 border-r border-zinc-200 py-2 text-xs font-medium transition-colors',
                 isActive ? 'bg-[#84994F] text-white hover:bg-[#708243]' : 'bg-white text-zinc-600 hover:bg-zinc-50',
@@ -323,7 +165,7 @@ function StaffEditForm({ staff, locations, onClose }: StaffEditFormProps) {
             <button
               type="button"
               onClick={() => setIsActive(false)}
-              disabled={isSubmitting}
+              disabled={updateStaffMember.isPending}
               className={cn(
                 'flex-1 py-2 text-xs font-medium transition-colors',
                 !isActive ? 'bg-destructive text-white hover:bg-destructive/90' : 'bg-white text-zinc-600 hover:bg-zinc-50',
@@ -350,9 +192,9 @@ function StaffEditForm({ staff, locations, onClose }: StaffEditFormProps) {
           type="button"
           className="h-11 flex-1 rounded-none bg-[#133458] text-sm text-white hover:bg-[#0f2843]"
           onClick={handleSave}
-          disabled={isSubmitting || !hasChanges}
+          disabled={updateStaffMember.isPending || !hasChanges}
         >
-          {isSubmitting ? 'Kaydediliyor...' : 'Değişiklikleri Kaydet'}
+          {updateStaffMember.isPending ? 'Kaydediliyor...' : 'Değişiklikleri Kaydet'}
         </Button>
       </div>
 

@@ -74,7 +74,7 @@ export function OrderHistoryDetailPage() {
     )
   }
 
-  const canEdit = order.status === 'PENDING' && order.paymentStatus === 'UNPAID'
+  const canEdit = order.status === 'PENDING' && order.paymentStatus === 'UNPAID' // eğer sipariş hazırlama aşamasında ve ödenmemiş ise sipariş güncellenebilir.
 
   function handleAdd(productId: string) {
     addItem.mutate(

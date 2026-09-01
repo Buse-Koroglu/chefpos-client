@@ -6,25 +6,25 @@ import { useKioskProducts } from '../hooks/useKioskProducts'
 import { useKioskCart } from '../hooks/useKioskCart'
 import { useCreateKioskOrder } from '../hooks/useCreateKioskOrder'
 import { useMakeKioskOrderPaid } from '../hooks/useMakeKioskOrderPaid'
-import { useIdleTimer } from '../hooks/useIdleTimer'
 import { KioskCategoryTabs } from '../components/KioskCategoryTabs'
-import { KioskCartPanel } from '../components/KioskCartPanel'
+import { KioskCardPanel } from '../components/KioskCardPanel'
 import { KioskReviewStep } from '../components/KioskReviewStep'
 import { KioskPaymentStep } from '../components/KioskPaymentStep'
 import { KioskConfirmationScreen } from '../components/KioskConfirmationScreen'
 import type { Product } from '../types'
+import { useUnactiveTimer } from '../hooks/useUnactiveTimer'
 
-const IDLE_TIMEOUT_MS = 75_000
+const INACTIVE_TIMEOUT_MS = 75_000 // 75 saniye tıklanma olmazsa her değeri sıfırlayıp sipariş alma ekranına dönmesi için
 
 type Step = 'menu' | 'review' | 'payment' | 'confirmation'
-type PaymentStatus = 'idle' | 'processing' | 'error'
+type PaymentStatus = 'unactive' | 'processing' | 'error'
 
 export function KioskPage() {
   const { locationId } = useParams<{ locationId: string }>()
   const [categoryId, setCategoryId] = useState('')
   const [step, setStep] = useState<Step>('menu')
   const [customerName, setCustomerName] = useState('')
-  const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>('idle')
+  const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>('unactive')
   const [paymentError, setPaymentError] = useState<string>()
   const [orderId, setOrderId] = useState<string>()
   const [orderNumber, setOrderNumber] = useState<number>()
@@ -44,13 +44,13 @@ export function KioskPage() {
     setCustomerName('')
     setCategoryId('')
     setStep('menu')
-    setPaymentStatus('idle')
+    setPaymentStatus('unactive')
     setPaymentError(undefined)
     setOrderId(undefined)
     setOrderNumber(undefined)
   }
 
-  useIdleTimer(IDLE_TIMEOUT_MS, resetToStart, step !== 'confirmation')
+  useUnactiveTimer(INACTIVE_TIMEOUT_MS, resetToStart, step !== 'confirmation')
 
   function handleAddProduct(product: Product) {
     cart.addItem(product)
@@ -79,7 +79,7 @@ export function KioskPage() {
 
       const paidOrder = await makeOrderPaid.mutateAsync(currentOrderId)
       setOrderNumber(paidOrder.orderNumber ?? currentOrderNumber)
-      setPaymentStatus('idle')
+      setPaymentStatus('unactive')
       setStep('confirmation')
     } catch {
       setPaymentStatus('error')
@@ -156,7 +156,7 @@ export function KioskPage() {
         </main>
       </div>
 
-      <KioskCartPanel
+      <KioskCardPanel
         items={cart.items}
         totalAmount={cart.totalAmount}
         onIncrease={cart.increaseQuantity}

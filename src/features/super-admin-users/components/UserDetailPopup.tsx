@@ -1,13 +1,9 @@
-import { useState } from 'react'
-import { useQueryClient } from '@tanstack/react-query'
 import { Dialog } from '@base-ui/react/dialog'
 import { X } from 'lucide-react'
-import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import type { UserResponseDto } from '@/shared/types/auth'
-import { activateUser, deactivateUser } from '@/shared/api/endpoints/users'
-import { getApiErrorMessage } from '@/shared/api/apiError'
 import { RoleBadge } from '@/features/admin-staff/components/RoleBadge'
+import { useUpdateUserStatus } from '@/features/super-admin-users/hooks/useUpdateUserStatus'
 
 interface UserDetailPopupProps {
   user: UserResponseDto | null
@@ -16,25 +12,12 @@ interface UserDetailPopupProps {
 }
 
 export function UserDetailPopup({ user, locationsById, onClose }: UserDetailPopupProps) {
-  const queryClient = useQueryClient()
-  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false)
+  const updateStatusMutation = useUpdateUserStatus()
+  const isUpdatingStatus = updateStatusMutation.isPending
 
-  async function handleSetActive(nextActive: boolean) {
+  function handleSetActive(nextActive: boolean) {
     if (!user || user.isActive === nextActive) return
-    setIsUpdatingStatus(true)
-    try {
-      if (nextActive) {
-        await activateUser(user.id)
-      } else {
-        await deactivateUser(user.id)
-      }
-      queryClient.invalidateQueries({ queryKey: ['users'], exact: false })
-      toast.success(nextActive ? 'Kullanıcı aktif hale getirildi.' : 'Kullanıcı pasif hale getirildi.')
-    } catch (err) {
-      toast.error(getApiErrorMessage(err, 'Durum güncellenemedi.'))
-    } finally {
-      setIsUpdatingStatus(false)
-    }
+    updateStatusMutation.mutate({ userId: user.id, nextActive })
   }
 
   return (

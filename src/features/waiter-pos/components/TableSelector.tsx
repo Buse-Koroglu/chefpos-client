@@ -10,6 +10,8 @@ interface TableSelectorProps {
   onSelectPackage: () => void
 }
 
+// Masa / Paket Seçim Component'i
+
 export function TableSelector({ tables, selectedTableId, isPackage, onSelect, onSelectPackage }: TableSelectorProps) {
   const [open, setOpen] = useState(false)
   const selected = tables.find((t) => t.id === selectedTableId)
@@ -29,12 +31,8 @@ export function TableSelector({ tables, selectedTableId, isPackage, onSelect, on
         <div className="fixed inset-0 z-50 flex items-end" onClick={() => setOpen(false)}>
           <div className="absolute inset-0 bg-black/40" />
           <div
-            className="relative max-h-[70vh] w-full overflow-y-auto border-t border-zinc-300 bg-white"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <p className="border-b border-zinc-200 px-4 py-3 text-xs font-semibold tracking-wide text-zinc-500 uppercase">
-              Masa Seçin
-            </p>
+            className="relative max-h-[70vh] w-full overflow-y-auto border-t border-zinc-300 bg-white" onClick={(e) => e.stopPropagation()}>
+            <p className="border-b border-zinc-200 px-4 py-3 text-xs font-semibold tracking-wide text-zinc-500 uppercase">  Masa Seçin </p>
             <button
               type="button"
               onClick={() => {
@@ -44,7 +42,7 @@ export function TableSelector({ tables, selectedTableId, isPackage, onSelect, on
               className={`flex w-full items-center gap-2 border-b border-zinc-100 px-4 py-3 text-sm font-medium ${
                 isPackage ? 'bg-[#133458] text-white' : 'text-[#133458]'
               }`}
-            >
+              >
               <ShoppingBag className="size-4" />
               Paket (Masasız Sipariş)
             </button>

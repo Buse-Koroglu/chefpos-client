@@ -24,20 +24,20 @@ export function OrderHistoryPage() {
 
   const [filter, setFilter] = useState<PaymentFilter>('ALL')
   const [pageNumber, setPageNumber] = useState(1)
-  const [accumulatedItems, setAccumulatedItems] = useState<Order[]>([])
+  const [collectedItems, setCollectedItems] = useState<Order[]>([])
 
   const { data, isLoading, isFetching, isError, error } = useOrderHistory(locationId, filter, pageNumber)
 
   const [lastMergedData, setLastMergedData] = useState<typeof data>(undefined)
   if (data && data !== lastMergedData) {
     setLastMergedData(data)
-    setAccumulatedItems((current) => (data.pageNumber === 1 ? data.items : [...current, ...data.items]))
+    setCollectedItems((current) => (data.pageNumber === 1 ? data.items : [...current, ...data.items]))
   }
 
   function handleFilterChange(nextFilter: PaymentFilter) {
     setFilter(nextFilter)
     setPageNumber(1)
-    setAccumulatedItems([])
+    setCollectedItems([])
     setLastMergedData(undefined)
   }
 
@@ -66,12 +66,12 @@ export function OrderHistoryPage() {
           <p className="py-8 text-center text-sm text-zinc-400">Yükleniyor...</p>
         ) : isError ? (
           <p className="py-8 text-center text-sm text-red-500">{getErrorMessage(error)}</p>
-        ) : accumulatedItems.length === 0 ? (
+        ) : collectedItems.length === 0 ? (
           <p className="py-8 text-center text-sm text-zinc-400">Sipariş bulunamadı.</p>
         ) : (
           <>
             <div className="flex flex-col gap-2">
-              {accumulatedItems.map((order) => (
+              {collectedItems.map((order) => (
                 <OrderHistoryCard
                   key={order.id}
                   order={order}

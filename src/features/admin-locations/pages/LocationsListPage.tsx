@@ -11,7 +11,7 @@ import { LocationsPagination } from '@/features/admin-locations/components/Locat
 import { LocationEditPopup } from '@/features/admin-locations/components/LocationEditPopup'
 import { AddLocationPopup } from '@/features/admin-locations/components/AddLocationPopup'
 import { usePagedLocations } from '@/features/admin-locations/hooks/usePagedLocations'
-import { LOCATIONS_SEARCH_DEBOUNCE_MS } from '@/features/admin-locations/constants'
+import { LOCATIONS_SEARCH_DEBOUNCE_TIME } from '@/features/admin-locations/constants'
 import type { LocationStatusFilter } from '@/features/admin-locations/types'
 
 function getLocationsErrorMessage(error: unknown): string {
@@ -31,7 +31,7 @@ export function LocationsListPage() {
   const [selectedLocationId, setSelectedLocationId] = useState<string | null>(null)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
 
-  const searchTerm = useDebouncedValue(searchInput, LOCATIONS_SEARCH_DEBOUNCE_MS)
+  const searchTerm = useDebouncedValue(searchInput, LOCATIONS_SEARCH_DEBOUNCE_TIME)
 
   const { data, isLoading, isFetching, isError, error } = usePagedLocations(searchTerm, status, pageNumber)
   const items = useMemo(() => data?.items ?? [], [data])

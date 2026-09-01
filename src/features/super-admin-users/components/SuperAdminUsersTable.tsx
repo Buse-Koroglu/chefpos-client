@@ -24,15 +24,7 @@ const TABLE_HEAD = (
   </tr>
 )
 
-export function SuperAdminUsersTable({
-  users,
-  locationsById,
-  isLoading,
-  onSelect,
-  onPromote,
-  onDemote,
-  demotingUserId,
-}: SuperAdminUsersTableProps) {
+export function SuperAdminUsersTable({users,locationsById,isLoading,onSelect,onPromote,onDemote,demotingUserId,}: SuperAdminUsersTableProps) {
   if (isLoading) {
     return (
       <div className="overflow-x-auto border border-zinc-200 bg-white">

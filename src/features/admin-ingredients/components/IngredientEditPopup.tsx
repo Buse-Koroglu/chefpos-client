@@ -1,22 +1,12 @@
 import { useState } from 'react'
-import { useQueryClient } from '@tanstack/react-query'
 import { Dialog } from '@base-ui/react/dialog'
 import { X } from 'lucide-react'
-import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { STOCK_UNIT_LABELS } from '@/shared/types/ingredient'
-import {
-  activateIngredient,
-  deactivateIngredient,
-  updateIngredient,
-  updateIngredientMinStockThreshold,
-  updateIngredientPrice,
-} from '@/shared/api/endpoints/ingredients'
 import type { IngredientWithLocation } from '@/features/admin-ingredients/types'
-
-const FIELD_CLASSNAME =
-  'h-10 w-full rounded-none border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
+import { useUpdateIngredient } from '@/features/admin-ingredients/hooks/useUpdateIngredient'
+import { FIELD_CLASSNAME } from './MultiSelectDropdown'
 
 interface IngredientEditFormProps {
   ingredient: IngredientWithLocation
@@ -24,7 +14,7 @@ interface IngredientEditFormProps {
 }
 
 function IngredientEditForm({ ingredient, onClose }: IngredientEditFormProps) {
-  const queryClient = useQueryClient()
+  const updateIngredientMutation = useUpdateIngredient()
 
   const [name, setName] = useState(ingredient.name)
   const [latestUnitPrice, setLatestUnitPrice] = useState(
@@ -33,7 +23,7 @@ function IngredientEditForm({ ingredient, onClose }: IngredientEditFormProps) {
   const [minStockThreshold, setMinStockThreshold] = useState(String(ingredient.minStockThreshold))
   const [isActive, setIsActive] = useState(ingredient.isActive)
   const [error, setError] = useState<string | null>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const isSubmitting = updateIngredientMutation.isPending
 
   const canEditPrice = ingredient.latestUnitPrice !== null
 
@@ -48,36 +38,32 @@ function IngredientEditForm({ ingredient, onClose }: IngredientEditFormProps) {
     Number(minStockThreshold) >= 0 &&
     (!canEditPrice || (latestUnitPrice.trim() !== '' && Number(latestUnitPrice) >= 0))
 
-  async function handleSave() {
+  function handleSave() {
     if (!isFormValid) {
       setError('Lütfen tüm alanları geçerli değerlerle doldurun.')
       return
     }
 
-    setIsSubmitting(true)
     setError(null)
 
-    try {
-      if (name.trim() !== ingredient.name) {
-        await updateIngredient(ingredient.id, { name: name.trim() })
-      }
-      if (canEditPrice && Number(latestUnitPrice) !== ingredient.latestUnitPrice) {
-        await updateIngredientPrice(ingredient.id, { unitPrice: Number(latestUnitPrice) })
-      }
-      if (Number(minStockThreshold) !== ingredient.minStockThreshold) {
-        await updateIngredientMinStockThreshold(ingredient.id, Number(minStockThreshold))
-      }
-      if (isActive !== ingredient.isActive) {
-        await (isActive ? activateIngredient(ingredient.id) : deactivateIngredient(ingredient.id))
-      }
-
-      queryClient.invalidateQueries({ queryKey: ['ingredients'], exact: false })
-      toast.success('Ham madde bilgileri güncellendi.')
-      onClose()
-    } catch {
-      setError('Değişiklikler kaydedilemedi. Lütfen tekrar deneyin.')
-      setIsSubmitting(false)
-    }
+    updateIngredientMutation.mutate(
+      {
+        ingredientId: ingredient.id,
+        name: name.trim() !== ingredient.name ? name.trim() : undefined,
+        unitPrice: canEditPrice && Number(latestUnitPrice) !== ingredient.latestUnitPrice ? Number(latestUnitPrice) : undefined,
+        minStockThreshold:
+          Number(minStockThreshold) !== ingredient.minStockThreshold ? Number(minStockThreshold) : undefined,
+        isActive: isActive !== ingredient.isActive ? isActive : undefined,
+      },
+      {
+        onSuccess: () => {
+          onClose()
+        },
+        onError: () => {
+          setError('Değişiklikler kaydedilemedi. Lütfen tekrar deneyin.')
+        },
+      },
+    )
   }
 
   return (

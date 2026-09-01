@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import type { KioskCartItem, Product } from '../types'
+import type { KioskCardItem, Product } from '../types'
 
 export function useKioskCart() {
-  const [items, setItems] = useState<KioskCartItem[]>([])
+  const [items, setItems] = useState<KioskCardItem[]>([])
 
   function addItem(product: Product) {
     setItems((current) => {

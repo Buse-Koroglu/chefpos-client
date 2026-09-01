@@ -1,21 +1,17 @@
 import { useState } from 'react'
-import { useQueryClient } from '@tanstack/react-query'
 import { Dialog } from '@base-ui/react/dialog'
 import { X } from 'lucide-react'
-import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { getApiErrorMessage } from '@/shared/api/apiError'
-import { recordManualDeduction } from '@/shared/api/endpoints/ingredients'
 import { useLocationStore } from '@/shared/stores/locationStore'
 import { useIngredients } from '@/features/inventory-dashboard/hooks/useIngredients'
+import { useManualStockDeduction } from '../hooks/useManualStockDeduction'
 
-const FIELD_CLASSNAME =
-  'h-10 w-full rounded-none border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
+const FIELD_CLASSNAME = 'h-10 w-full rounded-none border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
 
-const TEXTAREA_CLASSNAME =
-  'w-full rounded-none border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
+const TEXTAREA_CLASSNAME = 'w-full rounded-none border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
 
 interface FormErrors {
   ingredientId?: string
@@ -37,15 +33,11 @@ function validate(ingredientId: string, quantity: string, note: string): FormErr
 }
 
 export function ManualDeductionPopup({ open, onClose }: ManualDeductionPopupProps) {
-  const queryClient = useQueryClient()
+  const manualStockDeductionMutation = useManualStockDeduction()
 
   const locationId = useLocationStore((state) => state.selectedLocationId) ?? undefined
 
-  const {
-    data: ingredients = [],
-    isLoading: isIngredientsLoading,
-    isError: isIngredientsError,
-  } = useIngredients(locationId)
+  const {data: ingredients = [], isLoading: isIngredientsLoading, isError: isIngredientsError} = useIngredients(locationId)
 
   const [ingredientId, setIngredientId] = useState('')
   const [quantity, setQuantity] = useState('')
@@ -77,19 +69,19 @@ export function ManualDeductionPopup({ open, onClose }: ManualDeductionPopupProp
     setIsSubmitting(true)
     setSubmitError(null)
 
-    try {
-      await recordManualDeduction(ingredientId, { quantity: Number(quantity), note: note.trim() })
-
-      await queryClient.invalidateQueries({ queryKey: ['ingredients'] })
-      await queryClient.invalidateQueries({ queryKey: ['stockMovements'] })
-
-      toast.success('Elden düşüm başarıyla kaydedildi.')
-      reset()
-      onClose()
-    } catch (error) {
-      setSubmitError(getApiErrorMessage(error, 'Elden düşüm kaydedilemedi. Lütfen tekrar deneyin.'))
-      setIsSubmitting(false)
-    }
+    manualStockDeductionMutation.mutate(
+      { ingredientId, quantity: Number(quantity), note: note.trim() },
+      {
+        onSuccess: () => {
+          reset()
+          onClose()
+        },
+        onError: (error) => {
+          setSubmitError(getApiErrorMessage(error, 'Elden düşüm kaydedilemedi. Lütfen tekrar deneyin.'))
+          setIsSubmitting(false)
+        },
+      },
+    )
   }
 
   return (

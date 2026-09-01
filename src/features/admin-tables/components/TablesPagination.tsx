@@ -8,8 +8,7 @@ interface TablesPaginationProps {
   onPageChange: (page: number) => void
 }
 
-const NAV_BUTTON_CLASSNAME =
-  'flex size-8 items-center justify-center border border-zinc-200 text-zinc-500 transition-colors hover:border-zinc-300 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-40'
+const PAGINATION_CLASSNAME = 'flex size-8 items-center justify-center border border-zinc-200 text-zinc-500 transition-colors hover:border-zinc-300 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-40'
 
 function getPageNumbers(current: number, total: number): number[] {
   const maxButtons = 5
@@ -28,7 +27,7 @@ export function TablesPagination({ pageNumber, totalPages, totalCount, onPageCha
       <div className="flex items-center gap-1.5">
         <button
           type="button"
-          className={NAV_BUTTON_CLASSNAME}
+          className={PAGINATION_CLASSNAME}
           disabled={pageNumber <= 1}
           onClick={() => onPageChange(1)}
         >
@@ -36,7 +35,7 @@ export function TablesPagination({ pageNumber, totalPages, totalCount, onPageCha
         </button>
         <button
           type="button"
-          className={NAV_BUTTON_CLASSNAME}
+          className={PAGINATION_CLASSNAME}
           disabled={pageNumber <= 1}
           onClick={() => onPageChange(pageNumber - 1)}
         >
@@ -61,7 +60,7 @@ export function TablesPagination({ pageNumber, totalPages, totalCount, onPageCha
 
         <button
           type="button"
-          className={NAV_BUTTON_CLASSNAME}
+          className={PAGINATION_CLASSNAME}
           disabled={pageNumber >= totalPages}
           onClick={() => onPageChange(pageNumber + 1)}
         >
@@ -69,7 +68,7 @@ export function TablesPagination({ pageNumber, totalPages, totalCount, onPageCha
         </button>
         <button
           type="button"
-          className={NAV_BUTTON_CLASSNAME}
+          className={PAGINATION_CLASSNAME}
           disabled={pageNumber >= totalPages}
           onClick={() => onPageChange(totalPages)}
         >

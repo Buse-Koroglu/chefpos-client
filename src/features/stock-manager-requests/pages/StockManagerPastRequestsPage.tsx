@@ -9,7 +9,7 @@ import { StockRequestsSearchInput } from '@/features/admin-stock-requests/compon
 import { StockRequestsTable } from '@/features/admin-stock-requests/components/StockRequestsTable'
 import { StockRequestsPagination } from '@/features/admin-stock-requests/components/StockRequestsPagination'
 import { StockRequestDetailPopup } from '@/features/admin-stock-requests/components/StockRequestDetailPopup'
-import { STOCK_REQUESTS_SEARCH_DEBOUNCE_MS } from '@/features/admin-stock-requests/constants'
+import { STOCK_REQUESTS_SEARCH_DEBOUNCE_TIME } from '@/features/admin-stock-requests/constants'
 import { useStockManagerPastRequests } from '../hooks/useStockManagerPastRequests'
 
 function getErrorMessage(error: unknown): string {
@@ -31,7 +31,7 @@ export function StockManagerPastRequestsPage() {
   const [pageNumber, setPageNumber] = useState(1)
   const [selectedStockRequestId, setSelectedStockRequestId] = useState<string | null>(null)
 
-  const searchTerm = useDebouncedValue(searchInput, STOCK_REQUESTS_SEARCH_DEBOUNCE_MS)
+  const searchTerm = useDebouncedValue(searchInput, STOCK_REQUESTS_SEARCH_DEBOUNCE_TIME)
 
   const { data, isLoading, isFetching, isError, error } = useStockManagerPastRequests(
     locationId,

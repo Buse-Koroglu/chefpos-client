@@ -44,27 +44,15 @@ export function InventoryDashboardPage() {
 
   const pendingRequestsValue = isLoading
     ? '…'
-    : isError
-      ? '—'
-      : String(
-          dashboard?.pendingRequestsCount ?? 0,
-        )
+    : isError ? '—'  : String (  dashboard?.pendingRequestsCount ?? 0 )
 
   const pastRequestsValue = isLoading
     ? '…'
-    : isError
-      ? '—'
-      : String(
-          dashboard?.pastRequestsCount ?? 0,
-        )
+    : isError? '—' : String( dashboard?.pastRequestsCount ?? 0 )
 
   const totalRequestsValue = isLoading
     ? '…'
-    : isError
-      ? '—'
-      : String(
-          dashboard?.totalStockRequestsCount ?? 0,
-        )
+    : isError ? '—' : String(dashboard?.totalStockRequestsCount ?? 0)
 
   return (
     <div className="flex h-screen bg-zinc-50">
@@ -152,10 +140,10 @@ export function InventoryDashboardPage() {
         </main>
       </div>
 
-<CreateStockRequestPopup
-  open={isCreateRequestOpen}
-  onClose={() => setIsCreateRequestOpen(false)}
-/>
+    <CreateStockRequestPopup
+      open={isCreateRequestOpen}
+      onClose={() => setIsCreateRequestOpen(false)}
+    />
       
     </div>
   )

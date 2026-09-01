@@ -6,6 +6,8 @@ interface CategoryTabsProps {
   onSelect: (categoryId: string) => void
 }
 
+// Sipariş verme ekranında bulunan kategori tab'ları
+
 export function CategoryTabs({ categories, selectedCategoryId, onSelect }: CategoryTabsProps) {
   const allTab = { id: '', name: 'Tümü' }
 
@@ -17,11 +19,7 @@ export function CategoryTabs({ categories, selectedCategoryId, onSelect }: Categ
           type="button"
           onClick={() => onSelect(cat.id)}
           className={`shrink-0 whitespace-nowrap border px-3 py-1.5 text-xs font-medium ${
-            selectedCategoryId === cat.id
-              ? 'border-zinc-700 bg-[#133458] text-white'
-              : 'border-zinc-200 bg-white text-zinc-600'
-          }`}
-        >
+            selectedCategoryId === cat.id ? 'border-zinc-700 bg-[#133458] text-white'  : 'border-zinc-200 bg-white text-zinc-600' }`}>
           {cat.name}
         </button>
       ))}

@@ -3,7 +3,7 @@ import type { CartItem } from '../types'
 
 const currencyFormatter = new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' })
 
-interface CartItemsSheetProps {
+interface CardItemsSheetProps {
   open: boolean
   onClose: () => void
   items: CartItem[]
@@ -12,7 +12,9 @@ interface CartItemsSheetProps {
   onRemove: (productId: string) => void
 }
 
-export function CartItemsSheet({ open, onClose, items, onIncrease, onDecrease, onRemove }: CartItemsSheetProps) {
+// Sipariş Detayı için Cart (CardBar component'ine basınca açılır)
+
+export function CardItemsSheet({ open, onClose, items, onIncrease, onDecrease, onRemove }: CardItemsSheetProps) {
   if (!open) return null
 
   return (

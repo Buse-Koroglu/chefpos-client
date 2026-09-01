@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { CartItem, Product } from '../types'
 
-export function useCart() {
+export function useCard() {
   const [items, setItems] = useState<CartItem[]>([])
 
   function addItem(product: Product) {
@@ -24,8 +24,7 @@ export function useCart() {
 
   function decreaseQuantity(productId: string) {
     setItems((current) =>
-      current
-        .map((i) => (i.productId === productId ? { ...i, quantity: i.quantity - 1 } : i))
+      current.map((i) => (i.productId === productId ? { ...i, quantity: i.quantity - 1 } : i))
         .filter((i) => i.quantity > 0),
     )
   }

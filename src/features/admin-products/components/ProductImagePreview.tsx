@@ -19,10 +19,7 @@ export function ProductImagePreview({ imageUrl, size = 'sm' }: ProductImagePrevi
   }
 
   return (
-    <img
-      src={resolvedUrl}
-      alt=""
-      className={`${sizeClassName} shrink-0 border border-zinc-200 object-cover`}
+    <img src={resolvedUrl} alt="" className={`${sizeClassName} shrink-0 border border-zinc-200 object-cover`}
       onError={(event) => {
         event.currentTarget.style.display = 'none'
       }}

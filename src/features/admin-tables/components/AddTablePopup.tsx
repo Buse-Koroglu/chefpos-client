@@ -1,16 +1,13 @@
 import { useState } from 'react'
 import axios from 'axios'
-import { useQueryClient } from '@tanstack/react-query'
 import { Dialog } from '@base-ui/react/dialog'
 import { X } from 'lucide-react'
-import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import type { LocationDto } from '@/shared/types/location'
-import { createTable } from '@/shared/api/endpoints/tables'
+import { useCreateTable } from '@/features/admin-tables/hooks/useCreateTable'
 
-const FIELD_CLASSNAME =
-  'h-10 w-full rounded-none border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
+const FIELD_CLASSNAME = 'h-10 w-full rounded-none border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
 
 interface FormErrors {
   locationId?: string
@@ -40,20 +37,20 @@ interface AddTablePopupProps {
 }
 
 export function AddTablePopup({ open, locations, onClose }: AddTablePopupProps) {
-  const queryClient = useQueryClient()
+  const createTableMutation = useCreateTable()
 
   const [locationId, setLocationId] = useState('')
   const [tableNumber, setTableNumber] = useState('')
   const [errors, setErrors] = useState<FormErrors>({})
   const [submitError, setSubmitError] = useState<string | null>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const isSubmitting = createTableMutation.isPending
 
   function reset() {
     setLocationId('')
     setTableNumber('')
     setErrors({})
     setSubmitError(null)
-    setIsSubmitting(false)
   }
 
   function handleClose() {
@@ -66,17 +63,13 @@ export function AddTablePopup({ open, locations, onClose }: AddTablePopupProps) 
     setErrors(nextErrors)
     if (Object.keys(nextErrors).length > 0) return
 
-    setIsSubmitting(true)
     setSubmitError(null)
 
     try {
-      await createTable({ locationId, tableNumber: Number(tableNumber) })
-      queryClient.invalidateQueries({ queryKey: ['tables'], exact: false })
-      toast.success('Masa başarıyla eklendi.')
+      await createTableMutation.mutateAsync({ locationId, tableNumber: Number(tableNumber) })
       handleClose()
     } catch (error) {
       setSubmitError(getCreateErrorMessage(error))
-      setIsSubmitting(false)
     }
   }
 

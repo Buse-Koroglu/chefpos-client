@@ -6,6 +6,6 @@ export function useDashboardSummary(locationId: string | undefined) {
     queryKey: ['dashboard', 'admin-summary', locationId],
     queryFn: () => getAdminDashboardSummary(locationId!),
     enabled: Boolean(locationId),
-    refetchInterval: 60_000,
+    refetchInterval: 60_000, // dashboard verisini 60 sn'de bir refetch eder
   })
 }

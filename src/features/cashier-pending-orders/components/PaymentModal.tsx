@@ -15,8 +15,7 @@ const currencyFormatter = new Intl.NumberFormat('tr-TR', {
 const VAT_RATE = 0
 const SERVICE_FEE = 0
 
-const FIELD_CLASSNAME =
-  'h-10 w-full rounded-none border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
+const FIELD_CLASSNAME = 'h-10 w-full rounded-none border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
 
 type PaymentMethod = 'CARD' | 'CASH' | 'TRANSFER'
 

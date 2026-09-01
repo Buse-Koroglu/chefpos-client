@@ -54,12 +54,7 @@ export function ProductsListPage({ variant = 'admin' }: ProductsListPageProps) {
   const { data: categories = [] } = useActiveCategories()
   const searchTerm = useDebouncedValue(searchInput, PRODUCTS_SEARCH_DEBOUNCE_MS)
 
-  const { data, isLoading, isFetching, isError, error } = usePagedProductsAdmin(
-    searchTerm,
-    locationId,
-    status,
-    pageNumber,
-  )
+  const { data, isLoading, isFetching, isError, error } = usePagedProductsAdmin(searchTerm, locationId, status,pageNumber)
   const items = data?.items ?? []
 
   function handleSearchChange(value: string) {

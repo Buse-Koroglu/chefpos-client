@@ -55,6 +55,7 @@ export function InventoryIngredientsPage() {
       </div>
 
       <CreateStockRequestPopup
+        key={requestIngredientId ?? 'none'}
         open={Boolean(requestIngredientId)}
         initialIngredientId={requestIngredientId ?? undefined}
         onClose={() => setRequestIngredientId(null)}

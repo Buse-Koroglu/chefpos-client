@@ -26,16 +26,8 @@ const URGENCY_ROW_CLASSNAME = {
   critical: 'bg-red-50 hover:bg-red-100',
 }
 
-export function PreparingOrderRow({
-  order,
-  onClick,
-  now,
-  showUrgency,
-}: PreparingOrderRowProps) {
-  const urgency =
-    showUrgency && order.status === 'PENDING'
-      ? getOrderUrgency(order.createdAt, now)
-      : 'normal'
+export function PreparingOrderRow({order,onClick,now,showUrgency}: PreparingOrderRowProps) {
+  const urgency =  showUrgency && order.status === 'PENDING' ? getOrderUrgency(order.createdAt, now) : 'normal'
 
   return (
     <tr

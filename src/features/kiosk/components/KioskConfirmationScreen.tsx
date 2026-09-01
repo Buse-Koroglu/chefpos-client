@@ -7,15 +7,10 @@ interface KioskConfirmationScreenProps {
   onNewOrder: () => void
 }
 
-export function KioskConfirmationScreen({
-  orderNumber,
-  autoResetSeconds = 10,
-  onNewOrder,
-}: KioskConfirmationScreenProps) {
+export function KioskConfirmationScreen({ orderNumber,autoResetSeconds = 10,onNewOrder,}: KioskConfirmationScreenProps) {
   const [secondsLeft, setSecondsLeft] = useState(autoResetSeconds)
 
   useEffect(() => {
-    setSecondsLeft(autoResetSeconds)
     const interval = setInterval(() => {
       setSecondsLeft((current) => {
         if (current <= 1) {
@@ -26,7 +21,7 @@ export function KioskConfirmationScreen({
       })
     }, 1000)
     return () => clearInterval(interval)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoResetSeconds])
 
   return (

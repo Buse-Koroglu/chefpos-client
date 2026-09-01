@@ -37,14 +37,10 @@ export function CashierHomePage() {
   const pendingOrdersValue = isPendingOrdersCountLoading ? '…' : String(pendingOrdersCount)
   const todayRevenueValue = isLoading
     ? '…'
-    : isError
-      ? '—'
-      : currencyFormatter.format(dashboard?.todayRevenue ?? 0)
+    : isError ? '—'  : currencyFormatter.format(dashboard?.todayRevenue ?? 0)
   const bestSellingValue = isLoading
     ? '…'
-    : isError
-      ? '—'
-      : (dashboard?.bestSellingProduct?.productName ?? 'Henüz satış verisi yok')
+    : isError ? '—' : (dashboard?.bestSellingProduct?.productName ?? 'Henüz satış verisi yok')
 
   return (
     <div className="flex h-screen bg-zinc-50">

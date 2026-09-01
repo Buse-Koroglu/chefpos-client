@@ -10,8 +10,7 @@ import { Pagination } from '@/shared/components/Pagination'
 import { PastOrderCard } from '../components/PastOrderCard'
 import { usePastOrders, type OrderHistoryFilter } from '../hooks/usePastOrders'
 
-const FORM_INPUT_CLASSNAME =
-  'h-10 w-full rounded-none border border-zinc-200 bg-white pl-9 pr-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
+const FORM_INPUT_CLASSNAME = 'h-10 w-full rounded-none border border-zinc-200 bg-white pl-9 pr-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
 
 const STATUS_TABS: Array<{ value: OrderHistoryFilter; label: string }> = [
   { value: 'PAID', label: 'Ödenen' },

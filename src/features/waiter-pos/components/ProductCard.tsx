@@ -8,6 +8,8 @@ const currencyFormatter = new Intl.NumberFormat('tr-TR', {
   maximumFractionDigits: 2,
 })
 
+// Sipariş verme ekranında bulunan product cartları
+
 interface ProductCardProps {
   product: Product
   onAdd: (product: Product) => void
@@ -24,10 +26,7 @@ export function ProductCard({ product, onAdd }: ProductCardProps) {
     >
       <div className="flex h-28 items-center justify-center overflow-hidden bg-zinc-100 text-zinc-300">
         {resolvedImageUrl ? (
-          <img src={resolvedImageUrl} alt={product.name} className="size-full object-cover" />
-        ) : (
-          <UtensilsCrossed className="size-9" />
-        )}
+          <img src={resolvedImageUrl} alt={product.name} className="size-full object-cover" /> ) : ( <UtensilsCrossed className="size-9" />)}
       </div>
 
       <div className="flex flex-1 flex-col gap-2 p-3">

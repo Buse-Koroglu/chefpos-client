@@ -1,16 +1,13 @@
 import { useState } from 'react'
-import { useQueryClient } from '@tanstack/react-query'
 import { Dialog } from '@base-ui/react/dialog'
 import { X } from 'lucide-react'
-import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import type { LocationDto } from '@/shared/types/location'
-import { addRole, assignLocationAccess, getAdminByLocation, removeRole } from '@/shared/api/endpoints/users'
 import { getApiErrorMessage } from '@/shared/api/apiError'
+import { ExistingAdminError, usePromoteToAdmin } from '@/features/super-admin-users/hooks/usePromoteToAdmin'
 
-const FIELD_CLASSNAME =
-  'h-10 w-full rounded-none border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
+const FIELD_CLASSNAME = 'h-10 w-full rounded-none border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
 
 interface PromoteToAdminPopupProps {
   userId: string | null
@@ -20,15 +17,14 @@ interface PromoteToAdminPopupProps {
 }
 
 export function PromoteToAdminPopup({ userId, userName, locations, onClose }: PromoteToAdminPopupProps) {
-  const queryClient = useQueryClient()
+  const promoteMutation = usePromoteToAdmin()
   const [locationId, setLocationId] = useState('')
   const [error, setError] = useState<string | null>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const isSubmitting = promoteMutation.isPending
 
   function reset() {
     setLocationId('')
     setError(null)
-    setIsSubmitting(false)
   }
 
   function handleClose() {
@@ -36,42 +32,28 @@ export function PromoteToAdminPopup({ userId, userName, locations, onClose }: Pr
     onClose()
   }
 
-  async function handleSubmit() {
+  function handleSubmit() {
     if (!userId) return
     if (!locationId) {
       setError('Yerleşke seçimi zorunludur.')
       return
     }
 
-    setIsSubmitting(true)
     setError(null)
 
-    try {
-      const existingAdmin = await getAdminByLocation(locationId)
-      if (existingAdmin && existingAdmin.id !== userId) {
-        setError(
-          `Bu yerleşkede zaten bir Yönetici atanmış: ${existingAdmin.firstName} ${existingAdmin.lastName}. Devam etmeden önce mevcut yöneticiyi indirin.`,
-        )
-        setIsSubmitting(false)
-        return
-      }
-
-      await addRole(userId, 'ADMIN')
-
-      try {
-        await assignLocationAccess(userId, locationId)
-      } catch (assignError) {
-        await removeRole(userId, 'ADMIN')
-        throw assignError
-      }
-
-      queryClient.invalidateQueries({ queryKey: ['users'], exact: false })
-      toast.success('Kullanıcı yönetici olarak atandı.')
-      handleClose()
-    } catch (err) {
-      setError(getApiErrorMessage(err, 'Yönetici ataması yapılamadı.'))
-      setIsSubmitting(false)
-    }
+    promoteMutation.mutate(
+      { userId, locationId },
+      {
+        onSuccess: () => {
+          handleClose()
+        },
+        onError: (err) => {
+          setError(
+            err instanceof ExistingAdminError ? err.message : getApiErrorMessage(err, 'Yönetici ataması yapılamadı.'),
+          )
+        },
+      },
+    )
   }
 
   return (

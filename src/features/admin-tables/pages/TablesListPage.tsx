@@ -16,7 +16,7 @@ import { TablesPagination } from '@/features/admin-tables/components/TablesPagin
 import { TableEditPopup } from '@/features/admin-tables/components/TableEditPopup'
 import { AddTablePopup } from '@/features/admin-tables/components/AddTablePopup'
 import { usePagedTablesAdmin } from '@/features/admin-tables/hooks/usePagedTablesAdmin'
-import { TABLES_SEARCH_DEBOUNCE_MS } from '@/features/admin-tables/constants'
+import { TABLES_SEARCH_DEBOUNCE_TIME } from '@/features/admin-tables/constants'
 import type { TableStatusFilter } from '@/features/admin-tables/types'
 
 function toIsActiveParam(status: TableStatusFilter): boolean | undefined {
@@ -45,7 +45,7 @@ export function TablesListPage() {
 
   const { data: locations = [] } = useLocations()
   const locationsById = useMemo(() => new Map(locations.map((location) => [location.id, location.name])), [locations])
-  const searchTerm = useDebouncedValue(searchInput, TABLES_SEARCH_DEBOUNCE_MS)
+  const searchTerm = useDebouncedValue(searchInput, TABLES_SEARCH_DEBOUNCE_TIME)
 
   const { data, isLoading, isFetching, isError, error } = usePagedTablesAdmin(searchTerm, locationId, status, pageNumber)
   const items = useMemo(() => data?.items ?? [], [data])

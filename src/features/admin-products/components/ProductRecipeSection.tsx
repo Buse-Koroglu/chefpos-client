@@ -1,12 +1,11 @@
 import { useState } from 'react'
-import { useQueryClient } from '@tanstack/react-query'
 import { Trash2 } from 'lucide-react'
-import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { STOCK_UNIT_LABELS } from '@/shared/types/ingredient'
 import type { ProductItemResponse } from '@/shared/types/product'
-import { addProductIngredient, removeProductIngredient } from '@/shared/api/endpoints/products'
 import { useLocationIngredients } from '@/features/admin-products/hooks/useLocationIngredients'
+import { useAddProductIngredient } from '@/features/admin-products/hooks/useAddProductIngredient'
+import { useRemoveProductIngredient } from '@/features/admin-products/hooks/useRemoveProductIngredient'
 
 const FIELD_CLASSNAME =
   'h-9 rounded-none border border-zinc-200 bg-white px-2.5 text-sm text-zinc-900 outline-none transition-colors focus-visible:border-zinc-400'
@@ -19,54 +18,45 @@ interface ProductRecipeSectionProps {
 }
 
 export function ProductRecipeSection({ productId, locationId, locationName, ingredients }: ProductRecipeSectionProps) {
-  const queryClient = useQueryClient()
   const { data: availableIngredients = [] } = useLocationIngredients(locationId)
+  const addIngredientMutation = useAddProductIngredient()
+  const removeIngredientMutation = useRemoveProductIngredient()
 
   const [selectedIngredientId, setSelectedIngredientId] = useState('')
   const [quantity, setQuantity] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [removingId, setRemovingId] = useState<string | null>(null)
+
+  const isSubmitting = addIngredientMutation.isPending
+  const removingId =
+    removeIngredientMutation.isPending && removeIngredientMutation.variables
+      ? removeIngredientMutation.variables.productItemId
+      : null
 
   const usedIngredientIds = new Set(ingredients.map((item) => item.ingredientId))
   const selectableIngredients = availableIngredients.filter((ingredient) => !usedIngredientIds.has(ingredient.id))
 
-  function invalidateProduct() {
-    queryClient.invalidateQueries({ queryKey: ['products', 'detail', productId] })
-    queryClient.invalidateQueries({ queryKey: ['products', 'admin'], exact: false })
-  }
-
-  async function handleAdd() {
+  function handleAdd() {
     if (!selectedIngredientId || !quantity || Number(quantity) <= 0) return
 
-    setIsSubmitting(true)
-    try {
-      await addProductIngredient(productId, {
-        locationId,
-        ingredientId: selectedIngredientId,
-        quantityPerServing: Number(quantity),
-      })
-      invalidateProduct()
-      setSelectedIngredientId('')
-      setQuantity('')
-      toast.success('Ham madde reçeteye eklendi.')
-    } catch {
-      toast.error('Ham madde reçeteye eklenemedi.')
-    } finally {
-      setIsSubmitting(false)
-    }
+    addIngredientMutation.mutate(
+      {
+        productId,
+        payload: {
+          locationId,
+          ingredientId: selectedIngredientId,
+          quantityPerServing: Number(quantity),
+        },
+      },
+      {
+        onSuccess: () => {
+          setSelectedIngredientId('')
+          setQuantity('')
+        },
+      },
+    )
   }
 
-  async function handleRemove(productItemId: string) {
-    setRemovingId(productItemId)
-    try {
-      await removeProductIngredient(productId, productItemId, locationId)
-      invalidateProduct()
-      toast.success('Ham madde reçeteden kaldırıldı.')
-    } catch {
-      toast.error('Ham madde reçeteden kaldırılamadı.')
-    } finally {
-      setRemovingId(null)
-    }
+  function handleRemove(productItemId: string) {
+    removeIngredientMutation.mutate({ productId, productItemId, locationId })
   }
 
   return (

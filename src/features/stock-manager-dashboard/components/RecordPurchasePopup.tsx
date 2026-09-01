@@ -1,18 +1,15 @@
 import { useState } from 'react'
-import { useQueryClient } from '@tanstack/react-query'
 import { Dialog } from '@base-ui/react/dialog'
 import { X } from 'lucide-react'
-import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { getApiErrorMessage } from '@/shared/api/apiError'
-import { recordIngredientPurchase } from '@/shared/api/endpoints/ingredients'
 import { useLocationStore } from '@/shared/stores/locationStore'
 import { useIngredients } from '@/features/inventory-dashboard/hooks/useIngredients'
+import { useRecordPurchase } from '../hooks/useRecordPurchase'
 
-const FIELD_CLASSNAME =
-  'h-10 w-full rounded-none border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
+const FIELD_CLASSNAME = 'h-10 w-full rounded-none border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
 
 interface FormErrors {
   ingredientId?: string
@@ -23,7 +20,8 @@ interface FormErrors {
 interface RecordPurchasePopupProps {
   open: boolean
   onClose: () => void
-}
+} 
+// Parti Alış Popup
 
 function validate(ingredientId: string, quantity: string, unitPrice: string): FormErrors {
   const errors: FormErrors = {}
@@ -34,7 +32,7 @@ function validate(ingredientId: string, quantity: string, unitPrice: string): Fo
 }
 
 export function RecordPurchasePopup({ open, onClose }: RecordPurchasePopupProps) {
-  const queryClient = useQueryClient()
+  const recordPurchaseMutation = useRecordPurchase()
 
   const locationId = useLocationStore((state) => state.selectedLocationId) ?? undefined
 
@@ -76,23 +74,24 @@ export function RecordPurchasePopup({ open, onClose }: RecordPurchasePopupProps)
     setIsSubmitting(true)
     setSubmitError(null)
 
-    try {
-      await recordIngredientPurchase(ingredientId, {
+    recordPurchaseMutation.mutate(
+      {
+        ingredientId,
         quantity: Number(quantity),
         unitPrice: Number(unitPrice),
         note: note.trim() || undefined,
-      })
-
-      await queryClient.invalidateQueries({ queryKey: ['ingredients'] })
-      await queryClient.invalidateQueries({ queryKey: ['stockMovements'] })
-
-      toast.success('Parti alışı başarıyla kaydedildi.')
-      reset()
-      onClose()
-    } catch (error) {
-      setSubmitError(getApiErrorMessage(error, 'Parti alışı kaydedilemedi. Lütfen tekrar deneyin.'))
-      setIsSubmitting(false)
-    }
+      },
+      {
+        onSuccess: () => {
+          reset()
+          onClose()
+        },
+        onError: (error) => {
+          setSubmitError(getApiErrorMessage(error, 'Parti alışı kaydedilemedi. Lütfen tekrar deneyin.'))
+          setIsSubmitting(false)
+        },
+      },
+    )
   }
 
   return (

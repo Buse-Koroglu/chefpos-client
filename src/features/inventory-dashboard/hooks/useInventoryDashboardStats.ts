@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 
 import { getInventoryDashboardStats } from '@/shared/api/endpoints/inventoryDashboard'
 
-const REFETCH_INTERVAL_MS = 30_000
+const REFETCH_TIME = 45_000 // 45 sn refetch
 
 export function useInventoryDashboardStats(
   locationId: string | undefined,
@@ -19,6 +19,6 @@ export function useInventoryDashboardStats(
 
     enabled: Boolean(locationId),
 
-    refetchInterval: REFETCH_INTERVAL_MS,
+    refetchInterval: REFETCH_TIME,
   })
 }

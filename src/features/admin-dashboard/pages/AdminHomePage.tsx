@@ -40,14 +40,7 @@ export function AdminHomePage() {
     }
   }, [selectedLocationId, locations, setSelectedLocationId])
 
-  const {
-    data: summary,
-    isLoading: isSummaryLoading,
-    isError: isSummaryError,
-    error: summaryError,
-    isFetching: isSummaryFetching,
-    refetch: refetchSummary,
-  } = useDashboardSummary(selectedLocationId ?? undefined)
+  const { data: summary,isLoading: isSummaryLoading, isError: isSummaryError, error: summaryError, isFetching: isSummaryFetching, refetch: refetchSummary } = useDashboardSummary(selectedLocationId ?? undefined)
 
   const staffCountValue = summary ? String(summary.totalStaffCount) : ''
   const bestSellingValue = summary ? (summary.topSellingProductName ?? 'Henüz veri yok') : ''

@@ -8,8 +8,7 @@ interface StockRequestsPaginationProps {
   onPageChange: (page: number) => void
 }
 
-const NAV_BUTTON_CLASSNAME =
-  'flex size-8 items-center justify-center border border-zinc-200 text-zinc-500 transition-colors hover:border-zinc-300 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-40'
+const NAV_BUTTON_CLASSNAME = 'flex size-8 items-center justify-center border border-zinc-200 text-zinc-500 transition-colors hover:border-zinc-300 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-40'
 
 function getPageNumbers(current: number, total: number): number[] {
   const maxButtons = 5
@@ -50,9 +49,7 @@ export function StockRequestsPagination({ pageNumber, totalPages, totalCount, on
             onClick={() => onPageChange(page)}
             className={cn(
               'flex size-8 items-center justify-center border text-sm font-medium tabular-nums transition-colors',
-              page === pageNumber
-                ? 'border-zinc-900 bg-zinc-900 text-white'
-                : 'border-zinc-200 text-zinc-600 hover:border-zinc-300 hover:bg-zinc-50',
+              page === pageNumber ? 'border-zinc-900 bg-zinc-900 text-white' : 'border-zinc-200 text-zinc-600 hover:border-zinc-300 hover:bg-zinc-50',
             )}
           >
             {page}

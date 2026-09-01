@@ -10,7 +10,7 @@ import { Pagination } from '@/shared/components/Pagination'
 import { StockRequestsSearchInput } from '@/features/admin-stock-requests/components/StockRequestsSearchInput'
 import { StockRequestsTable } from '@/features/admin-stock-requests/components/StockRequestsTable'
 import { StockRequestDetailPopup } from '@/features/admin-stock-requests/components/StockRequestDetailPopup'
-import { STOCK_REQUESTS_SEARCH_DEBOUNCE_MS } from '@/features/admin-stock-requests/constants'
+import { STOCK_REQUESTS_SEARCH_DEBOUNCE_TIME } from '@/features/admin-stock-requests/constants'
 import { useMyStockRequests } from '../hooks/useMyStockRequests'
 import type { MyStockRequestsTab } from '../types'
 import { useMyStockRequestsCount } from '../hooks/useMyStockRequestCount'
@@ -40,7 +40,7 @@ export function MyStockRequestsPage() {
   const [pageNumber, setPageNumber] = useState(1)
   const [selectedStockRequestId, setSelectedStockRequestId] = useState<string | null>(null)
 
-  const searchTerm = useDebouncedValue(searchInput, STOCK_REQUESTS_SEARCH_DEBOUNCE_MS)
+  const searchTerm = useDebouncedValue(searchInput, STOCK_REQUESTS_SEARCH_DEBOUNCE_TIME)
 
   const { data, isLoading, isFetching, isError, error } = useMyStockRequests(locationId, tab, searchTerm, pageNumber)
   const { total: tabRequestCount } = useMyStockRequestsCount(locationId, tab)
@@ -77,9 +77,7 @@ export function MyStockRequestsPage() {
                 onClick={() => handleTabChange(tabItem.value)}
                 className={cn(
                   'flex-1 border-b-2 px-4 py-2.5 text-sm font-medium transition-colors',
-                  tab === tabItem.value
-                    ? 'border-[#133458] bg-zinc-50 text-zinc-900'
-                    : 'border-transparent text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900',
+                  tab === tabItem.value ? 'border-[#133458] bg-zinc-50 text-zinc-900' : 'border-transparent text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900',
                 )}
               >
                 {tabItem.label}

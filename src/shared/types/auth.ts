@@ -57,4 +57,5 @@ export interface ApiProblemDetails {
   title: string
   detail: string
   instance?: string
+  errorCode?: string
 }

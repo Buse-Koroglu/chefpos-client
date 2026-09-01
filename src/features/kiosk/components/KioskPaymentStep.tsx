@@ -2,7 +2,7 @@ const currencyFormatter = new Intl.NumberFormat('tr-TR', { style: 'currency', cu
 
 interface KioskPaymentStepProps {
   totalAmount: number
-  status: 'idle' | 'processing' | 'error'
+  status: 'unactive' | 'processing' | 'error'
   errorMessage?: string
   onPay: () => void
   onBack: () => void

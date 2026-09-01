@@ -1,20 +1,17 @@
 import { useState } from 'react'
-import { useQueryClient } from '@tanstack/react-query'
 import { Dialog } from '@base-ui/react/dialog'
 import { X } from 'lucide-react'
-import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import type { MenuResponseDto } from '@/shared/types/menu'
-import { activateMenu, deactivateMenu, updateMenu } from '@/shared/api/endpoints/menus'
 import { Skeleton } from '@/shared/components/Skeleton'
 import { useMenuDetail } from '@/features/admin-menus/hooks/useMenuDetail'
+import { useUpdateMenu } from '@/features/admin-menus/hooks/useUpdateMenu'
 import { MenuProductsList } from './MenuProductsList'
 import { ExistingProductPicker } from './ExistingProductPicker'
 import { NewProductForMenuForm } from './NewProductForMenuForm'
 
-const FIELD_CLASSNAME =
-  'h-10 w-full rounded-none border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
+const FIELD_CLASSNAME = 'h-10 w-full rounded-none border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
 
 function getDetailErrorMessage(): string {
   return 'Menü bilgileri yüklenemedi.'
@@ -26,48 +23,44 @@ interface MenuEditFormProps {
 }
 
 function MenuEditForm({ menu, onClose }: MenuEditFormProps) {
-  const queryClient = useQueryClient()
+  const updateMenuMutation = useUpdateMenu()
 
   const [name, setName] = useState(menu.name)
   const [description, setDescription] = useState(menu.description ?? '')
   const [isActive, setIsActive] = useState(menu.isActive)
   const [addTab, setAddTab] = useState<'existing' | 'new'>('existing')
   const [saveError, setSaveError] = useState<string | null>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const hasChanges =
     name.trim() !== menu.name || description.trim() !== (menu.description ?? '') || isActive !== menu.isActive
   const isFormValid = name.trim() !== ''
 
-  function invalidateMenus() {
-    queryClient.invalidateQueries({ queryKey: ['menus', 'detail', menu.id] })
-    queryClient.invalidateQueries({ queryKey: ['menus'], exact: false })
-  }
-
-  async function handleSave() {
+  function handleSave() {
     if (!isFormValid) {
       setSaveError('Menü adı zorunludur.')
       return
     }
 
-    setIsSubmitting(true)
     setSaveError(null)
 
-    try {
-      if (name.trim() !== menu.name || description.trim() !== (menu.description ?? '')) {
-        await updateMenu(menu.id, { name: name.trim(), description: description.trim() || null })
-      }
-      if (isActive !== menu.isActive) {
-        await (isActive ? activateMenu(menu.id) : deactivateMenu(menu.id))
-      }
-      invalidateMenus()
-      toast.success('Menü bilgileri güncellendi.')
-      onClose()
-    } catch {
-      setSaveError('Menü bilgileri güncellenemedi.')
-    } finally {
-      setIsSubmitting(false)
-    }
+    const detailsChanged = name.trim() !== menu.name || description.trim() !== (menu.description ?? '')
+    const activeChanged = isActive !== menu.isActive
+
+    updateMenuMutation.mutate(
+      {
+        menuId: menu.id,
+        details: detailsChanged ? { name: name.trim(), description: description.trim() || null } : null,
+        isActive: activeChanged ? isActive : null,
+      },
+      {
+        onSuccess: () => {
+          onClose()
+        },
+        onError: () => {
+          setSaveError('Menü bilgileri güncellenemedi.')
+        },
+      },
+    )
   }
 
   const usedProductIds = new Set(menu.products.map((product) => product.productId))
@@ -91,7 +84,7 @@ function MenuEditForm({ menu, onClose }: MenuEditFormProps) {
           <input
             value={name}
             onChange={(event) => setName(event.target.value)}
-            disabled={isSubmitting}
+            disabled={updateMenuMutation.isPending}
             className={FIELD_CLASSNAME}
           />
         </div>
@@ -101,7 +94,7 @@ function MenuEditForm({ menu, onClose }: MenuEditFormProps) {
           <input
             value={description}
             onChange={(event) => setDescription(event.target.value)}
-            disabled={isSubmitting}
+            disabled={updateMenuMutation.isPending}
             className={FIELD_CLASSNAME}
           />
         </div>
@@ -112,7 +105,7 @@ function MenuEditForm({ menu, onClose }: MenuEditFormProps) {
             <button
               type="button"
               onClick={() => setIsActive(true)}
-              disabled={isSubmitting}
+              disabled={updateMenuMutation.isPending}
               className={cn(
                 'flex-1 border-r border-zinc-200 py-2 text-xs font-medium transition-colors',
                 isActive ? 'bg-[#84994F] text-white hover:bg-[#708243]' : 'bg-white text-zinc-600 hover:bg-zinc-50',
@@ -123,7 +116,7 @@ function MenuEditForm({ menu, onClose }: MenuEditFormProps) {
             <button
               type="button"
               onClick={() => setIsActive(false)}
-              disabled={isSubmitting}
+              disabled={updateMenuMutation.isPending}
               className={cn(
                 'flex-1 py-2 text-xs font-medium transition-colors',
                 !isActive ? 'bg-destructive text-white hover:bg-destructive/90' : 'bg-white text-zinc-600 hover:bg-zinc-50',
@@ -182,9 +175,9 @@ function MenuEditForm({ menu, onClose }: MenuEditFormProps) {
           type="button"
           className="h-11 flex-1 rounded-none bg-[#133458] text-sm text-white hover:bg-[#0f2843]"
           onClick={handleSave}
-          disabled={isSubmitting || !hasChanges}
+          disabled={updateMenuMutation.isPending || !hasChanges}
         >
-          {isSubmitting ? 'Kaydediliyor...' : 'Değişiklikleri Kaydet'}
+          {updateMenuMutation.isPending ? 'Kaydediliyor...' : 'Değişiklikleri Kaydet'}
         </Button>
       </div>
     </>

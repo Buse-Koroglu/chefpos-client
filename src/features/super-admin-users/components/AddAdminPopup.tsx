@@ -1,6 +1,4 @@
-import { useState } from 'react'
-import axios from 'axios'
-import { useQueryClient } from '@tanstack/react-query'
+import { useState, type ReactNode } from 'react'
 import { Dialog } from '@base-ui/react/dialog'
 import { AlertTriangle, Check, Copy, RotateCcw, X } from 'lucide-react'
 import { toast } from 'sonner'
@@ -8,11 +6,14 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import type { UserResponseDto } from '@/shared/types/auth'
 import type { LocationDto } from '@/shared/types/location'
-import { assignLocationAccess, createUser, getAdminByLocation } from '@/shared/api/endpoints/users'
-import { getApiErrorMessage } from '@/shared/api/apiError'
+import { useCreateAdmin, type CreateAdminFormData } from '../hooks/useCreateAdmin'
 
-const FIELD_CLASSNAME =
-  'h-10 w-full rounded-none border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
+const FIELD_CLASSNAME = 'h-10 w-full rounded-none border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
+
+const ALERT_VARIANT_CLASSNAME = {
+  error: 'border-red-200 bg-red-50 text-red-700',
+  success: 'border-green-200 bg-green-50 text-green-700',
+} as const
 
 interface FormErrors {
   firstName?: string
@@ -30,13 +31,36 @@ function validate(firstName: string, lastName: string, personalId: string, locat
   return errors
 }
 
-function getCreateErrorMessage(error: unknown): string {
-  if (axios.isAxiosError(error)) {
-    const status = error.response?.status
-    if (status === 409) return 'Bu personel numarası zaten kayıtlı.'
-    if (status === 401 || status === 403) return 'Bu işlem için süper yönetici yetkisine sahip olmalısınız.'
-  }
-  return 'Yönetici oluşturulamadı. Lütfen tekrar deneyin.'
+function PopupHeader({ title, showClose = true }: { title: string; showClose?: boolean }) {
+  return (
+    <div className="flex items-center justify-between border-b border-zinc-200 px-5 py-4">
+      <Dialog.Title className="text-sm font-semibold tracking-wide text-zinc-900 uppercase">{title}</Dialog.Title>
+      {showClose && (
+        <Dialog.Close className="text-zinc-400 transition-colors hover:text-zinc-700">
+          <X className="size-4" />
+        </Dialog.Close>
+      )}
+    </div>
+  )
+}
+
+function InlineAlert({ variant, icon, children }: { variant: keyof typeof ALERT_VARIANT_CLASSNAME; icon?: ReactNode; children: ReactNode }) {
+  return (
+    <div className={cn('flex items-center gap-2 border px-3 py-2 text-xs', ALERT_VARIANT_CLASSNAME[variant])}>
+      {icon}
+      {children}
+    </div>
+  )
+}
+
+function FormField({ label, error, children }: { label: string; error?: string; children: ReactNode }) {
+  return (
+    <div>
+      <label className="mb-1.5 block text-xs font-medium text-zinc-600">{label}</label>
+      {children}
+      {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
+    </div>
+  )
 }
 
 interface AdminFormStepProps {
@@ -44,7 +68,7 @@ interface AdminFormStepProps {
   isSubmitting: boolean
   submitError: string | null
   onCancel: () => void
-  onSubmit: (data: { firstName: string; lastName: string; personalId: string; locationId: string }) => void
+  onSubmit: (data: CreateAdminFormData) => void
 }
 
 function AdminFormStep({ locations, isSubmitting, submitError, onCancel, onSubmit }: AdminFormStepProps) {
@@ -63,43 +87,29 @@ function AdminFormStep({ locations, isSubmitting, submitError, onCancel, onSubmi
 
   return (
     <>
-      <div className="flex items-center justify-between border-b border-zinc-200 px-5 py-4">
-        <Dialog.Title className="text-sm font-semibold tracking-wide text-zinc-900 uppercase">
-          Yeni Admin Ekle
-        </Dialog.Title>
-        <Dialog.Close className="text-zinc-400 transition-colors hover:text-zinc-700">
-          <X className="size-4" />
-        </Dialog.Close>
-      </div>
+      <PopupHeader title="Yeni Admin Ekle" />
 
       <div className="space-y-4 px-5 py-4">
-        {submitError && (
-          <div className="border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">{submitError}</div>
-        )}
+        {submitError && <InlineAlert variant="error">{submitError}</InlineAlert>}
 
         <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="mb-1.5 block text-xs font-medium text-zinc-600">Ad *</label>
+          <FormField label="Ad *" error={errors.firstName}>
             <input
               value={firstName}
               onChange={(event) => setFirstName(event.target.value)}
               className={cn(FIELD_CLASSNAME, errors.firstName && 'border-red-300')}
             />
-            {errors.firstName && <p className="mt-1 text-xs text-red-600">{errors.firstName}</p>}
-          </div>
-          <div>
-            <label className="mb-1.5 block text-xs font-medium text-zinc-600">Soyad *</label>
+          </FormField>
+          <FormField label="Soyad *" error={errors.lastName}>
             <input
               value={lastName}
               onChange={(event) => setLastName(event.target.value)}
               className={cn(FIELD_CLASSNAME, errors.lastName && 'border-red-300')}
             />
-            {errors.lastName && <p className="mt-1 text-xs text-red-600">{errors.lastName}</p>}
-          </div>
+          </FormField>
         </div>
 
-        <div>
-          <label className="mb-1.5 block text-xs font-medium text-zinc-600">Personel No *</label>
+        <FormField label="Personel No *" error={errors.personalId}>
           <input
             value={personalId}
             onChange={(event) => setPersonalId(event.target.value.replace(/\D/g, '').slice(0, 11))}
@@ -107,11 +117,9 @@ function AdminFormStep({ locations, isSubmitting, submitError, onCancel, onSubmi
             placeholder="11 haneli numara"
             className={cn(FIELD_CLASSNAME, errors.personalId && 'border-red-300')}
           />
-          {errors.personalId && <p className="mt-1 text-xs text-red-600">{errors.personalId}</p>}
-        </div>
+        </FormField>
 
-        <div>
-          <label className="mb-1.5 block text-xs font-medium text-zinc-600">Yönetici Olacağı Yerleşke *</label>
+        <FormField label="Yönetici Olacağı Yerleşke *" error={errors.locationId}>
           <select
             value={locationId}
             onChange={(event) => setLocationId(event.target.value)}
@@ -124,8 +132,7 @@ function AdminFormStep({ locations, isSubmitting, submitError, onCancel, onSubmi
               </option>
             ))}
           </select>
-          {errors.locationId && <p className="mt-1 text-xs text-red-600">{errors.locationId}</p>}
-        </div>
+        </FormField>
       </div>
 
       <div className="flex gap-2 border-t border-zinc-200 p-4">
@@ -160,14 +167,7 @@ interface AdminResultStepProps {
   onFinish: () => void
 }
 
-function AdminResultStep({
-  user,
-  generatedPassword,
-  locationAssigned,
-  onRetryLocation,
-  isRetrying,
-  onFinish,
-}: AdminResultStepProps) {
+function AdminResultStep({ user, generatedPassword, locationAssigned, onRetryLocation, isRetrying, onFinish }: AdminResultStepProps) {
   function handleCopy() {
     if (!generatedPassword) return
     navigator.clipboard.writeText(generatedPassword).then(() => toast.success('Şifre kopyalandı.'))
@@ -175,17 +175,12 @@ function AdminResultStep({
 
   return (
     <>
-      <div className="flex items-center justify-between border-b border-zinc-200 px-5 py-4">
-        <Dialog.Title className="text-sm font-semibold tracking-wide text-zinc-900 uppercase">
-          Yönetici Oluşturuldu
-        </Dialog.Title>
-      </div>
+      <PopupHeader title="Yönetici Oluşturuldu" showClose={false} />
 
       <div className="space-y-4 px-5 py-4">
-        <div className="flex items-center gap-2 border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700">
-          <Check className="size-4 shrink-0" />
+        <InlineAlert variant="success" icon={<Check className="size-4 shrink-0" />}>
           {user.firstName} {user.lastName} başarıyla oluşturuldu.
-        </div>
+        </InlineAlert>
 
         {generatedPassword && (
           <div>
@@ -222,7 +217,7 @@ function AdminResultStep({
       </div>
 
       <div className="flex justify-end border-t border-zinc-200 p-4">
-        <Button type="button" className="h-11 rounded-none bg-zinc-900 px-6 text-sm text-white hover:bg-zinc-800" onClick={onFinish}>
+        <Button type="button" className="h-11 rounded-none bg-[#133458] px-6 text-sm text-white hover:bg-[#0f2843]" onClick={onFinish}>
           Tamam
         </Button>
       </div>
@@ -237,95 +232,11 @@ interface AddAdminPopupProps {
 }
 
 export function AddAdminPopup({ open, locations, onClose }: AddAdminPopupProps) {
-  const queryClient = useQueryClient()
-
-  const [step, setStep] = useState<'form' | 'result'>('form')
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [submitError, setSubmitError] = useState<string | null>(null)
-  const [createdUser, setCreatedUser] = useState<UserResponseDto | null>(null)
-  const [generatedPassword, setGeneratedPassword] = useState<string | null>(null)
-  const [pendingLocationId, setPendingLocationId] = useState<string | null>(null)
-  const [locationAssigned, setLocationAssigned] = useState(true)
-  const [isRetrying, setIsRetrying] = useState(false)
-
-  function reset() {
-    setStep('form')
-    setIsSubmitting(false)
-    setSubmitError(null)
-    setCreatedUser(null)
-    setGeneratedPassword(null)
-    setPendingLocationId(null)
-    setLocationAssigned(true)
-    setIsRetrying(false)
-  }
+  const flow = useCreateAdmin()
 
   function handleClose() {
-    reset()
+    flow.reset()
     onClose()
-  }
-
-  async function handleSubmit(data: { firstName: string; lastName: string; personalId: string; locationId: string }) {
-    setIsSubmitting(true)
-    setSubmitError(null)
-
-    try {
-      const existingAdmin = await getAdminByLocation(data.locationId)
-      if (existingAdmin) {
-        setSubmitError(
-          `Bu yerleşkede zaten bir Yönetici atanmış: ${existingAdmin.firstName} ${existingAdmin.lastName}.`,
-        )
-        setIsSubmitting(false)
-        return
-      }
-
-      const { user, generatedPassword: password } = await createUser({
-        personalId: data.personalId,
-        firstName: data.firstName,
-        lastName: data.lastName,
-        roles: ['ADMIN'],
-      })
-
-      let finalUser = user
-      let assigned = true
-      try {
-        finalUser = await assignLocationAccess(user.id, data.locationId)
-      } catch {
-        assigned = false
-      }
-
-      queryClient.invalidateQueries({ queryKey: ['users'], exact: false })
-      setCreatedUser(finalUser)
-      setGeneratedPassword(password)
-      setPendingLocationId(data.locationId)
-      setLocationAssigned(assigned)
-      setStep('result')
-
-      if (assigned) {
-        toast.success('Yönetici başarıyla oluşturuldu.')
-      } else {
-        toast.warning(`${finalUser.firstName} ${finalUser.lastName} oluşturuldu ancak yerleşke ataması başarısız oldu.`)
-      }
-    } catch (error) {
-      setSubmitError(getCreateErrorMessage(error))
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
-  async function handleRetryLocation() {
-    if (!createdUser || !pendingLocationId) return
-    setIsRetrying(true)
-    try {
-      const updatedUser = await assignLocationAccess(createdUser.id, pendingLocationId)
-      setCreatedUser(updatedUser)
-      setLocationAssigned(true)
-      queryClient.invalidateQueries({ queryKey: ['users'], exact: false })
-      toast.success('Yerleşke ataması tamamlandı.')
-    } catch (error) {
-      toast.error(getApiErrorMessage(error, 'Yerleşke ataması yine başarısız oldu.'))
-    } finally {
-      setIsRetrying(false)
-    }
   }
 
   return (
@@ -333,23 +244,23 @@ export function AddAdminPopup({ open, locations, onClose }: AddAdminPopupProps) 
       <Dialog.Portal>
         <Dialog.Backdrop className="fixed inset-0 bg-zinc-900/40 backdrop-blur-sm" />
         <Dialog.Popup className="fixed top-1/2 left-1/2 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 border border-zinc-200 bg-white">
-          {step === 'form' ? (
+          {flow.step === 'form' ? (
             <AdminFormStep
               key={open ? 'open' : 'closed'}
               locations={locations}
-              isSubmitting={isSubmitting}
-              submitError={submitError}
+              isSubmitting={flow.isSubmitting}
+              submitError={flow.submitError}
               onCancel={handleClose}
-              onSubmit={handleSubmit}
+              onSubmit={flow.submit}
             />
           ) : (
-            createdUser && (
+            flow.createdUser && (
               <AdminResultStep
-                user={createdUser}
-                generatedPassword={generatedPassword}
-                locationAssigned={locationAssigned}
-                onRetryLocation={handleRetryLocation}
-                isRetrying={isRetrying}
+                user={flow.createdUser}
+                generatedPassword={flow.generatedPassword}
+                locationAssigned={flow.locationAssigned}
+                onRetryLocation={flow.retryLocation}
+                isRetrying={flow.isRetrying}
                 onFinish={handleClose}
               />
             )

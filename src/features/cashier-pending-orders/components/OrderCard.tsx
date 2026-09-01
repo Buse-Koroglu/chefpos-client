@@ -21,15 +21,7 @@ interface OrderCardProps {
   isCancelling: boolean
 }
 
-export function OrderCard({
-  order,
-  isReadyForPayment,
-  onComplete,
-  onCancel,
-  onOpenPayment,
-  isCompleting,
-  isCancelling,
-}: OrderCardProps) {
+export function OrderCard({order,isReadyForPayment,onComplete,onCancel,onOpenPayment,isCompleting,isCancelling,}: OrderCardProps) {
   const isBusy = isCompleting || isCancelling
 
   return (

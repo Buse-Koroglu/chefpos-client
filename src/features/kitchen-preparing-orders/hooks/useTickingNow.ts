@@ -1,10 +1,5 @@
 import { useEffect, useState } from 'react'
 
-/**
- * Verilen aralıkla güncellenen bir "now" değeri döner. Tarayıcı sekmesi
- * arka plandayken interval'i durdurup sekme tekrar görünür olduğunda
- * hemen tazeleyerek gereksiz kaynak tüketimini önler.
- */
 export function useTickingNow(intervalMs: number) {
   const [now, setNow] = useState(() => new Date())
 

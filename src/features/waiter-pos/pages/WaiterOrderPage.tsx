@@ -9,15 +9,15 @@ import { TableSelector } from '../components/TableSelector'
 import { CategoryTabs } from '../components/CategoryTabs'
 import { MenuTabs } from '../components/MenuTabs'
 import { ProductCard } from '../components/ProductCard'
-import { CartBar } from '../components/CartBar'
+import { CardBar } from '../components/CardBar'
 import { useActiveTables } from '../hooks/useActiveTables'
 import { useCategories } from '../hooks/useCategories'
 import { useMenus } from '../hooks/useMenus'
 import { useProducts } from '../hooks/useProducts'
-import { useCart } from '../hooks/useCart'
+import { useCard } from '../hooks/useCard'
 import { useCreateOrder } from '../hooks/useCreateOrder'
 import { WaiterSidebar } from '@/shared/components/WaiterSidebar'
-import { CartItemsSheet } from '../components/CartItemsSheet'
+import { CardItemsSheet } from '../components/CardItemsSheet'
 import { getApiErrorMessage } from '@/shared/api/apiError'
 import { isTableOccupiedConflict } from '../utils'
 import type { Product } from '../types'
@@ -33,7 +33,7 @@ export function WaiterOrderPage() {
   const [selectedMenuId, setSelectedMenuId] = useState('')
   const [customerName, setCustomerName] = useState('')
   const [searchInput, setSearchInput] = useState('')
-  const debouncedSearch = useDebouncedValue(searchInput, 400)
+  const debouncedSearch = useDebouncedValue(searchInput, 400) // 400 ms debounce
   const [menuOpen, setMenuOpen] = useState(false)
   const { data: tables = [] } = useActiveTables(locationId)
   const { data: categories = [] } = useCategories(locationId)
@@ -41,14 +41,14 @@ export function WaiterOrderPage() {
   const activeMenu = menus.find((menu) => menu.id === selectedMenuId)
 
   const [pageNumber, setPageNumber] = useState(1)
-  const [accumulatedItems, setAccumulatedItems] = useState<Product[]>([])
+  const [collectedItems, setCollectedItems] = useState<Product[]>([]) //  gelen tüm ürünleri toplamak için state
 
   const filterKey = `${locationId ?? ''}|${categoryId}|${selectedMenuId}|${debouncedSearch}`
   const [lastFilterKey, setLastFilterKey] = useState(filterKey)
   if (filterKey !== lastFilterKey) {
     setLastFilterKey(filterKey)
     setPageNumber(1)
-    setAccumulatedItems([])
+    setCollectedItems([])
   }
 
   const { data: productsPage, isLoading, isFetching } = useProducts({
@@ -63,7 +63,7 @@ export function WaiterOrderPage() {
   const [lastMergedPage, setLastMergedPage] = useState<typeof productsPage>(undefined)
   if (productsPage && productsPage !== lastMergedPage && filterKey === lastFilterKey) {
     setLastMergedPage(productsPage)
-    setAccumulatedItems((current) =>
+    setCollectedItems((current) =>
       productsPage.pageNumber === 1 ? productsPage.items : [...current, ...productsPage.items],
     )
   }
@@ -71,8 +71,8 @@ export function WaiterOrderPage() {
   const canLoadMore = !selectedMenuId && Boolean(productsPage) && productsPage!.pageNumber < productsPage!.totalPages
 
   const displayProducts = activeMenu
-    ? accumulatedItems.filter((product) => activeMenu.products.some((menuProduct) => menuProduct.productId === product.id))
-    : accumulatedItems
+    ? collectedItems.filter((product) => activeMenu.products.some((menuProduct) => menuProduct.productId === product.id))
+    : collectedItems
 
   function handleCategorySelect(value: string) {
     setCategoryId(value)
@@ -84,7 +84,7 @@ export function WaiterOrderPage() {
     setCategoryId('')
   }
 
-  const { items, addItem, totalCount, increaseQuantity, decreaseQuantity, removeItem,totalAmount, clear } = useCart()
+  const { items, addItem, totalCount, increaseQuantity, decreaseQuantity, removeItem,totalAmount, clear } = useCard()
   const createOrder = useCreateOrder()
 
   const [lastSyncedLocationId, setLastSyncedLocationId] = useState(locationId)
@@ -121,12 +121,11 @@ export function WaiterOrderPage() {
           setCustomerName('')
         },
         onError: (error) => {
-          const message = getApiErrorMessage(error, 'Sipariş oluşturulamadı.')
-          if (isTableOccupiedConflict(message)) {
+          if (isTableOccupiedConflict(error)) {
             toast.error('Seçtiğiniz masa dolu. Ödeme alınmadan yeni sipariş oluşturulamaz.')
             return
           }
-          toast.error(message)
+          toast.error(getApiErrorMessage(error, 'Sipariş oluşturulamadı.'))
         },
       },
     )
@@ -213,7 +212,7 @@ export function WaiterOrderPage() {
         )}
       </main>
 
-       <CartBar
+       <CardBar
         totalCount={totalCount}
         totalAmount={totalAmount}
         onSubmit={handleSubmit}
@@ -221,7 +220,7 @@ export function WaiterOrderPage() {
         isSubmitting={createOrder.isPending}
       />
 
-      <CartItemsSheet
+      <CardItemsSheet
         open={cartOpen}
         onClose={() => setCartOpen(false)}
         items={items}

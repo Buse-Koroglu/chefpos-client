@@ -45,7 +45,6 @@ export function OrderDetailModal({
         className="w-full max-w-2xl border border-zinc-300 bg-white shadow-xl"
         onClick={(event) => event.stopPropagation()}
       >
-        {/* HEADER */}
         <div className="flex items-center justify-between border-b border-zinc-200 px-5 py-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
@@ -79,7 +78,6 @@ export function OrderDetailModal({
           </button>
         </div>
 
-        {/* ORDER INFORMATION */}
         <div className="grid grid-cols-3 border-b border-zinc-200">
           <div className="border-r border-zinc-200 px-5 py-4">
             <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
@@ -120,7 +118,6 @@ export function OrderDetailModal({
           </div>
         </div>
 
-        {/* ORDER ITEMS */}
         <div className="p-5">
           <div className="mb-3 flex items-center justify-between">
             <h3 className="text-sm font-bold uppercase tracking-wide text-zinc-800">
@@ -133,7 +130,6 @@ export function OrderDetailModal({
           </div>
 
           <div className="border border-zinc-200">
-            {/* TABLE HEADER */}
             <div className="grid grid-cols-[70px_1fr_120px] border-b border-zinc-200 bg-zinc-100 px-4 py-2.5">
               <span className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
                 Adet
@@ -148,7 +144,6 @@ export function OrderDetailModal({
               </span>
             </div>
 
-            {/* ITEMS */}
             {order.items.map((item) => (
               <div
                 key={item.id}
@@ -174,7 +169,6 @@ export function OrderDetailModal({
           </div>
         </div>
 
-        {/* TOTAL */}
         <div className="mx-5 border-t border-zinc-300 py-4">
           <div className="flex items-center justify-between">
             <span className="text-sm font-semibold uppercase tracking-wide text-zinc-500">
@@ -189,14 +183,12 @@ export function OrderDetailModal({
           </div>
         </div>
 
-        {/* ERROR */}
         {canComplete && completeOrderMutation.isError && (
           <div className="mx-5 mb-4 border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             Sipariş tamamlanamadı. Lütfen tekrar deneyin.
           </div>
         )}
 
-        {/* FOOTER */}
         <div className="flex items-center justify-between border-t border-zinc-200 bg-zinc-50 px-5 py-4">
           <p className="text-xs text-zinc-400">
             {canComplete
