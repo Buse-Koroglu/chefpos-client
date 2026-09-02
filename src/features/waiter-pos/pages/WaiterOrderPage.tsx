@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { ChevronDown, ChevronUp, Search } from 'lucide-react'
 import { useLocationStore } from '@/shared/stores/locationStore'
 import { useLocations } from '@/shared/hooks/useLocations'
 import { useDebouncedValue } from '@/shared/hooks/useDebouncedValue'
+import { useInfiniteScrollTrigger } from '@/shared/hooks/useInfiniteScrollTrigger'
 import { WaiterHeader } from '../components/WaiterHeader'
 import { TableSelector } from '../components/TableSelector'
 import { CategoryTabs } from '../components/CategoryTabs'
@@ -71,6 +72,14 @@ export function WaiterOrderPage() {
   }
 
   const canLoadMore = !selectedMenuId && Boolean(productsPage) && productsPage!.pageNumber < productsPage!.totalPages
+
+  const mainRef = useRef<HTMLElement>(null)
+  const sentinelRef = useInfiniteScrollTrigger({
+    rootRef: mainRef,
+    hasMore: canLoadMore,
+    isLoading: isFetching,
+    onLoadMore: () => setPageNumber((current) => current + 1),
+  })
 
   const displayProducts = activeMenu
     ? collectedItems.filter((product) => activeMenu.products.some((menuProduct) => menuProduct.productId === product.id))
@@ -210,7 +219,7 @@ export function WaiterOrderPage() {
         <CategoryTabs categories={categories} selectedCategoryId={categoryId} onSelect={handleCategorySelect} />
       )}
 
-      <main className="flex-1 overflow-y-auto p-3 pb-24">
+      <main ref={mainRef} className="flex-1 overflow-y-auto p-3 pb-24">
         {isLoading ? (
           <p className="py-8 text-center text-sm text-zinc-400">Yükleniyor...</p>
         ) : (
@@ -220,15 +229,11 @@ export function WaiterOrderPage() {
                 <ProductCard key={product.id} product={product} onAdd={() => addItem(product)} />
               ))}
             </div>
-            {canLoadMore && (
-              <button
-                type="button"
-                onClick={() => setPageNumber((current) => current + 1)}
-                disabled={isFetching}
-                className="mt-3 h-10 w-full border border-zinc-300 bg-white text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50 disabled:opacity-50"
-              >
-                {isFetching ? 'Yükleniyor...' : 'Daha Fazla Yükle'}
-              </button>
+
+            <div ref={sentinelRef} className="h-1" />
+
+            {canLoadMore && isFetching && (
+              <p className="py-3 text-center text-sm text-zinc-400">Yükleniyor...</p>
             )}
           </>
         )}

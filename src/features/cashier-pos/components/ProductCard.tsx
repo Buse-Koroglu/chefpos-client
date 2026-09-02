@@ -75,7 +75,7 @@ export function ProductCard({ product, onAdd, size = 'default' }: ProductCardPro
             <span
               aria-hidden="true"
               className={cn(
-                'flex shrink-0 items-center justify-center bg-[#133458] text-white',
+                'flex shrink-0 items-center justify-center text-[#133458]',
                 isLarge ? 'size-14' : 'size-6',
               )}
             >

@@ -1,10 +1,21 @@
-import { useQuery } from '@tanstack/react-query'
-import { getProducts } from '@/shared/api/endpoints/products'
+import { useQuery, keepPreviousData } from '@tanstack/react-query'
+import { getProductsPaged } from '@/shared/api/endpoints/products'
 
-export function useProducts(locationId: string | undefined, categoryId?: string, includeUncategorized?: boolean) {
+export function useProducts(params: {
+  locationId: string | undefined
+  categoryId?: string
+  searchTerm?: string
+  pageNumber: number
+  pageSize?: number
+  includeUncategorized?: boolean
+}) {
+  const { locationId, categoryId, searchTerm, pageNumber, pageSize = 20, includeUncategorized } = params
+  
   return useQuery({
-    queryKey: ['products', locationId, categoryId, includeUncategorized],
-    queryFn: () => getProducts({ locationId: locationId!, categoryId, includeUncategorized }),
+    queryKey: ['cashier-products', locationId, categoryId, searchTerm, pageNumber, pageSize, includeUncategorized],
+    queryFn: () =>
+      getProductsPaged({locationId,categoryId,searchTerm: searchTerm || undefined,isActive: true,pageNumber,pageSize,includeUncategorized }),
     enabled: Boolean(locationId),
+    placeholderData: keepPreviousData,
   })
 }
