@@ -148,7 +148,7 @@ export function NewOrderPage() {
           <div className="flex items-end gap-3">
             <div className="max-w-sm flex-1 space-y-1.5">
               <Label htmlFor="customerName" className="text-base text-zinc-700">
-                Müşteri
+                Müşteri <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="customerName"

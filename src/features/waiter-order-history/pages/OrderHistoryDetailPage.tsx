@@ -6,6 +6,7 @@ import { useLocationStore } from '@/shared/stores/locationStore'
 import { useDebouncedValue } from '@/shared/hooks/useDebouncedValue'
 import { getApiErrorMessage } from '@/shared/api/apiError'
 import { PaymentStatusBadge } from '@/shared/components/PaymentStatusBadge'
+import { Button } from '@/components/ui/button'
 import { CategoryTabs } from '@/features/waiter-pos/components/CategoryTabs'
 import { ProductCard } from '@/features/waiter-pos/components/ProductCard'
 import { useCategories } from '@/features/waiter-pos/hooks/useCategories'
@@ -13,6 +14,7 @@ import { useProducts } from '@/features/waiter-pos/hooks/useProducts'
 import { OrderStatusBadge } from '../components/OrderStatusBadge'
 import { useOrderDetail } from '../hooks/useOrderDetail'
 import { useOrderItemMutations } from '../hooks/useOrderItemMutations'
+import { useCancelOrder } from '../hooks/useCancelOrder'
 
 const currencyFormatter = new Intl.NumberFormat('tr-TR', {
   style: 'currency',
@@ -40,6 +42,7 @@ export function OrderHistoryDetailPage() {
 
   const { data: order, isLoading, isError } = useOrderDetail(id)
   const { addItem, removeItem, decreaseItem } = useOrderItemMutations(id!)
+  const cancelOrder = useCancelOrder()
 
   const { data: categories = [] } = useCategories(editMode ? locationId : undefined)
   const { data: productsPage } = useProducts({
@@ -104,6 +107,16 @@ export function OrderHistoryDetailPage() {
   function handleRemove(orderItemId: string) {
     removeItem.mutate(orderItemId, {
       onError: (error) => toast.error(getApiErrorMessage(error, 'Ürün kaldırılamadı.')),
+    })
+  }
+
+  function handleCancel() {
+    cancelOrder.mutate(order!.id, {
+      onSuccess: () => {
+        toast.success('Sipariş iptal edildi.')
+        navigate('/app/waiter-orders/history')
+      },
+      onError: (error) => toast.error(getApiErrorMessage(error, 'Sipariş iptal edilemedi.')),
     })
   }
 
@@ -242,13 +255,24 @@ export function OrderHistoryDetailPage() {
             Bitti
           </button>
         ) : canEdit ? (
-          <button
-            type="button"
-            onClick={() => setEditMode(true)}
-            className="h-11 w-full bg-[#133458] text-sm font-semibold text-white transition-colors hover:bg-[#0f2843]"
-          >
-            Düzenle
-          </button>
+          <div className="flex flex-col gap-2">
+            <button
+              type="button"
+              onClick={() => setEditMode(true)}
+              className="h-11 w-full bg-[#133458] text-sm font-semibold text-white transition-colors hover:bg-[#0f2843]"
+            >
+              Düzenle
+            </button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={handleCancel}
+              disabled={cancelOrder.isPending}
+              className="h-11 w-full rounded-none text-base"
+            >
+              {cancelOrder.isPending ? 'İptal ediliyor...' : 'İptal Et'}
+            </Button>
+          </div>
         ) : null}
       </div>
     </div>

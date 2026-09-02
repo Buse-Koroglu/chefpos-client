@@ -12,9 +12,9 @@ export function WaiterHeader({ locationName, onMenuClick }: WaiterHeaderProps) {
         <button type="button" onClick={onMenuClick} aria-label="Menü" className="text-zinc-900">
           <Menu className="size-5" />
         </button>
-        <span className="text-sm font-semibold tracking-tight text-zinc-900">ChefPos Terminal</span>
+        <span className="text-base font-semibold tracking-tight text-zinc-900">ChefPos Terminal</span>
       </div>
-      <span className="text-xs font-medium text-zinc-500">{locationName}</span>
+      <span className="text-sm font-medium text-zinc-500">{locationName}</span>
     </header>
   )
 }

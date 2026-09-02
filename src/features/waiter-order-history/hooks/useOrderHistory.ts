@@ -18,6 +18,7 @@ export function useOrderHistory(locationId: string | undefined, filter: OrderHis
       getOrders({
         locationId: locationId!,
         waiterId: userId,
+        type: 'WAITER',
         status: filter,
         fromDate,
         toDate,

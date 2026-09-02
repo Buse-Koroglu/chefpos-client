@@ -52,22 +52,22 @@ export function WeeklyRevenueChart({ days, isLoading, isError }: WeeklyRevenueCh
   return (
     <div className="flex h-full flex-col border-2 border-zinc-300 bg-white p-5">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-zinc-700">Haftalık Kâr Grafiği</h2>
-        <span className="min-w-24 text-right text-sm tabular-nums text-zinc-500">
+        <h2 className="text-lg font-semibold text-zinc-700">Haftalık Kâr Grafiği</h2>
+        <span className="min-w-24 text-right text-base tabular-nums text-zinc-500">
           {hovered ? currencyFormatter.format(hovered.profit) : ' '}
         </span>
       </div>
 
       {isError ? (
-        <div className="flex flex-1 items-center justify-center py-10 text-sm text-zinc-500">
+        <div className="flex flex-1 items-center justify-center py-10 text-base text-zinc-500">
           Haftalık kâr verisi alınamadı.
         </div>
       ) : isLoading ? (
-        <div className="flex flex-1 items-center justify-center py-10 text-sm text-zinc-500">Yükleniyor…</div>
+        <div className="flex flex-1 items-center justify-center py-10 text-base text-zinc-500">Yükleniyor…</div>
       ) : (
         <>
           <div className="mt-2 flex flex-1 items-stretch gap-3">
-            <div className="flex w-24 shrink-0 flex-col justify-between py-0.5 text-xs text-zinc-400 tabular-nums">
+            <div className="flex w-24 shrink-0 flex-col justify-between py-0.5 text-sm text-zinc-400 tabular-nums">
               <span>{currencyFormatter.format(maxRevenue)}</span>
               <span>0 ₺</span>
             </div>
@@ -84,7 +84,7 @@ export function WeeklyRevenueChart({ days, isLoading, isError }: WeeklyRevenueCh
                 return (
                   <div key={entry.date} className="relative flex h-full flex-1 flex-col items-center justify-end">
                     {isHovered && (
-                      <div className="absolute -top-8 z-10 border border-zinc-200 bg-white px-2 py-1 text-xs whitespace-nowrap text-zinc-700 shadow-sm">
+                      <div className="absolute -top-8 z-10 border border-zinc-200 bg-white px-2 py-1 text-sm whitespace-nowrap text-zinc-700 shadow-sm">
                         {currencyFormatter.format(entry.profit)}
                       </div>
                     )}
@@ -95,7 +95,7 @@ export function WeeklyRevenueChart({ days, isLoading, isError }: WeeklyRevenueCh
                       onMouseLeave={() => setHoveredDay(null)}
                       onFocus={() => setHoveredDay(entry.date)}
                       onBlur={() => setHoveredDay(null)}
-                      className={`w-full max-w-6 outline-none ${
+                      className={`w-full max-w-10 outline-none ${
                         entry.isToday ? 'bg-[#133458]' : 'bg-zinc-200 hover:bg-zinc-300'
                       } ${isHovered ? 'bg-zinc-300' : ''} ${entry.isToday && isHovered ? 'bg-[#0f2843]' : ''}`}
                       style={{ height: `${barHeight}%` }}
@@ -112,7 +112,7 @@ export function WeeklyRevenueChart({ days, isLoading, isError }: WeeklyRevenueCh
               {entries.map((entry) => (
                 <span
                   key={entry.date}
-                  className={`flex-1 text-center text-xs ${entry.isToday ? 'font-semibold text-zinc-900' : 'text-zinc-500'}`}
+                  className={`flex-1 text-center text-sm ${entry.isToday ? 'font-semibold text-zinc-900' : 'text-zinc-500'}`}
                 >
                   {entry.abbreviation}
                 </span>

@@ -7,9 +7,8 @@ export function useCancelOrder() {
   return useMutation({
     mutationFn: cancelOrder,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['orders', 'pending'] })
-      queryClient.invalidateQueries({ queryKey: ['orders', 'pending-count'] })
-      queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+      queryClient.invalidateQueries({ queryKey: ['orders', 'history'] })
+      queryClient.invalidateQueries({ queryKey: ['orders', 'detail'] })
     },
   })
 }

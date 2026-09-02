@@ -8,6 +8,7 @@ export function useCompleteOrder() {
     mutationFn: completeOrder,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['orders', 'pending'] })
+      queryClient.invalidateQueries({ queryKey: ['orders', 'pending-count'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
     },
   })

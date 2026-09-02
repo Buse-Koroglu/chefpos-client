@@ -20,7 +20,7 @@ export function OrderStatusFilterTabs({ value, onChange }: OrderStatusFilterTabs
           type="button"
           onClick={() => onChange(tab.value)}
           className={cn(
-            'flex-1 border-b-2 px-3 py-2.5 text-sm font-medium transition-colors',
+            'flex-1 border-b-2 px-3 py-2.5 text-base font-medium transition-colors',
             value === tab.value ? 'border-[#133458] bg-zinc-50 text-zinc-900' : 'border-transparent text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900',
           )}
         >

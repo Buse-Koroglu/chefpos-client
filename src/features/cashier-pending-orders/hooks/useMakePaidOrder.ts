@@ -8,6 +8,7 @@ export function useMakePaidOrder() {
     mutationFn: makeOrderPaid,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['orders', 'pending'] })
+      queryClient.invalidateQueries({ queryKey: ['orders', 'pending-count'] })
       queryClient.invalidateQueries({ queryKey: ['orders', 'history'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
     },

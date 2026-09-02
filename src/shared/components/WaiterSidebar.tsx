@@ -114,9 +114,9 @@ export function WaiterSidebar({ open, onClose }: WaiterSidebarProps) {
                 onClose()
                 navigate('/app/waiter-orders/history')
               }}
-              className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 hover:text-zinc-900"
+              className="flex w-full items-center gap-2.5 px-3 py-2.5 text-base font-medium text-zinc-700 transition-colors hover:bg-zinc-100 hover:text-zinc-900"
             >
-              <History className="size-4" />
+              <History className="size-5" />
               Geçmiş Siparişler
             </button>
           </nav>
