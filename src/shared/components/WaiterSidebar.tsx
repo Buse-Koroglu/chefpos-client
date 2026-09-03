@@ -30,19 +30,31 @@ export function WaiterSidebar({ open, onClose }: WaiterSidebarProps) {
 
   const { data: allLocations = [] } = useLocations()
 
-  const roles = user?.roles ?? []
+  const roles = useMemo(() => {
+    const roleSet = new Set(user?.locationRoles.map((lr) => lr.role) ?? [])
+    if (user?.roles.includes('SUPER_ADMIN')) roleSet.add('SUPER_ADMIN')
+    return Array.from(roleSet)
+  }, [user])
+
   const currentRole: Role | undefined = (activeRole && roles.includes(activeRole) ? activeRole : roles[0]) ?? undefined
 
-  const userLocations = useMemo(
-    () => allLocations.filter((location) => user?.locationIds.includes(location.id)),
-    [allLocations, user],
+  const userLocations = useMemo( // sadece o an seçili rolün geçerli olduğu yerleşkeler gösterilir
+    () => {
+      if (!currentRole) return []
+      const locationIds = new Set(user?.locationRoles.filter((lr) => lr.role === currentRole).map((lr) => lr.locationId) ?? [])
+      return allLocations.filter((location) => locationIds.has(location.id))
+    },
+    [allLocations, user, currentRole],
   )
 
   useEffect(() => {
-    if (!selectedLocationId && userLocations.length > 0) {
-      setSelectedLocationId(userLocations[0].id)
+    if (userLocations.length > 0) {
+      const isValid = selectedLocationId && userLocations.some((location) => location.id === selectedLocationId)
+      if (!isValid) {
+        setSelectedLocationId(userLocations[0].id)
+      }
     }
-  }, [selectedLocationId, userLocations, setSelectedLocationId])
+  }, [currentRole, selectedLocationId, userLocations, setSelectedLocationId])
 
   function handleRoleChange(role: Role) {
     setActiveRole(role)

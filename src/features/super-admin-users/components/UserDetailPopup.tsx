@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils'
 import type { UserResponseDto } from '@/shared/types/auth'
 import { RoleBadge } from '@/features/admin-staff/components/RoleBadge'
 import { useUpdateUserStatus } from '@/features/super-admin-users/hooks/useUpdateUserStatus'
+import { useRevokeRoleAtLocation } from '@/features/super-admin-users/hooks/useRevokeRoleAtLocation'
 
 interface UserDetailPopupProps {
   user: UserResponseDto | null
@@ -14,6 +15,12 @@ interface UserDetailPopupProps {
 export function UserDetailPopup({ user, locationsById, onClose }: UserDetailPopupProps) {
   const updateStatusMutation = useUpdateUserStatus()
   const isUpdatingStatus = updateStatusMutation.isPending
+  const revokeRoleMutation = useRevokeRoleAtLocation()
+
+  function handleRevokeAssignment(role: UserResponseDto['locationRoles'][number]['role'], locationId: string) {
+    if (!user) return
+    revokeRoleMutation.mutate({ userId: user.id, role, locationId })
+  }
 
   function handleSetActive(nextActive: boolean) {
     if (!user || user.isActive === nextActive) return
@@ -46,19 +53,31 @@ export function UserDetailPopup({ user, locationsById, onClose }: UserDetailPopu
               </div>
 
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-zinc-600">Roller</label>
-                <div className="flex flex-wrap gap-1">
-                  {user.roles.map((role) => (
-                    <RoleBadge key={role} role={role} />
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="mb-1.5 block text-xs font-medium text-zinc-600">Yerleşkeler</label>
-                <p className="text-sm text-zinc-600">
-                  {user.locationIds.map((id) => locationsById.get(id) ?? '—').join(', ') || '—'}
-                </p>
+                <label className="mb-1.5 block text-xs font-medium text-zinc-600">Görev · Yerleşke</label>
+                {user.locationRoles.length === 0 && !user.roles.includes('SUPER_ADMIN') ? (
+                  <p className="text-sm text-zinc-600">—</p>
+                ) : (
+                  <div className="flex flex-wrap gap-1.5">
+                    {user.locationRoles.map((lr) => (
+                      <span
+                        key={`${lr.role}-${lr.locationId}`}
+                        className="flex items-center gap-1.5 border border-zinc-200 bg-zinc-50 py-1 pr-1 pl-2 text-xs text-zinc-700"
+                      >
+                        <RoleBadge role={lr.role} locationName={locationsById.get(lr.locationId) ?? '—'} />
+                        <button
+                          type="button"
+                          onClick={() => handleRevokeAssignment(lr.role, lr.locationId)}
+                          disabled={revokeRoleMutation.isPending}
+                          className="text-zinc-400 transition-colors hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+                          title="Bu atamayı kaldır"
+                        >
+                          <X className="size-3" />
+                        </button>
+                      </span>
+                    ))}
+                    {user.roles.includes('SUPER_ADMIN') && <RoleBadge role="SUPER_ADMIN" />}
+                  </div>
+                )}
               </div>
 
               <div>

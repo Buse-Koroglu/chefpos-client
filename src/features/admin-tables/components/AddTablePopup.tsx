@@ -38,7 +38,7 @@ interface AddTablePopupProps {
 export function AddTablePopup({ open, locations, onClose }: AddTablePopupProps) {
   const createTableMutation = useCreateTable()
 
-  const adminLocationId = useAuthStore((state) => state.user?.locationIds[0])
+  const adminLocationId = useAuthStore((state) => state.user?.locationRoles.find((lr) => lr.role === 'ADMIN')?.locationId)
   const adminLocationName = locations.find((location) => location.id === adminLocationId)?.name ?? '—'
 
   const [tableNumber, setTableNumber] = useState('')

@@ -3,6 +3,11 @@ import { ROLES } from '@/shared/types/auth'
 import type { Role, UserResponseDto } from '@/shared/types/auth'
 import type {CreateUserRequest, CreateUserResult, ExportUsersQueryRequest,GetUsersQueryRequest,GetUsersResult} from '@/shared/types/users'
 
+interface RawLocationRole {
+  role: number | Role
+  locationId: string
+}
+
 interface RawUserPayload {
   id: string
   personalId: string
@@ -12,6 +17,7 @@ interface RawUserPayload {
   isFirstLogin: boolean
   isActive: boolean
   locationIds: string[]
+  locationRoles: RawLocationRole[]
   generatedPassword?: string | null
 }
 
@@ -25,6 +31,10 @@ function normalizeUser(raw: RawUserPayload): UserResponseDto {
     isFirstLogin: raw.isFirstLogin,
     isActive: raw.isActive,
     locationIds: raw.locationIds ?? [],
+    locationRoles: (raw.locationRoles ?? []).map((lr) => ({
+      role: typeof lr.role === 'number' ? ROLES[lr.role] : lr.role,
+      locationId: lr.locationId,
+    })),
   }
 }
 
@@ -76,6 +86,16 @@ export function assignLocationAccess(userId: string, locationId: string) {
 
 export function revokeLocationAccess(userId: string, locationId: string) {
   return apiClient.delete<RawUserPayload>(`/api/users/${userId}/locations/${locationId}`)
+    .then((res) => normalizeUser(res.data))
+}
+
+export function grantRoleAtLocation(userId: string, role: Role, locationId: string) {
+  return apiClient.post<RawUserPayload>(`/api/users/${userId}/location-roles`, { role: ROLES.indexOf(role), locationId })
+    .then((res) => normalizeUser(res.data))
+}
+
+export function revokeRoleAtLocation(userId: string, role: Role, locationId: string) {
+  return apiClient.delete<RawUserPayload>(`/api/users/${userId}/location-roles/${role}/${locationId}`)
     .then((res) => normalizeUser(res.data))
 }
 

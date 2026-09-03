@@ -17,8 +17,7 @@ const TABLE_HEAD = (
   <tr className="border-b border-zinc-200 bg-zinc-50 text-xs font-semibold tracking-wide text-zinc-500 uppercase">
     <th className="px-4 py-3">Adı Soyadı</th>
     <th className="px-4 py-3">Personel No</th>
-    <th className="px-4 py-3">Roller</th>
-    <th className="px-4 py-3">Yerleşkeler</th>
+    <th className="px-4 py-3">Rol · Yerleşke</th>
     <th className="px-4 py-3">Durum</th>
     <th className="px-4 py-3">İşlemler</th>
   </tr>
@@ -77,13 +76,11 @@ export function SuperAdminUsersTable({users,locationsById,isLoading,onSelect,onP
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex flex-wrap gap-1">
-                    {user.roles.map((role) => (
-                      <RoleBadge key={role} role={role} />
+                    {user.locationRoles.map((lr) => (
+                      <RoleBadge key={`${lr.role}-${lr.locationId}`} role={lr.role} locationName={locationsById.get(lr.locationId) ?? '—'} />
                     ))}
+                    {isSuperAdmin && <RoleBadge role="SUPER_ADMIN" />}
                   </div>
-                </td>
-                <td className="px-4 py-3 text-zinc-600">
-                  {user.locationIds.map((id) => locationsById.get(id) ?? '—').join(', ') || '—'}
                 </td>
                 <td className="px-4 py-3">
                   <StatusBadge isActive={user.isActive} />

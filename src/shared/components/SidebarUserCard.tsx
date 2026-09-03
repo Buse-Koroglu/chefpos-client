@@ -29,17 +29,29 @@ export function SidebarUserCard({ isCollapsed = false }: SidebarUserCardProps) {
 
   const { data: allLocations = [] } = useLocations()
 
-  const roles = user?.roles ?? []
+  const roles = useMemo(() => { // her rol, o role sahip olduğu bir yerleşke varsa gösterilir; SUPER_ADMIN yerleşkeden bağımsızdır
+    const roleSet = new Set(user?.locationRoles.map((lr) => lr.role) ?? [])
+    if (user?.roles.includes('SUPER_ADMIN')) roleSet.add('SUPER_ADMIN')
+    return Array.from(roleSet)
+  }, [user])
+
   const currentRole: Role | undefined = (activeRole && roles.includes(activeRole) ? activeRole : roles[0]) ?? undefined
 
-  const userLocations = useMemo( // personel hangi yerleşkelerde görevliyse sadece onları görebilmeli
-    () => allLocations.filter((location) => user?.locationIds.includes(location.id)),
-    [allLocations, user], 
+  const userLocations = useMemo( // sadece o an seçili rolün geçerli olduğu yerleşkeler gösterilir
+    () => {
+      if (!currentRole) return []
+      const locationIds = new Set(user?.locationRoles.filter((lr) => lr.role === currentRole).map((lr) => lr.locationId) ?? [])
+      return allLocations.filter((location) => locationIds.has(location.id))
+    },
+    [allLocations, user, currentRole],
   )
 
   useEffect(() => {
-    if (currentRole && currentRole !== 'ADMIN' && currentRole !== 'SUPER_ADMIN' && !selectedLocationId && userLocations.length > 0) {
-      setSelectedLocationId(userLocations[0].id) // user locationlardan ilki olan default olarak gelir
+    if (currentRole && currentRole !== 'ADMIN' && currentRole !== 'SUPER_ADMIN' && userLocations.length > 0) {
+      const isValid = selectedLocationId && userLocations.some((location) => location.id === selectedLocationId)
+      if (!isValid) {
+        setSelectedLocationId(userLocations[0].id) // seçili yerleşke yeni rol için geçerli değilse, o role ait ilk yerleşkeye geçilir
+      }
     }
   }, [currentRole, selectedLocationId, userLocations, setSelectedLocationId])
 

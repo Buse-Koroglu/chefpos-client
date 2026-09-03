@@ -14,7 +14,7 @@ import { ROLE_LABELS, ROLE_OPTIONS } from '@/features/admin-staff/constants'
 import { isStockManagerConflict, StockManagerPrecheckError } from '@/features/admin-staff/utils'
 import { FIELD_CLASSNAME, MultiSelectDropdown } from './MultiSelectDropdown'
 import { useCreateStaffMember } from '@/features/admin-staff/hooks/useCreateStaffMember'
-import { useAssignLocationAccess } from '@/features/admin-staff/hooks/useAssignLocationAccess'
+import { useGrantRoleAtLocation } from '@/features/admin-staff/hooks/useGrantRoleAtLocation'
 
 interface FormErrors {
   firstName?: string
@@ -42,23 +42,20 @@ function getCreateErrorMessage(error: unknown): string {
 }
 
 interface StaffFormStepProps {
-  locations: LocationDto[]
-  adminLocationId: string | undefined
+  adminLocations: LocationDto[]
   isSubmitting: boolean
   submitError: string | null
   onCancel: () => void
-  onSubmit: (data: { firstName: string; lastName: string; personalId: string; roles: Role[]; locationIds: string[] }) => void
+  onSubmit: (data: { firstName: string; lastName: string; personalId: string; roles: Role[]; locationId: string }) => void
 }
 
-function StaffFormStep({ locations, adminLocationId, isSubmitting, submitError, onCancel, onSubmit }: StaffFormStepProps) {
+function StaffFormStep({ adminLocations, isSubmitting, submitError, onCancel, onSubmit }: StaffFormStepProps) {
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [personalId, setPersonalId] = useState('')
   const [roles, setRoles] = useState<Role[]>([])
+  const [locationId, setLocationId] = useState(adminLocations[0]?.id ?? '')
   const [errors, setErrors] = useState<FormErrors>({})
-
-  const locationIds = adminLocationId ? [adminLocationId] : []
-  const adminLocationName = locations.find((location) => location.id === adminLocationId)?.name ?? '—'
 
   function toggleRole(role: Role) {
     setRoles((prev) => (prev.includes(role) ? prev.filter((value) => value !== role) : [...prev, role]))
@@ -67,8 +64,8 @@ function StaffFormStep({ locations, adminLocationId, isSubmitting, submitError, 
   function handleSubmit() {
     const nextErrors = validate(firstName, lastName, personalId, roles)
     setErrors(nextErrors)
-    if (Object.keys(nextErrors).length > 0) return
-    onSubmit({ firstName, lastName, personalId, roles, locationIds })
+    if (Object.keys(nextErrors).length > 0 || !locationId) return
+    onSubmit({ firstName, lastName, personalId, roles, locationId })
   }
 
   const roleOptions = ROLE_OPTIONS.map((r) => ({ id: r, label: ROLE_LABELS[r] }))
@@ -138,7 +135,21 @@ function StaffFormStep({ locations, adminLocationId, isSubmitting, submitError, 
 
         <div>
           <label className="mb-1.5 block text-xs font-medium text-zinc-600">Yerleşke</label>
-          <input value={adminLocationName} readOnly className={cn(FIELD_CLASSNAME, 'bg-zinc-50 text-zinc-500')} />
+          {adminLocations.length > 1 ? (
+            <select value={locationId} onChange={(event) => setLocationId(event.target.value)} className={FIELD_CLASSNAME}>
+              {adminLocations.map((location) => (
+                <option key={location.id} value={location.id}>
+                  {location.name}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <input
+              value={adminLocations[0]?.name ?? '—'}
+              readOnly
+              className={cn(FIELD_CLASSNAME, 'bg-zinc-50 text-zinc-500')}
+            />
+          )}
         </div>
       </div>
 
@@ -168,14 +179,13 @@ function StaffFormStep({ locations, adminLocationId, isSubmitting, submitError, 
 interface StaffResultStepProps {
   user: UserResponseDto
   generatedPassword: string | null
-  failedLocationIds: string[]
-  locationsById: Map<string, string>
-  onRetryLocation: (locationId: string) => void
-  retryingLocationId: string | null
+  failedRoles: Role[]
+  onRetryRole: (role: Role) => void
+  retryingRole: Role | null
   onFinish: () => void
 }
 
-function StaffResultStep({user,generatedPassword,failedLocationIds,locationsById,onRetryLocation,retryingLocationId,onFinish}:StaffResultStepProps) {
+function StaffResultStep({user,generatedPassword,failedRoles,onRetryRole,retryingRole,onFinish}:StaffResultStepProps) {
   function handleCopy(value: string, successMessage: string) {
     navigator.clipboard.writeText(value).then(() => toast.success(successMessage))
   }
@@ -236,21 +246,21 @@ function StaffResultStep({user,generatedPassword,failedLocationIds,locationsById
           </div>
         )}
 
-        {failedLocationIds.length > 0 && (
+        {failedRoles.length > 0 && (
           <div className="border border-red-200 bg-red-50 px-3 py-2.5">
-            <p className="text-xs font-medium text-red-700">Aşağıdaki lokasyonlar atanamadı:</p>
+            <p className="text-xs font-medium text-red-700">Aşağıdaki roller atanamadı:</p>
             <ul className="mt-1.5 space-y-1.5">
-              {failedLocationIds.map((locationId) => (
-                <li key={locationId} className="flex items-center justify-between gap-2 text-xs text-red-700">
-                  {locationsById.get(locationId) ?? locationId}
+              {failedRoles.map((role) => (
+                <li key={role} className="flex items-center justify-between gap-2 text-xs text-red-700">
+                  {ROLE_LABELS[role]}
                   <button
                     type="button"
-                    onClick={() => onRetryLocation(locationId)}
-                    disabled={retryingLocationId === locationId}
+                    onClick={() => onRetryRole(role)}
+                    disabled={retryingRole === role}
                     className="flex items-center gap-1 border border-red-300 px-2 py-1 font-medium text-red-700 transition-colors hover:bg-red-100 disabled:opacity-50"
                   >
                     <RotateCcw className="size-3" />
-                    {retryingLocationId === locationId ? 'Deneniyor...' : 'Tekrar Dene'}
+                    {retryingRole === role ? 'Deneniyor...' : 'Tekrar Dene'}
                   </button>
                 </li>
               ))}
@@ -275,18 +285,23 @@ interface AddStaffPopupProps {
 }
 
 export function AddStaffPopup({ open, locations, onClose }: AddStaffPopupProps) {
-  const adminLocationId = useAuthStore((state) => state.user?.locationIds[0])
+  const user = useAuthStore((state) => state.user)
+  const adminLocations = useMemo(() => {
+    const adminLocationIds = new Set(user?.locationRoles.filter((lr) => lr.role === 'ADMIN').map((lr) => lr.locationId) ?? [])
+    return locations.filter((location) => adminLocationIds.has(location.id))
+  }, [locations, user])
   const locationsById = useMemo(() => new Map(locations.map((location) => [location.id, location.name])), [locations])
 
   const createStaffMember = useCreateStaffMember()
-  const assignLocation = useAssignLocationAccess()
+  const grantRole = useGrantRoleAtLocation()
 
   const [step, setStep] = useState<'form' | 'result'>('form')
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [createdUser, setCreatedUser] = useState<UserResponseDto | null>(null)
   const [generatedPassword, setGeneratedPassword] = useState<string | null>(null)
-  const [failedLocationIds, setFailedLocationIds] = useState<string[]>([])
-  const [retryingLocationId, setRetryingLocationId] = useState<string | null>(null)
+  const [failedRoles, setFailedRoles] = useState<Role[]>([])
+  const [submittedLocationId, setSubmittedLocationId] = useState<string | null>(null)
+  const [retryingRole, setRetryingRole] = useState<Role | null>(null)
   const [stockManagerConflictMessage, setStockManagerConflictMessage] = useState<string | null>(null)
 
   function reset() {
@@ -294,8 +309,9 @@ export function AddStaffPopup({ open, locations, onClose }: AddStaffPopupProps) 
     setSubmitError(null)
     setCreatedUser(null)
     setGeneratedPassword(null)
-    setFailedLocationIds([])
-    setRetryingLocationId(null)
+    setFailedRoles([])
+    setSubmittedLocationId(null)
+    setRetryingRole(null)
     setStockManagerConflictMessage(null)
   }
 
@@ -309,7 +325,7 @@ export function AddStaffPopup({ open, locations, onClose }: AddStaffPopupProps) 
     lastName: string
     personalId: string
     roles: Role[]
-    locationIds: string[]
+    locationId: string
   }) {
     setSubmitError(null)
 
@@ -317,7 +333,8 @@ export function AddStaffPopup({ open, locations, onClose }: AddStaffPopupProps) 
       const result = await createStaffMember.mutateAsync({ ...data, locationsById })
       setCreatedUser(result.user)
       setGeneratedPassword(result.generatedPassword)
-      setFailedLocationIds(result.failedLocationIds)
+      setFailedRoles(result.failedRoles)
+      setSubmittedLocationId(data.locationId)
       setStep('result')
       if (result.stockManagerConflictMessage) {
         setStockManagerConflictMessage(result.stockManagerConflictMessage)
@@ -331,22 +348,22 @@ export function AddStaffPopup({ open, locations, onClose }: AddStaffPopupProps) 
     }
   }
 
-  async function handleRetryLocation(locationId: string) {
-    if (!createdUser) return
-    setRetryingLocationId(locationId)
+  async function handleRetryRole(role: Role) {
+    if (!createdUser || !submittedLocationId) return
+    setRetryingRole(role)
     try {
-      const updatedUser = await assignLocation.mutateAsync({ userId: createdUser.id, locationId })
+      const updatedUser = await grantRole.mutateAsync({ userId: createdUser.id, role, locationId: submittedLocationId })
       setCreatedUser(updatedUser)
-      setFailedLocationIds((prev) => prev.filter((id) => id !== locationId))
-      toast.success('Lokasyon ataması tamamlandı.')
+      setFailedRoles((prev) => prev.filter((r) => r !== role))
+      toast.success('Rol ataması tamamlandı.')
     } catch (error) {
       if (isStockManagerConflict(error)) {
         setStockManagerConflictMessage(getApiErrorMessage(error))
       } else {
-        toast.error(getApiErrorMessage(error, 'Lokasyon ataması yine başarısız oldu.'))
+        toast.error(getApiErrorMessage(error, 'Rol ataması yine başarısız oldu.'))
       }
     } finally {
-      setRetryingLocationId(null)
+      setRetryingRole(null)
     }
   }
 
@@ -359,8 +376,7 @@ export function AddStaffPopup({ open, locations, onClose }: AddStaffPopupProps) 
           {step === 'form' ? (
             <StaffFormStep
               key={open ? 'open' : 'closed'}
-              locations={locations}
-              adminLocationId={adminLocationId}
+              adminLocations={adminLocations}
               isSubmitting={createStaffMember.isPending}
               submitError={submitError}
               onCancel={handleClose}
@@ -371,10 +387,9 @@ export function AddStaffPopup({ open, locations, onClose }: AddStaffPopupProps) 
               <StaffResultStep
                 user={createdUser}
                 generatedPassword={generatedPassword}
-                failedLocationIds={failedLocationIds}
-                locationsById={locationsById}
-                onRetryLocation={handleRetryLocation}
-                retryingLocationId={retryingLocationId}
+                failedRoles={failedRoles}
+                onRetryRole={handleRetryRole}
+                retryingRole={retryingRole}
                 onFinish={handleClose}
               />
             )

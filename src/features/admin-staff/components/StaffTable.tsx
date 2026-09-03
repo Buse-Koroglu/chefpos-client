@@ -1,5 +1,7 @@
+import { useMemo } from 'react'
 import { AlertTriangle } from 'lucide-react'
 import type { UserResponseDto } from '@/shared/types/auth'
+import { useAuthStore } from '@/shared/stores/authStore'
 import { Skeleton } from '@/shared/components/Skeleton'
 import { RoleBadge } from './RoleBadge'
 import { StatusBadge } from './StatusBadge'
@@ -15,14 +17,19 @@ const TABLE_HEAD = (
   <tr className="border-b border-zinc-200 bg-zinc-50 text-xs font-semibold tracking-wide text-zinc-500 uppercase">
     <th className="px-4 py-3">Adı Soyadı</th>
     <th className="px-4 py-3">Personel No</th>
-    <th className="px-4 py-3">Roller</th>
-    <th className="px-4 py-3">Lokasyonlar</th>
+    <th className="px-4 py-3">Rol · Yerleşke</th>
     <th className="px-4 py-3">Durum</th>
     <th className="px-4 py-3">İşlemler</th>
   </tr>
 )
 
 export function StaffTable({ staff, locationsById, onSelect, isLoading }: StaffTableProps) {
+  const authUser = useAuthStore((state) => state.user)
+  const adminLocationIds = useMemo(
+    () => new Set(authUser?.locationRoles.filter((lr) => lr.role === 'ADMIN').map((lr) => lr.locationId) ?? []),
+    [authUser],
+  )
+
   if (isLoading) {
     return (
       <div className="overflow-x-auto border border-zinc-200 bg-white">
@@ -78,13 +85,13 @@ export function StaffTable({ staff, locationsById, onSelect, isLoading }: StaffT
             </td>
               <td className="px-4 py-3">
                 <div className="flex flex-wrap gap-1">
-                  {member.roles.map((role) => (
-                    <RoleBadge key={role} role={role} />
-                  ))}
+                  {member.locationRoles
+                    .filter((lr) => adminLocationIds.has(lr.locationId))
+                    .map((lr) => (
+                      <RoleBadge key={`${lr.role}-${lr.locationId}`} role={lr.role} locationName={locationsById.get(lr.locationId) ?? '—'} />
+                    ))}
+                  {member.roles.includes('SUPER_ADMIN') && <RoleBadge role="SUPER_ADMIN" />}
                 </div>
-              </td>
-              <td className="px-4 py-3 text-zinc-600">
-                {member.locationIds.map((id) => locationsById.get(id) ?? '—').join(', ')}
               </td>
               <td className="px-4 py-3">
                 <StatusBadge isActive={member.isActive} />
