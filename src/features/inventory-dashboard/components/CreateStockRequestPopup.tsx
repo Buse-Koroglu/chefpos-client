@@ -248,15 +248,27 @@ export function CreateStockRequestPopup({open,onClose,initialIngredientId}: Crea
                 )}
 
               {selectedIngredient && (
-                <p className="mt-1.5 text-xs text-zinc-500">
-                  Güncel birim fiyat:{' '}
-                  <span className="font-medium text-zinc-700">
+                <>
+                  <p className="mt-1.5 text-sm text-zinc-500">
+                    Güncel birim fiyat:{' '}
+                    <span className="font-medium text-zinc-700">
+                      {selectedIngredient.latestUnitPrice != null
+                        ? selectedIngredient.latestUnitPrice.toLocaleString(
+                            'tr-TR',
+                            { minimumFractionDigits: 2, maximumFractionDigits: 2 },
+                          )
+                        : 'Henüz alım yok'}
+                    </span>
+                  </p>
+
+                  <p className="mt-1 text-sm text-zinc-400">
+                    * Mevcut stok maliyet ortalaması:{' '}
                     {selectedIngredient.weightedAverageUnitPrice.toLocaleString(
                       'tr-TR',
                       { minimumFractionDigits: 2, maximumFractionDigits: 2 },
                     )}
-                  </span>
-                </p>
+                  </p>
+                </>
               )}
             </div>
 

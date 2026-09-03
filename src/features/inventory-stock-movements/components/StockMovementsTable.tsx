@@ -72,7 +72,9 @@ export function StockMovementsTable({ movements, isLoading }: StockMovementsTabl
                 {movement.weightedUnitPrice.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </td>
               <td className="px-4 py-3 text-zinc-600">{movement.performedByUserName}</td>
-              <td className="max-w-xs truncate px-4 py-3 text-zinc-500">{movement.note ?? '—'}</td>
+              <td className="max-w-xs truncate px-4 py-3 text-zinc-500">
+                {movement.note?.startsWith('Stok talebi onayı:') ? '—' : (movement.note ?? '—')}
+              </td>
               <td className="px-4 py-3 tabular-nums text-zinc-500">{formatStockRequestDateTime(movement.createdAt)}</td>
             </tr>
           ))}

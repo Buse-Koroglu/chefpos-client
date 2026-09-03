@@ -10,10 +10,10 @@ import { StaffHeader } from '@/shared/components/StaffHeader'
 import { useLocations } from '@/shared/hooks/useLocations'
 import { useLocationStore } from '@/shared/stores/locationStore'
 
-import { DashInfoCard } from '@/features/cashier-dashboard/components/DashInfoCard'
 import { DashNavigationCard } from '@/features/cashier-dashboard/components/DashNavigationCard'
 
 import { useInventoryDashboardStats } from '../hooks/useInventoryDashboardStats'
+import { DashInfoCard } from '../components/DashInfoCard'
 import { InventorySidebar } from '@/shared/components/InventorySidebar'
 import { useState } from 'react'
 import { CreateStockRequestPopup } from '../components/CreateStockRequestPopup'
@@ -68,7 +68,7 @@ export function InventoryDashboardPage() {
 
           <section>
             <div className="mb-3">
-              <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+              <h2 className="text-lg font-semibold uppercase tracking-wider text-zinc-700">
                 Hızlı İşlemler
               </h2>
             </div>
@@ -100,7 +100,7 @@ export function InventoryDashboardPage() {
 
           <section>
             <div className="mb-3">
-              <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+              <h2 className="text-lg font-semibold uppercase tracking-wider text-zinc-700">
                 Stok Taleplerim
               </h2>
             </div>
@@ -110,12 +110,14 @@ export function InventoryDashboardPage() {
                 label="Bekleyen Stok Taleplerim"
                 value={pendingRequestsValue}
                 icon={Clock3}
+                accent="amber"
               />
 
               <DashInfoCard
                 label="Geçmiş Stok Taleplerim"
                 value={pastRequestsValue}
                 icon={Archive}
+                accent="primary"
               />
             </div>
           </section>
