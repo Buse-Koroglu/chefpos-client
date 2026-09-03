@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react'
 import axios from 'axios'
-import { Plus } from 'lucide-react'
+import { Plus, RefreshCw } from 'lucide-react'
 import { toast } from 'sonner'
+import { cn } from '@/lib/utils'
 import { useLocations } from '@/shared/hooks/useLocations'
 import { useDebouncedValue } from '@/shared/hooks/useDebouncedValue'
 import { AdminSidebar } from '@/shared/components/AdminSidebar'
@@ -48,7 +49,7 @@ export function StaffListPage() {
   const locationsById = useMemo(() => new Map(locations.map((location) => [location.id, location.name])), [locations])
 
   const searchTerm = useDebouncedValue(searchInput, STAFF_SEARCH_DEBOUNCE_TIME)
-  const { data, isLoading, isFetching, isError, error } = usePagedStaffAdmin(searchTerm, filters, pageNumber)
+  const { data, isLoading, isFetching, isError, error, refetch } = usePagedStaffAdmin(searchTerm, filters, pageNumber)
   const items = useMemo(() => data?.items ?? [], [data])
 
   function handleSearchChange(value: string) {
@@ -110,7 +111,19 @@ export function StaffListPage() {
             </div>
           )}
 
-          <StaffSearchInput value={searchInput} onChange={handleSearchChange} />
+          <div className="flex items-center gap-3">
+            <StaffSearchInput value={searchInput} onChange={handleSearchChange} />
+
+            <button
+              type="button"
+              onClick={() => refetch()}
+              disabled={isFetching}
+              className="flex h-10 shrink-0 items-center gap-2 border border-zinc-200 bg-white px-3 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50 disabled:opacity-50"
+            >
+              <RefreshCw className={cn('size-4', isFetching && 'animate-spin')} />
+              Yenile
+            </button>
+          </div>
 
           <div className="flex flex-1 flex-col">
             <StaffTable

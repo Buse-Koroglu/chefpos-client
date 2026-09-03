@@ -195,8 +195,8 @@ export function MenuEditPopup({ menuId, onClose }: MenuEditPopupProps) {
   return (
     <Dialog.Root open={Boolean(menuId)} onOpenChange={(open) => !open && onClose()}>
       <Dialog.Portal>
-        <Dialog.Backdrop className="fixed inset-0 bg-zinc-900/40 backdrop-blur-sm" />
-        <Dialog.Popup className="fixed top-1/2 left-1/2 w-full max-w-xl -translate-x-1/2 -translate-y-1/2 border border-zinc-200 bg-white">
+        <Dialog.Backdrop className="fixed inset-0 z-50 bg-zinc-900/40 backdrop-blur-sm" />
+        <Dialog.Popup className="fixed top-1/2 left-1/2 z-50 w-full max-w-xl -translate-x-1/2 -translate-y-1/2 border border-zinc-200 bg-white">
           {isError ? (
             <div className="p-5">
               <div className="border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">

@@ -176,9 +176,8 @@ interface StaffResultStepProps {
 }
 
 function StaffResultStep({user,generatedPassword,failedLocationIds,locationsById,onRetryLocation,retryingLocationId,onFinish}:StaffResultStepProps) {
-  function handleCopy() {
-    if (!generatedPassword) return
-    navigator.clipboard.writeText(generatedPassword).then(() => toast.success('Şifre kopyalandı.'))
+  function handleCopy(value: string, successMessage: string) {
+    navigator.clipboard.writeText(value).then(() => toast.success(successMessage))
   }
 
   return (
@@ -195,6 +194,24 @@ function StaffResultStep({user,generatedPassword,failedLocationIds,locationsById
           {user.firstName} {user.lastName} başarıyla oluşturuldu.
         </div>
 
+        <div>
+          <label className="mb-1.5 block text-xs font-medium text-zinc-600">Personel No</label>
+          <div className="flex items-center gap-2">
+            <span className="flex-1 border border-zinc-200 bg-zinc-50 px-3 py-2 font-mono text-sm text-zinc-900">
+              {user.personalId}
+            </span>
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              className="size-10 rounded-none"
+              onClick={() => handleCopy(user.personalId, 'Personel no kopyalandı.')}
+            >
+              <Copy className="size-4" />
+            </Button>
+          </div>
+        </div>
+
         {generatedPassword && (
           <div>
             <label className="mb-1.5 block text-xs font-medium text-zinc-600">Oluşturulan Şifre</label>
@@ -202,11 +219,17 @@ function StaffResultStep({user,generatedPassword,failedLocationIds,locationsById
               <span className="flex-1 border border-zinc-200 bg-zinc-50 px-3 py-2 font-mono text-sm text-zinc-900">
                 {generatedPassword}
               </span>
-              <Button type="button" variant="outline" size="icon" className="size-10 rounded-none" onClick={handleCopy}>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="size-10 rounded-none"
+                onClick={() => handleCopy(generatedPassword, 'Şifre kopyalandı.')}
+              >
                 <Copy className="size-4" />
               </Button>
             </div>
-            <p className="mt-1.5 flex items-center gap-1.5 text-xs text-amber-600">
+            <p className="mt-1.5 flex items-center gap-1.5 text-xs text-red-600">
               <AlertTriangle className="size-3.5 shrink-0" />
               Bu şifreyi personele iletin, bir daha gösterilmeyecek.
             </p>
@@ -331,8 +354,8 @@ export function AddStaffPopup({ open, locations, onClose }: AddStaffPopupProps) 
     <>
     <Dialog.Root open={open} onOpenChange={(nextOpen) => !nextOpen && handleClose()}>
       <Dialog.Portal>
-        <Dialog.Backdrop className="fixed inset-0 bg-zinc-900/40 backdrop-blur-sm" />
-        <Dialog.Popup className="fixed top-1/2 left-1/2 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 border border-zinc-200 bg-white">
+        <Dialog.Backdrop className="fixed inset-0 z-50 bg-zinc-900/40 backdrop-blur-sm" />
+        <Dialog.Popup className="fixed top-1/2 left-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 border border-zinc-200 bg-white">
           {step === 'form' ? (
             <StaffFormStep
               key={open ? 'open' : 'closed'}

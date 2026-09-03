@@ -5,18 +5,17 @@ import { X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import type { LocationDto } from '@/shared/types/location'
+import { useAuthStore } from '@/shared/stores/authStore'
 import { useCreateTable } from '@/features/admin-tables/hooks/useCreateTable'
 
 const FIELD_CLASSNAME = 'h-10 w-full rounded-none border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
 
 interface FormErrors {
-  locationId?: string
   tableNumber?: string
 }
 
-function validate(locationId: string, tableNumber: string): FormErrors {
+function validate(tableNumber: string): FormErrors {
   const errors: FormErrors = {}
-  if (!locationId) errors.locationId = 'Yerleşke seçmelisiniz.'
   if (tableNumber.trim() === '' || Number(tableNumber) <= 0) errors.tableNumber = 'Geçerli bir masa numarası girin.'
   return errors
 }
@@ -39,7 +38,9 @@ interface AddTablePopupProps {
 export function AddTablePopup({ open, locations, onClose }: AddTablePopupProps) {
   const createTableMutation = useCreateTable()
 
-  const [locationId, setLocationId] = useState('')
+  const adminLocationId = useAuthStore((state) => state.user?.locationIds[0])
+  const adminLocationName = locations.find((location) => location.id === adminLocationId)?.name ?? '—'
+
   const [tableNumber, setTableNumber] = useState('')
   const [errors, setErrors] = useState<FormErrors>({})
   const [submitError, setSubmitError] = useState<string | null>(null)
@@ -47,7 +48,6 @@ export function AddTablePopup({ open, locations, onClose }: AddTablePopupProps) 
   const isSubmitting = createTableMutation.isPending
 
   function reset() {
-    setLocationId('')
     setTableNumber('')
     setErrors({})
     setSubmitError(null)
@@ -59,14 +59,14 @@ export function AddTablePopup({ open, locations, onClose }: AddTablePopupProps) 
   }
 
   async function handleSubmit() {
-    const nextErrors = validate(locationId, tableNumber)
+    const nextErrors = validate(tableNumber)
     setErrors(nextErrors)
-    if (Object.keys(nextErrors).length > 0) return
+    if (Object.keys(nextErrors).length > 0 || !adminLocationId) return
 
     setSubmitError(null)
 
     try {
-      await createTableMutation.mutateAsync({ locationId, tableNumber: Number(tableNumber) })
+      await createTableMutation.mutateAsync({ locationId: adminLocationId, tableNumber: Number(tableNumber) })
       handleClose()
     } catch (error) {
       setSubmitError(getCreateErrorMessage(error))
@@ -76,8 +76,8 @@ export function AddTablePopup({ open, locations, onClose }: AddTablePopupProps) 
   return (
     <Dialog.Root open={open} onOpenChange={(nextOpen) => !nextOpen && handleClose()}>
       <Dialog.Portal>
-        <Dialog.Backdrop className="fixed inset-0 bg-zinc-900/40 backdrop-blur-sm" />
-        <Dialog.Popup className="fixed top-1/2 left-1/2 w-full max-w-md -translate-x-1/2 -translate-y-1/2 border border-zinc-200 bg-white">
+        <Dialog.Backdrop className="fixed inset-0 z-50 bg-zinc-900/40 backdrop-blur-sm" />
+        <Dialog.Popup className="fixed top-1/2 left-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 border border-zinc-200 bg-white">
           <div className="flex items-center justify-between border-b border-zinc-200 px-5 py-4">
             <Dialog.Title className="text-sm font-semibold tracking-wide text-zinc-900 uppercase">Yeni Masa Ekle</Dialog.Title>
             <Dialog.Close className="text-zinc-400 transition-colors hover:text-zinc-700">
@@ -92,19 +92,7 @@ export function AddTablePopup({ open, locations, onClose }: AddTablePopupProps) 
 
             <div>
               <label className="mb-1.5 block text-xs font-medium text-zinc-600">Yerleşke</label>
-              <select
-                value={locationId}
-                onChange={(event) => setLocationId(event.target.value)}
-                className={cn(FIELD_CLASSNAME, errors.locationId && 'border-red-300')}
-              >
-                <option value="">Yerleşke seçin</option>
-                {locations.map((location) => (
-                  <option key={location.id} value={location.id}>
-                    {location.name}
-                  </option>
-                ))}
-              </select>
-              {errors.locationId && <p className="mt-1 text-xs text-red-600">{errors.locationId}</p>}
+              <input value={adminLocationName} readOnly className={cn(FIELD_CLASSNAME, 'bg-zinc-50 text-zinc-500')} />
             </div>
 
             <div>

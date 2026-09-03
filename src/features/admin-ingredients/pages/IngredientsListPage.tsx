@@ -145,7 +145,11 @@ export function IngredientsListPage({ variant = 'admin' }: IngredientsListPagePr
         </main>
       </div>
 
-      <IngredientEditPopup ingredient={selectedIngredient} onClose={() => setSelectedIngredientId(null)} />
+      <IngredientEditPopup
+        ingredient={selectedIngredient}
+        canEditPrice={isSuperAdmin}
+        onClose={() => setSelectedIngredientId(null)}
+      />
       {isSuperAdmin && (
         <AddIngredientPopup open={isAddModalOpen} locations={locations} onClose={() => setIsAddModalOpen(false)} />
       )}

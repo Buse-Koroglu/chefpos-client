@@ -2,6 +2,7 @@ import { useState } from 'react'
 import axios from 'axios'
 import { Plus } from 'lucide-react'
 import { toast } from 'sonner'
+import { useAuthStore } from '@/shared/stores/authStore'
 import { useLocations } from '@/shared/hooks/useLocations'
 import { useDebouncedValue } from '@/shared/hooks/useDebouncedValue'
 import { AdminSidebar } from '@/shared/components/AdminSidebar'
@@ -43,6 +44,7 @@ interface ProductsListPageProps {
 
 export function ProductsListPage({ variant = 'admin' }: ProductsListPageProps) {
   const isSuperAdmin = variant === 'super-admin'
+  const adminLocationIds = useAuthStore((state) => state.user?.locationIds ?? [])
   const [searchInput, setSearchInput] = useState('')
   const [locationId, setLocationId] = useState('ALL')
   const [status, setStatus] = useState<ProductStatusFilter>('ALL')
@@ -149,6 +151,8 @@ export function ProductsListPage({ variant = 'admin' }: ProductsListPageProps) {
         locations={locations}
         categories={categories}
         canEditLocations={isSuperAdmin}
+        canEditDetails={isSuperAdmin}
+        visibleRecipeLocationIds={isSuperAdmin ? undefined : adminLocationIds}
         onClose={() => setSelectedProductId(null)}
       />
       {isSuperAdmin && (

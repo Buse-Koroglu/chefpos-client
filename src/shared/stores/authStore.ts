@@ -3,6 +3,7 @@ import * as authApi from '@/shared/api/endpoints/auth'
 import type { UserResponseDto } from '@/shared/types/auth'
 import { useActiveRoleStore } from '@/shared/stores/activeRoleStore'
 import { useLocationStore } from '@/shared/stores/locationStore'
+import { getDefaultRoleForRoles } from '@/routes-config/permissions'
 
 interface AuthState {
   accessToken: string | null
@@ -19,6 +20,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({accessToken: null,
   
   setSession: (accessToken, user) => {
     set({ accessToken, user, isAuthenticated: true, isFirstLogin: user.isFirstLogin,})
+
+    const { activeRole, setActiveRole } = useActiveRoleStore.getState()
+    if (!activeRole || !user.roles.includes(activeRole)) {
+      setActiveRole(getDefaultRoleForRoles(user.roles))
+    }
   },
 
   login: async (personalId, password) => {

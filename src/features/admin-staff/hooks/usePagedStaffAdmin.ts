@@ -3,6 +3,8 @@ import { getUsers } from '@/shared/api/endpoints/users'
 import { STAFF_PAGE_SIZE } from '@/features/admin-staff/constants'
 import type { StaffFilters, StatusFilter } from '@/features/admin-staff/types'
 
+const REFETCH_TIME = 45_000
+
 function toIsActiveParam(status: StatusFilter): boolean | undefined {
   if (status === 'ACTIVE') return true
   if (status === 'INACTIVE') return false
@@ -21,6 +23,7 @@ export function usePagedStaffAdmin(searchTerm: string, filters: StaffFilters, pa
         pageNumber,
         pageSize: STAFF_PAGE_SIZE,
       }),
+    refetchInterval: REFETCH_TIME,
     placeholderData: keepPreviousData,
   })
 }
