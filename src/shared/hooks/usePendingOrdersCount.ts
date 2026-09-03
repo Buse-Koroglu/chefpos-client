@@ -2,7 +2,7 @@ import { useQueries } from '@tanstack/react-query'
 import { getOrders } from '@/shared/api/endpoints/orders'
 
 const REFETCH_TIME = 10_000 // 10 saniyede bir veri çekilir güncel veri olması için
-const PREPARING_ORDER_TYPES = ['CASHIER', 'SELF_SERVICE'] as const // hazırlanan siparişlerde waiter siparişleri sayılmaz
+const PREPARING_ORDER_TYPES = ['CASHIER'] as const // hazırlanan siparişlerde waiter ve kiosk (self service) siparişleri sayılmaz
 const AWAITING_PAYMENT_ORDER_TYPES = ['CASHIER', 'WAITER', 'SELF_SERVICE'] as const // ödeme bekleyen siparişlerde tüm sipariş tipleri sayılır
 
 export type PendingOrdersCountTab = 'PREPARING' | 'AWAITING_PAYMENT'  // hazırlanma aşamasında olan v ödeme bekleyen sipariş sayıları
@@ -25,7 +25,7 @@ export function usePendingOrdersCount(locationId: string | undefined, tab: Pendi
   })
 
   const isLoading = queries.some((query) => query.isLoading)
-  const total = queries.reduce((sum, query) => sum + (query.data?.totalCount ?? 0), 0) // cashier + self service sipariş sayısı
+  const total = queries.reduce((sum, query) => sum + (query.data?.totalCount ?? 0), 0)
 
   return { total, isLoading }
 }
