@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useLocationStore } from '@/shared/stores/locationStore'
 import { useLocations } from '@/shared/hooks/useLocations'
+import { useDebouncedValue } from '@/shared/hooks/useDebouncedValue'
 import { StaffHeader } from '@/shared/components/StaffHeader'
 import { CashierSidebar } from '@/shared/components/CashierSidebar'
 import type { OrderItem, Product } from '../types'
@@ -24,16 +25,37 @@ export function NewOrderPage() {
 
   const [categoryId, setCategoryId] = useState('')
   const [menuId, setMenuId] = useState('')
+  const [searchInput, setSearchInput] = useState('')
+  const debouncedSearch = useDebouncedValue(searchInput, 400)
 
   const { data: categories = [] } = useCategories(locationId)
   const { data: menus = [] } = useMenus(locationId)
   const activeMenu = menus.find((menu) => menu.id === menuId)
-  const {
-    data: products = [],
-    isLoading,
-    isError,
-  } = useProducts(locationId, menuId ? undefined : categoryId || undefined, Boolean(menuId))
-  const displayProducts = activeMenu ? products.filter((product) => activeMenu.products.some((menuProduct) => menuProduct.productId === product.id)) : products
+
+  const [pageNumber, setPageNumber] = useState(1)
+  const [collectedItems, setCollectedItems] = useState<Product[]>([])
+
+  const filterKey = `${locationId ?? ''}|${categoryId}|${menuId}|${debouncedSearch}`
+  const [lastFilterKey, setLastFilterKey] = useState(filterKey)
+  if (filterKey !== lastFilterKey) {
+    setLastFilterKey(filterKey)
+    setPageNumber(1)
+    setCollectedItems([])
+  }
+
+  const {data: productsPage,isLoading,isError,isFetching} = useProducts({locationId,categoryId: menuId ? undefined : categoryId || undefined,searchTerm: menuId ? undefined : debouncedSearch,pageNumber,pageSize: menuId ? 100 : undefined,includeUncategorized: Boolean(menuId),})
+
+  const [lastMergedPage, setLastMergedPage] = useState<typeof productsPage>(undefined)
+  if (productsPage && productsPage !== lastMergedPage && filterKey === lastFilterKey) {
+    setLastMergedPage(productsPage)
+    setCollectedItems((current) =>
+      productsPage.pageNumber === 1 ? productsPage.items : [...current, ...productsPage.items],
+    )
+  }
+
+  const hasMore = !menuId && Boolean(productsPage) && productsPage!.pageNumber < productsPage!.totalPages
+
+  const displayProducts = activeMenu ? collectedItems.filter((product) => activeMenu.products.some((menuProduct) => menuProduct.productId === product.id)) : collectedItems
   const createOrder = useCreateOrder()
 
   function handleCategoryChange(value: string) {
@@ -126,7 +148,7 @@ export function NewOrderPage() {
           <div className="flex items-end gap-3">
             <div className="max-w-sm flex-1 space-y-1.5">
               <Label htmlFor="customerName" className="text-base text-zinc-700">
-                Müşteri
+                Müşteri <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="customerName"
@@ -176,7 +198,16 @@ export function NewOrderPage() {
                 Ürünler yüklenemedi.
               </div>
             ) : (
-              <ProductCatalog products={displayProducts} onAdd={handleAddItem} size="large" />
+              <ProductCatalog
+                products={displayProducts}
+                onAdd={handleAddItem}
+                size="large"
+                searchValue={searchInput}
+                onSearchChange={setSearchInput}
+                hasMore={hasMore}
+                isFetchingNextPage={isFetching && pageNumber > 1}
+                onLoadMore={() => setPageNumber((current) => current + 1)}
+              />
             )}
 
             <SelectedItemsPanel

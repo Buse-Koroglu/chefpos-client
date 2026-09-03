@@ -1,27 +1,25 @@
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { getOrders } from '@/shared/api/endpoints/orders'
+import type { OrderHistoryFilter } from './usePastOrders'
 
-const PAGE_SIZE = 20
-
-export type OrderHistoryFilter = 'PAID' | 'CANCELLED'
-
-export function usePastOrders(locationId: string | undefined, filter: OrderHistoryFilter, pageNumber: number) {
+export function usePastOrdersCount(locationId: string | undefined, filter: OrderHistoryFilter) {
   const now = new Date()
   const fromDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0).toISOString()
   const toDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999).toISOString()
 
-  return useQuery({
-    queryKey: ['orders', 'history', locationId, filter, pageNumber, fromDate],
+  const { data } = useQuery({
+    queryKey: ['orders', 'history-count', locationId, filter, fromDate],
     queryFn: () =>
       getOrders({
         locationId: locationId!,
         ...(filter === 'PAID' ? { paymentStatus: 'PAID' as const } : { status: 'CANCELLED' as const }),
         fromDate,
         toDate,
-        pageNumber,
-        pageSize: PAGE_SIZE,
+        pageNumber: 1,
+        pageSize: 1,
       }),
     enabled: Boolean(locationId),
-    placeholderData: keepPreviousData,
   })
+
+  return data?.totalCount ?? 0
 }

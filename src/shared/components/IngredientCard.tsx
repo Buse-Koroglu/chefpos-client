@@ -59,9 +59,11 @@ export function IngredientCard({ ingredient, hasPendingRequest, onClick }: Ingre
       </div>
 
       <div className="flex items-center justify-between border-t border-zinc-200/70 pt-2 text-xs text-zinc-500">
-        <span>Ağırlıklı Ort. Fiyat</span>
+        <span>Güncel Fiyat</span>
         <span className="font-medium text-zinc-700 tabular-nums">
-          {ingredient.weightedAverageUnitPrice.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2,})}
+          {ingredient.latestUnitPrice != null
+            ? ingredient.latestUnitPrice.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+            : 'Henüz alım yok'}
         </span>
       </div>
     </button>

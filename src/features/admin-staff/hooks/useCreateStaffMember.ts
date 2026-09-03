@@ -1,23 +1,24 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import type { Role, UserResponseDto } from '@/shared/types/auth'
-import { assignLocationAccess, createUser } from '@/shared/api/endpoints/users'
+import { createUser, grantRoleAtLocation } from '@/shared/api/endpoints/users'
 import { getApiErrorMessage } from '@/shared/api/apiError'
 import { addUserToCache, findStockManagerConflictMessage, isStockManagerConflict, StockManagerPrecheckError } from '@/features/admin-staff/utils'
+import { ROLE_LABELS } from '@/features/admin-staff/constants'
 
 export interface CreateStaffMemberInput {
   firstName: string
   lastName: string
   personalId: string
   roles: Role[]
-  locationIds: string[]
+  locationId: string
   locationsById: Map<string, string>
 }
 
 export interface CreateStaffMemberResult {
   user: UserResponseDto
   generatedPassword: string | null
-  failedLocationIds: string[]
+  failedRoles: Role[]
   stockManagerConflictMessage: string | null
 }
 
@@ -27,7 +28,7 @@ export function useCreateStaffMember() {
   return useMutation({
     mutationFn: async (input: CreateStaffMemberInput): Promise<CreateStaffMemberResult> => {
       if (input.roles.includes('STOCK_MANAGER')) {
-        const conflict = await findStockManagerConflictMessage(input.locationIds, input.locationsById)
+        const conflict = await findStockManagerConflictMessage([input.locationId], input.locationsById)
         if (conflict) {
           throw new StockManagerPrecheckError(
             `${conflict} Personeli oluşturmadan önce ilgili kullanıcının rolünü değiştirin veya farklı bir yerleşke seçin.`,
@@ -35,32 +36,30 @@ export function useCreateStaffMember() {
         }
       }
 
-      const { user, generatedPassword } = await createUser({ personalId: input.personalId,firstName: input.firstName,   lastName: input.lastName, roles: input.roles  })
+      const { user, generatedPassword } = await createUser({ personalId: input.personalId, firstName: input.firstName, lastName: input.lastName, roles: input.roles })
 
       let finalUser = user
-      const failedLocationIds: string[] = []
+      const failedRoles: Role[] = []
       let stockManagerConflictMessage: string | null = null
 
-      for (const locationId of input.locationIds) {
+      for (const role of input.roles) {
         try {
-          finalUser = await assignLocationAccess(finalUser.id, locationId)
+          finalUser = await grantRoleAtLocation(finalUser.id, role, input.locationId)
         } catch (error) {
-          failedLocationIds.push(locationId)
+          failedRoles.push(role)
           if (isStockManagerConflict(error)) {
             stockManagerConflictMessage = getApiErrorMessage(error)
           }
         }
       }
 
-      return { user: finalUser, generatedPassword, failedLocationIds, stockManagerConflictMessage }
+      return { user: finalUser, generatedPassword, failedRoles, stockManagerConflictMessage }
     },
-    onSuccess: (result, variables) => {
+    onSuccess: (result) => {
       addUserToCache(queryClient, result.user)
-      if (result.failedLocationIds.length > 0) {
-        const failedNames = result.failedLocationIds
-          .map((id) => variables.locationsById.get(id) ?? id)
-          .join(', ')
-        toast.warning(`${result.user.firstName} ${result.user.lastName} oluşturuldu ancak ${failedNames} lokasyonu atanamadı.`)
+      if (result.failedRoles.length > 0) {
+        const failedNames = result.failedRoles.map((role) => ROLE_LABELS[role]).join(', ')
+        toast.warning(`${result.user.firstName} ${result.user.lastName} oluşturuldu ancak ${failedNames} rolü atanamadı.`)
       } else {
         toast.success('Personel başarıyla eklendi.')
       }

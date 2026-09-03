@@ -54,7 +54,7 @@ export function OrderHistoryPage() {
         >
           <ArrowLeft className="size-5" />
         </button>
-        <span className="text-sm font-semibold tracking-tight text-zinc-900">Geçmiş Siparişlerim</span>
+        <span className="text-base font-semibold tracking-tight text-zinc-900">Geçmiş Siparişlerim</span>
       </header>
 
       <div className="border-b border-zinc-200 bg-white p-3">

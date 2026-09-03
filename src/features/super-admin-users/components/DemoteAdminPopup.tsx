@@ -2,54 +2,36 @@ import { useState } from 'react'
 import { Dialog } from '@base-ui/react/dialog'
 import { X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
-import type { LocationDto } from '@/shared/types/location'
 import { getApiErrorMessage } from '@/shared/api/apiError'
-import { usePromoteToAdmin } from '@/features/super-admin-users/hooks/usePromoteToAdmin'
+import { useDemoteAdmin } from '@/features/super-admin-users/hooks/useDemoteAdmin'
 
-const FIELD_CLASSNAME = 'h-10 w-full rounded-none border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
-
-interface PromoteToAdminPopupProps {
+interface DemoteAdminPopupProps {
   userId: string | null
   userName: string
-  locations: LocationDto[]
+  locationIds: string[]
+  locationsById: Map<string, string>
   onClose: () => void
 }
 
-export function PromoteToAdminPopup({ userId, userName, locations, onClose }: PromoteToAdminPopupProps) {
-  const promoteMutation = usePromoteToAdmin()
-  const [locationId, setLocationId] = useState('')
+export function DemoteAdminPopup({ userId, userName, locationIds, locationsById, onClose }: DemoteAdminPopupProps) {
+  const demoteMutation = useDemoteAdmin()
   const [error, setError] = useState<string | null>(null)
-  const isSubmitting = promoteMutation.isPending
-
-  function reset() {
-    setLocationId('')
-    setError(null)
-  }
+  const isSubmitting = demoteMutation.isPending
 
   function handleClose() {
-    reset()
+    setError(null)
     onClose()
   }
 
   function handleSubmit() {
     if (!userId) return
-    if (!locationId) {
-      setError('Yerleşke seçimi zorunludur.')
-      return
-    }
-
     setError(null)
 
-    promoteMutation.mutate(
-      { userId, locationId },
+    demoteMutation.mutate(
+      { userId, locationIds },
       {
-        onSuccess: () => {
-          handleClose()
-        },
-        onError: (err) => {
-          setError(getApiErrorMessage(err, 'Yönetici ataması yapılamadı.'))
-        },
+        onSuccess: () => handleClose(),
+        onError: (err) => setError(getApiErrorMessage(err, 'Kullanıcı yöneticilikten çıkarılamadı.')),
       },
     )
   }
@@ -61,7 +43,7 @@ export function PromoteToAdminPopup({ userId, userName, locations, onClose }: Pr
         <Dialog.Popup className="fixed top-1/2 left-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 border border-zinc-200 bg-white">
           <div className="flex items-center justify-between border-b border-zinc-200 px-5 py-4">
             <Dialog.Title className="text-sm font-semibold tracking-wide text-zinc-900 uppercase">
-              Yönetici Yap
+              Yöneticilikten Çıkar
             </Dialog.Title>
             <Dialog.Close className="text-zinc-400 transition-colors hover:text-zinc-700">
               <X className="size-4" />
@@ -72,25 +54,20 @@ export function PromoteToAdminPopup({ userId, userName, locations, onClose }: Pr
             {error && <div className="border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">{error}</div>}
 
             <p className="text-sm text-zinc-600">
-              <span className="font-medium text-zinc-900">{userName}</span> kullanıcısını bir yerleşkenin yöneticisi
-              yapmak üzeresiniz.
+              <span className="font-medium text-zinc-900">{userName}</span> kullanıcısının yöneticilik rolünü
+              kaldırmak üzeresiniz.
             </p>
 
-            <div>
-              <label className="mb-1.5 block text-xs font-medium text-zinc-600">Yerleşke *</label>
-              <select
-                value={locationId}
-                onChange={(event) => setLocationId(event.target.value)}
-                className={cn(FIELD_CLASSNAME, error && 'border-red-300')}
-              >
-                <option value="">Yerleşke seçin</option>
-                {locations.map((location) => (
-                  <option key={location.id} value={location.id}>
-                    {location.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+            {locationIds.length > 0 && (
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-zinc-600">
+                  Erişimi de kaldırılacak yerleşkeler
+                </label>
+                <p className="text-sm text-zinc-600">
+                  {locationIds.map((id) => locationsById.get(id) ?? id).join(', ')}
+                </p>
+              </div>
+            )}
           </div>
 
           <div className="flex gap-2 border-t border-zinc-200 p-4">
@@ -105,11 +82,11 @@ export function PromoteToAdminPopup({ userId, userName, locations, onClose }: Pr
             </Button>
             <Button
               type="button"
-              className="h-11 flex-1 rounded-none bg-[#133458] text-sm text-white hover:bg-[#0f2843]"
+              className="h-11 flex-1 rounded-none bg-red-600 text-sm text-white hover:bg-red-700"
               onClick={handleSubmit}
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Kaydediliyor...' : 'Yönetici Yap'}
+              {isSubmitting ? 'İşleniyor...' : 'Yöneticilikten Çıkar'}
             </Button>
           </div>
         </Dialog.Popup>

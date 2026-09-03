@@ -27,8 +27,15 @@ export function PastOrderCard({ order }: PastOrderCardProps) {
     <div className="flex flex-col border-2 border-zinc-300 bg-white">
       <div className="flex items-start justify-between gap-2 border-b-2 border-zinc-300 p-4">
         <div className="min-w-0">
-          <p className="text-2xl font-semibold text-zinc-900">#{order.orderNumber}</p>
-          <p className="truncate text-xl font-bold text-zinc-600 uppercase">{order.customerName || 'Müşteri belirtilmedi'}</p>
+          <p className="flex items-baseline gap-2 text-zinc-700">
+            <span className="truncate text-2xl font-bold">
+              {order.type === 'WAITER' && order.tableNumber != null ? `Masa ${order.tableNumber}` : order.customerName || 'Müşteri belirtilmedi'}
+            </span>
+            <span className="ml-auto shrink-0 text-lg font-medium text-zinc-500">#{order.orderNumber}</span>
+          </p>
+          {order.type === 'WAITER' && order.customerName && (
+            <p className="truncate text-xl font-bold text-zinc-600 uppercase">{order.customerName}</p>
+          )}
           {order.completedAt && (
             <p className="mt-0.5 text-sm text-zinc-500">{completedAtFormatter.format(new Date(order.completedAt))}</p>
           )}

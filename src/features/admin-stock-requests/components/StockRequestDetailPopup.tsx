@@ -228,8 +228,8 @@ export function StockRequestDetailPopup({ stockRequest, onClose }: StockRequestD
   return (
     <Dialog.Root open={Boolean(stockRequest)} onOpenChange={(open) => !open && onClose()}>
       <Dialog.Portal>
-        <Dialog.Backdrop className="fixed inset-0 bg-zinc-900/40 backdrop-blur-sm" />
-        <Dialog.Popup className="fixed top-1/2 left-1/2 w-full max-w-xl -translate-x-1/2 -translate-y-1/2 border border-zinc-200 bg-white">
+        <Dialog.Backdrop className="fixed inset-0 z-50 bg-zinc-900/40 backdrop-blur-sm" />
+        <Dialog.Popup className="fixed top-1/2 left-1/2 z-50 w-full max-w-xl -translate-x-1/2 -translate-y-1/2 border border-zinc-200 bg-white">
           {stockRequest && <StockRequestDetailForm key={stockRequest.id} stockRequest={stockRequest} onClose={onClose} />}
         </Dialog.Popup>
       </Dialog.Portal>

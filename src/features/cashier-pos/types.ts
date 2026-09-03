@@ -1,6 +1,6 @@
-import type { ProductResponse } from '@/shared/types/product'
+import type { ProductAdminResponseDto } from '@/shared/types/product'
 
-export type Product = ProductResponse
+export type Product = ProductAdminResponseDto
 
 export interface OrderItem extends Product {
   quantity: number

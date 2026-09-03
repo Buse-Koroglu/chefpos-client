@@ -1,18 +1,24 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import axios from 'axios'
 import { Dialog } from '@base-ui/react/dialog'
 import { AlertTriangle, Eye, EyeOff, X } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import type { Role, UserResponseDto } from '@/shared/types/auth'
 import type { LocationDto } from '@/shared/types/location'
+import { ROLE_LABELS } from '@/shared/types/auth'
+import { useAuthStore } from '@/shared/stores/authStore'
 import { Skeleton } from '@/shared/components/Skeleton'
 import { InfoDialog } from '@/shared/components/InfoDialog'
-import { ROLE_LABELS, ROLE_OPTIONS } from '@/features/admin-staff/constants'
-import { StockManagerPrecheckError } from '@/features/admin-staff/utils'
+import { getApiErrorMessage } from '@/shared/api/apiError'
+import { ROLE_OPTIONS } from '@/features/admin-staff/constants'
+import { findStockManagerConflictMessage, isStockManagerConflict } from '@/features/admin-staff/utils'
 import { useUserDetail } from '@/features/admin-staff/hooks/useUserDetail'
 import { useUpdateStaffMember } from '@/features/admin-staff/hooks/useUpdateStaffMember'
-import { FIELD_CLASSNAME, MultiSelectDropdown } from './MultiSelectDropdown'
+import { useGrantRoleAtLocation } from '@/features/admin-staff/hooks/useGrantRoleAtLocation'
+import { useRevokeRoleAtLocation } from '@/features/admin-staff/hooks/useRevokeRoleAtLocation'
+import { FIELD_CLASSNAME } from './MultiSelectDropdown'
 
 function getDetailErrorMessage(error: unknown): string {
   if (axios.isAxiosError(error)) {
@@ -32,51 +38,64 @@ interface StaffEditFormProps {
 
 function StaffEditForm({ staff, locations, onClose }: StaffEditFormProps) {
   const updateStaffMember = useUpdateStaffMember()
+  const grantRole = useGrantRoleAtLocation()
+  const revokeRole = useRevokeRoleAtLocation()
 
-  const [baseline, setBaseline] = useState(staff)
-  const [roles, setRoles] = useState<Role[]>(staff.roles)
-  const [locationIds, setLocationIds] = useState<string[]>(staff.locationIds)
+  const authUser = useAuthStore((state) => state.user)
+  const adminLocations = useMemo(() => {
+    const adminLocationIds = new Set(authUser?.locationRoles.filter((lr) => lr.role === 'ADMIN').map((lr) => lr.locationId) ?? [])
+    return locations.filter((location) => adminLocationIds.has(location.id))
+  }, [locations, authUser])
+
   const [isActive, setIsActive] = useState(staff.isActive)
-  const [saveErrors, setSaveErrors] = useState<string[]>([])
   const [showPersonalId, setShowPersonalId] = useState(false)
+  const [addRole, setAddRole] = useState<Role>(ROLE_OPTIONS[0])
+  const [addLocationId, setAddLocationId] = useState(adminLocations[0]?.id ?? '')
   const [stockManagerConflictMessage, setStockManagerConflictMessage] = useState<string | null>(null)
 
   const locationsById = new Map(locations.map((location) => [location.id, location.name]))
+  const visibleLocationRoles = staff.locationRoles.filter((lr) => adminLocations.some((location) => location.id === lr.locationId))
+  const isMutatingAssignment = grantRole.isPending || revokeRole.isPending
 
-  function toggleRole(role: Role) {
-    setRoles((prev) => (prev.includes(role) ? prev.filter((value) => value !== role) : [...prev, role]))
-  }
+  async function handleAddAssignment() {
+    if (!addLocationId) return
 
-  async function handleSave() {
-    setSaveErrors([])
-    setStockManagerConflictMessage(null)
-
-    try {
-      const result = await updateStaffMember.mutateAsync({ baseline, roles, locationIds, isActive, locationsById })
-      setBaseline(result.user)
-      setRoles(result.user.roles)
-      setLocationIds(result.user.locationIds)
-      setIsActive(result.user.isActive)
-
-      if (result.errors.length > 0) {
-        setSaveErrors(result.errors)
+    if (addRole === 'STOCK_MANAGER') {
+      const conflict = await findStockManagerConflictMessage([addLocationId], locationsById, staff.id)
+      if (conflict) {
+        setStockManagerConflictMessage(
+          `${conflict} Değişiklik yapmadan önce ilgili kullanıcının rolünü değiştirin veya farklı bir yerleşke seçin.`,
+        )
         return
       }
+    }
 
-      onClose()
+    try {
+      await grantRole.mutateAsync({ userId: staff.id, role: addRole, locationId: addLocationId })
+      toast.success('Rol ataması eklendi.')
     } catch (error) {
-      if (error instanceof StockManagerPrecheckError) {
-        setStockManagerConflictMessage(error.message)
+      if (isStockManagerConflict(error)) {
+        setStockManagerConflictMessage(getApiErrorMessage(error))
+      } else {
+        toast.error(getApiErrorMessage(error, 'Rol ataması eklenemedi.'))
       }
     }
   }
 
-  const hasChanges =
-    roles.length !== baseline.roles.length ||
-    roles.some((role) => !baseline.roles.includes(role)) ||
-    isActive !== baseline.isActive
+  async function handleRemoveAssignment(role: Role, locationId: string) {
+    try {
+      await revokeRole.mutateAsync({ userId: staff.id, role, locationId })
+      toast.success('Rol ataması kaldırıldı.')
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, 'Rol ataması kaldırılamadı.'))
+    }
+  }
 
-  const roleOptions = ROLE_OPTIONS.map((r) => ({ id: r, label: ROLE_LABELS[r] }))
+  function handleSaveStatus() {
+    updateStaffMember.mutate({ userId: staff.id, isActive })
+  }
+
+  const statusChanged = isActive !== staff.isActive
 
   return (
     <>
@@ -90,17 +109,6 @@ function StaffEditForm({ staff, locations, onClose }: StaffEditFormProps) {
       </div>
 
       <div className="max-h-[70vh] space-y-4 overflow-y-auto px-5 py-4">
-        {saveErrors.length > 0 && (
-          <div className="border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
-            <p className="font-medium">Bazı değişiklikler kaydedilemedi:</p>
-            <ul className="mt-1 list-inside list-disc">
-              {saveErrors.map((message) => (
-                <li key={message}>{message}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-
         <div>
           <label className="mb-1.5 block text-xs font-medium text-zinc-600">Personel ID</label>
           <div className="flex h-10 w-full items-center border border-zinc-200 bg-zinc-50">
@@ -130,22 +138,66 @@ function StaffEditForm({ staff, locations, onClose }: StaffEditFormProps) {
           />
         </div>
 
-        <MultiSelectDropdown
-          label="Görev"
-          placeholder="Görev seçiniz..."
-          options={roleOptions}
-          selectedIds={roles}
-          onToggle={toggleRole}
-          disabled={updateStaffMember.isPending}
-        />
-
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-zinc-600">Lokasyon</label>
-          <input
-            value={locations.filter((loc) => locationIds.includes(loc.id)).map((loc) => loc.name).join(', ') || '—'}
-            readOnly
-            className={cn(FIELD_CLASSNAME, 'bg-zinc-50 text-zinc-500')}
-          />
+          <label className="mb-1.5 block text-xs font-medium text-zinc-600">Görev · Yerleşke</label>
+          {visibleLocationRoles.length === 0 ? (
+            <p className="text-sm text-zinc-500">Henüz bir rol ataması yok.</p>
+          ) : (
+            <div className="flex flex-wrap gap-1.5">
+              {visibleLocationRoles.map((lr) => (
+                <span
+                  key={`${lr.role}-${lr.locationId}`}
+                  className="flex items-center gap-1.5 border border-zinc-200 bg-zinc-50 py-1 pr-1 pl-2 text-xs text-zinc-700"
+                >
+                  {ROLE_LABELS[lr.role]} · {locationsById.get(lr.locationId) ?? '—'}
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveAssignment(lr.role, lr.locationId)}
+                    disabled={isMutatingAssignment}
+                    className="text-zinc-400 transition-colors hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+                    title="Bu atamayı kaldır"
+                  >
+                    <X className="size-3" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+
+          <div className="mt-2 flex gap-2">
+            <select
+              value={addRole}
+              onChange={(event) => setAddRole(event.target.value as Role)}
+              disabled={isMutatingAssignment}
+              className={FIELD_CLASSNAME}
+            >
+              {ROLE_OPTIONS.map((role) => (
+                <option key={role} value={role}>
+                  {ROLE_LABELS[role]}
+                </option>
+              ))}
+            </select>
+            <select
+              value={addLocationId}
+              onChange={(event) => setAddLocationId(event.target.value)}
+              disabled={isMutatingAssignment}
+              className={FIELD_CLASSNAME}
+            >
+              {adminLocations.map((location) => (
+                <option key={location.id} value={location.id}>
+                  {location.name}
+                </option>
+              ))}
+            </select>
+            <Button
+              type="button"
+              className="h-10 shrink-0 rounded-none bg-[#133458] px-4 text-sm text-white hover:bg-[#0f2843]"
+              onClick={handleAddAssignment}
+              disabled={isMutatingAssignment || !addLocationId}
+            >
+              Ekle
+            </Button>
+          </div>
         </div>
 
         <div>
@@ -191,10 +243,10 @@ function StaffEditForm({ staff, locations, onClose }: StaffEditFormProps) {
         <Button
           type="button"
           className="h-11 flex-1 rounded-none bg-[#133458] text-sm text-white hover:bg-[#0f2843]"
-          onClick={handleSave}
-          disabled={updateStaffMember.isPending || !hasChanges}
+          onClick={handleSaveStatus}
+          disabled={updateStaffMember.isPending || !statusChanged}
         >
-          {updateStaffMember.isPending ? 'Kaydediliyor...' : 'Değişiklikleri Kaydet'}
+          {updateStaffMember.isPending ? 'Kaydediliyor...' : 'Durumu Kaydet'}
         </Button>
       </div>
 
@@ -220,8 +272,8 @@ export function StaffEditPopup({ userId, locations, onClose }: StaffEditPopupPro
   return (
     <Dialog.Root open={Boolean(userId)} onOpenChange={(open) => !open && onClose()}>
       <Dialog.Portal>
-        <Dialog.Backdrop className="fixed inset-0 bg-zinc-900/40 backdrop-blur-sm" />
-        <Dialog.Popup className="fixed top-1/2 left-1/2 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 border border-zinc-200 bg-white">
+        <Dialog.Backdrop className="fixed inset-0 z-50 bg-zinc-900/40 backdrop-blur-sm" />
+        <Dialog.Popup className="fixed top-1/2 left-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 border border-zinc-200 bg-white">
           {isError ? (
             <div className="p-5">
               <div className="border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -235,7 +287,7 @@ export function StaffEditPopup({ userId, locations, onClose }: StaffEditPopupPro
               <Skeleton className="h-10 w-full" />
             </div>
           ) : (
-            <StaffEditForm key={staff.id} staff={staff} locations={locations} onClose={onClose} />
+            <StaffEditForm staff={staff} locations={locations} onClose={onClose} />
           )}
         </Dialog.Popup>
       </Dialog.Portal>

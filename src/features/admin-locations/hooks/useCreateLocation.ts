@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { createLocation } from '@/shared/api/endpoints/locations'
-import { addRole, assignLocationAccess } from '@/shared/api/endpoints/users'
+import { grantRoleAtLocation } from '@/shared/api/endpoints/users'
 import { getApiErrorMessage } from '@/shared/api/apiError'
 
 interface CreateLocationVariables {
@@ -19,8 +19,7 @@ export function useCreateLocation() {
 
       if (adminUserId) {
         try {
-          await addRole(adminUserId, 'ADMIN')
-          await assignLocationAccess(adminUserId, location.id)
+          await grantRoleAtLocation(adminUserId, 'ADMIN', location.id)
           queryClient.invalidateQueries({ queryKey: ['users'], exact: false })
           toast.success('Yerleşke ve Yönetici ataması başarıyla tamamlandı.')
         } catch (adminError) {

@@ -84,7 +84,7 @@ export function StockMovementsPage() {
           </div>
 
           <div className="flex items-center justify-between">
-            <h2 className="text-xs font-semibold tracking-wider text-zinc-500 uppercase">Hareket Geçmişi</h2>
+            <h2 className="text-base font-semibold tracking-wider text-zinc-700 uppercase">Hareket Geçmişi</h2>
             <select value={type} onChange={(event) => handleTypeChange(event.target.value)} className={cn(FIELD_CLASSNAME)}>
               <option value="ALL">Tümü</option>
               {STOCK_MOVEMENT_TYPES.map((option) => (

@@ -162,9 +162,9 @@ export function CreateStockRequestPopup({open,onClose,initialIngredientId}: Crea
       }}
     >
       <Dialog.Portal>
-        <Dialog.Backdrop className="fixed inset-0 bg-zinc-900/40 backdrop-blur-sm" />
+        <Dialog.Backdrop className="fixed inset-0 z-50 bg-zinc-900/40 backdrop-blur-sm" />
 
-        <Dialog.Popup className="fixed left-1/2 top-1/2 w-full max-w-md -translate-x-1/2 -translate-y-1/2 border border-zinc-200 bg-white">
+        <Dialog.Popup className="fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 border border-zinc-200 bg-white">
           <div className="flex items-center justify-between border-b border-zinc-200 px-5 py-4">
             <Dialog.Title className="text-sm font-semibold uppercase tracking-wide text-zinc-900">
               Yeni Stok Talebi
@@ -248,15 +248,27 @@ export function CreateStockRequestPopup({open,onClose,initialIngredientId}: Crea
                 )}
 
               {selectedIngredient && (
-                <p className="mt-1.5 text-xs text-zinc-500">
-                  Güncel birim fiyat:{' '}
-                  <span className="font-medium text-zinc-700">
+                <>
+                  <p className="mt-1.5 text-sm text-zinc-500">
+                    Güncel birim fiyat:{' '}
+                    <span className="font-medium text-zinc-700">
+                      {selectedIngredient.latestUnitPrice != null
+                        ? selectedIngredient.latestUnitPrice.toLocaleString(
+                            'tr-TR',
+                            { minimumFractionDigits: 2, maximumFractionDigits: 2 },
+                          )
+                        : 'Henüz alım yok'}
+                    </span>
+                  </p>
+
+                  <p className="mt-1 text-sm text-zinc-400">
+                    * Mevcut stok maliyet ortalaması:{' '}
                     {selectedIngredient.weightedAverageUnitPrice.toLocaleString(
                       'tr-TR',
                       { minimumFractionDigits: 2, maximumFractionDigits: 2 },
                     )}
-                  </span>
-                </p>
+                  </p>
+                </>
               )}
             </div>
 

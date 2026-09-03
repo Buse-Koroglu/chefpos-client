@@ -61,6 +61,11 @@ export function getDefaultRouteForRoles(roles: Role[]): string {
   return match?.path ?? '/app/dashboard'
 }
 
+export function getDefaultRoleForRoles(roles: Role[]): Role | null {
+  const match = DEFAULT_ROUTE.find((entry) => roles.includes(entry.role))
+  return match?.role ?? null
+}
+
 export function getDefaultRouteForRole(role: Role): string {
   return DEFAULT_ROUTE.find((entry) => entry.role === role)?.path ?? '/app/dashboard'
 }

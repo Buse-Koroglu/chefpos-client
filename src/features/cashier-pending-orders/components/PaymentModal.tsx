@@ -183,8 +183,8 @@ export function PaymentModal({ order, onClose, onConfirm, isSubmitting }: Paymen
   return (
     <Dialog.Root open={Boolean(order)} onOpenChange={(open) => !open && onClose()}>
       <Dialog.Portal>
-        <Dialog.Backdrop className="fixed inset-0 bg-zinc-900/40" />
-        <Dialog.Popup className="fixed top-1/2 left-1/2 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 border border-zinc-200 bg-white">
+        <Dialog.Backdrop className="fixed inset-0 z-50 bg-zinc-900/40" />
+        <Dialog.Popup className="fixed top-1/2 left-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 border border-zinc-200 bg-white">
           {order && (
             <PaymentModalContent
               key={order.id}

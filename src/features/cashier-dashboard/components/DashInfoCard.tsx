@@ -10,11 +10,11 @@ export function DashInfoCard({ label, value, icon: Icon }: DashInfoCardProps) {
   return (
     <div className="flex items-center justify-between gap-3 border-2 border-zinc-300 bg-white px-4 py-10">
       <div className="min-w-0">
-        <p className="text-sm text-zinc-500">{label}</p>
+        <p className="text-lg text-zinc-500">{label}</p>
         <p className="mt-1 truncate text-2xl font-semibold text-zinc-700">{value}</p>
       </div>
-      <span className="flex size-10 shrink-0 items-center justify-center bg-zinc-100 text-zinc-700">
-        <Icon className="size-5" />
+      <span className="flex size-14 shrink-0 items-center justify-center bg-zinc-100 text-zinc-700">
+        <Icon className="size-7" />
       </span>
     </div>
   )

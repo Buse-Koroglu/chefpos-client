@@ -16,7 +16,7 @@ export function LocationSelect({ locations, value, onChange, disabled }: Locatio
         value={value ?? ''}
         disabled={disabled || locations.length === 0}
         onChange={(event) => onChange(event.target.value)}
-        className="bg-transparent text-sm text-zinc-900 outline-none disabled:text-zinc-400"
+        className="appearance-none bg-transparent text-sm text-zinc-900 outline-none disabled:text-zinc-400"
       >
         {locations.length === 0 && <option value="">Yerleşke yok</option>}
         {locations.map((location) => (

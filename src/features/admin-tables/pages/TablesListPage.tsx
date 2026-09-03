@@ -37,7 +37,6 @@ function getTablesErrorMessage(error: unknown): string {
 
 export function TablesListPage() {
   const [searchInput, setSearchInput] = useState('')
-  const [locationId, setLocationId] = useState('ALL')
   const [status, setStatus] = useState<TableStatusFilter>('ALL')
   const [pageNumber, setPageNumber] = useState(1)
   const [selectedTableId, setSelectedTableId] = useState<string | null>(null)
@@ -47,17 +46,12 @@ export function TablesListPage() {
   const locationsById = useMemo(() => new Map(locations.map((location) => [location.id, location.name])), [locations])
   const searchTerm = useDebouncedValue(searchInput, TABLES_SEARCH_DEBOUNCE_TIME)
 
-  const { data, isLoading, isFetching, isError, error } = usePagedTablesAdmin(searchTerm, locationId, status, pageNumber)
+  const { data, isLoading, isFetching, isError, error } = usePagedTablesAdmin(searchTerm, 'ALL', status, pageNumber)
   const items = useMemo(() => data?.items ?? [], [data])
   const selectedTable = useMemo(() => items.find((table) => table.id === selectedTableId) ?? null, [items, selectedTableId])
 
   function handleSearchChange(value: string) {
     setSearchInput(value)
-    setPageNumber(1)
-  }
-
-  function handleLocationChange(value: string) {
-    setLocationId(value)
     setPageNumber(1)
   }
 
@@ -75,13 +69,7 @@ export function TablesListPage() {
           title="Masalar"
           actions={
             <div className="flex items-center gap-3">
-              <TablesFiltersBar
-                locationId={locationId}
-                status={status}
-                locations={locations}
-                onLocationChange={handleLocationChange}
-                onStatusChange={handleStatusChange}
-              />
+              <TablesFiltersBar status={status} onStatusChange={handleStatusChange} />
               <ExportButton
                 onExport={async () => {
                   if ((data?.totalCount ?? 0) === 0) {
@@ -90,7 +78,6 @@ export function TablesListPage() {
                   }
                   const blob = await exportTables({
                     searchTerm: searchTerm || undefined,
-                    locationId: locationId === 'ALL' ? undefined : locationId,
                     isActive: toIsActiveParam(status),
                   })
                   downloadBlob(blob, `masalar_${new Date().toISOString().slice(0, 10)}.xlsx`)

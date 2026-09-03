@@ -1,7 +1,6 @@
 import { Plus, UtensilsCrossed } from 'lucide-react'
 import { resolveImageUrl } from '@/shared/lib/resolveImageUrl'
 import { cn } from '@/lib/utils'
-import type { Product } from '../types'
 
 const currencyFormatter = new Intl.NumberFormat('tr-TR', {
   style: 'currency',
@@ -9,13 +8,20 @@ const currencyFormatter = new Intl.NumberFormat('tr-TR', {
   maximumFractionDigits: 2,
 })
 
-interface ProductCardProps {
-  product: Product
-  onAdd: (product: Product) => void
+interface ProductCardData {
+  name: string
+  price: number
+  imageUrl?: string | null
+  isAvailable: boolean
+}
+
+interface ProductCardProps<T extends ProductCardData> {
+  product: T
+  onAdd: (product: T) => void
   size?: 'default' | 'large'
 }
 
-export function ProductCard({ product, onAdd, size = 'default' }: ProductCardProps) {
+export function ProductCard<T extends ProductCardData>({ product, onAdd, size = 'default' }: ProductCardProps<T>) {
   const resolvedImageUrl = resolveImageUrl(product.imageUrl)
   const isLarge = size === 'large'
   const isAvailable = product.isAvailable
@@ -75,7 +81,7 @@ export function ProductCard({ product, onAdd, size = 'default' }: ProductCardPro
             <span
               aria-hidden="true"
               className={cn(
-                'flex shrink-0 items-center justify-center bg-[#133458] text-white',
+                'flex shrink-0 items-center justify-center text-[#133458]',
                 isLarge ? 'size-14' : 'size-6',
               )}
             >

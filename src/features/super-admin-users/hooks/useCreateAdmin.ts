@@ -3,7 +3,7 @@ import axios from 'axios'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import type { UserResponseDto } from '@/shared/types/auth'
-import { assignLocationAccess, createUser, getAdminByLocation } from '@/shared/api/endpoints/users'
+import { createUser, getAdminByLocation, grantRoleAtLocation } from '@/shared/api/endpoints/users'
 import { getApiErrorMessage } from '@/shared/api/apiError'
 
 export interface CreateAdminFormData {
@@ -73,7 +73,7 @@ export function useCreateAdmin() {
       let finalUser = user
       let assigned = true
       try {
-        finalUser = await assignLocationAccess(user.id, data.locationId)
+        finalUser = await grantRoleAtLocation(user.id, 'ADMIN', data.locationId)
       } catch {
         assigned = false
       }
@@ -101,7 +101,7 @@ export function useCreateAdmin() {
     if (!createdUser || !pendingLocationId) return
     setIsRetrying(true)
     try {
-      const updatedUser = await assignLocationAccess(createdUser.id, pendingLocationId)
+      const updatedUser = await grantRoleAtLocation(createdUser.id, 'ADMIN', pendingLocationId)
       setCreatedUser(updatedUser)
       setLocationAssigned(true)
       invalidateUsers()

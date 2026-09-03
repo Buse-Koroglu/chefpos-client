@@ -7,7 +7,7 @@ import { StockManagerSidebar } from '@/shared/components/StockManagerSidebar'
 import { useLocations } from '@/shared/hooks/useLocations'
 import { useLocationStore } from '@/shared/stores/locationStore'
 
-import { DashInfoCard } from '@/features/cashier-dashboard/components/DashInfoCard'
+import { DashInfoCard } from '@/features/inventory-dashboard/components/DashInfoCard'
 import { DashNavigationCard } from '@/features/cashier-dashboard/components/DashNavigationCard'
 
 import { RecordPurchasePopup } from '../components/RecordPurchasePopup'
@@ -40,7 +40,7 @@ export function StockManagerDashboardPage() {
         <main className="flex flex-1 flex-col gap-6 p-6">
           <section>
             <div className="mb-3">
-              <h2 className="text-xs font-semibold tracking-wider text-zinc-500 uppercase">Hızlı İşlemler</h2>
+              <h2 className="text-lg font-semibold tracking-wider text-zinc-700 uppercase">Hızlı İşlemler</h2>
             </div>
 
             <div className="flex flex-col gap-4 sm:flex-row">
@@ -64,12 +64,12 @@ export function StockManagerDashboardPage() {
 
           <section>
             <div className="mb-3">
-              <h2 className="text-xs font-semibold tracking-wider text-zinc-500 uppercase">Stok Talepleri</h2>
+              <h2 className="text-lg font-semibold tracking-wider text-zinc-700 uppercase">Stok Talepleri</h2>
             </div>
 
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-              <DashInfoCard label="Bekleyen Stok Talepleri" value={pendingRequestsValue} icon={Clock3} />
-              <DashInfoCard label="Geçmiş Stok Talepleri" value={pastRequestsValue} icon={Archive} />
+              <DashInfoCard label="Bekleyen Stok Talepleri" value={pendingRequestsValue} icon={Clock3} accent="amber" />
+              <DashInfoCard label="Geçmiş Stok Talepleri" value={pastRequestsValue} icon={Archive} accent="primary" />
             </div>
           </section>
 

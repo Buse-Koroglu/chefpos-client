@@ -39,6 +39,7 @@ export interface ProductAdminResponseDto {
   price: number;
   imageUrl?: string | null;
   isActive: boolean;
+  isAvailable: boolean;
   categoryId: string | null;
   categoryName: string | null;
   locationIds: string[];

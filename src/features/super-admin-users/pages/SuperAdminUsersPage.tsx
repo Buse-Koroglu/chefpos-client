@@ -9,6 +9,7 @@ import { useDebouncedValue } from '@/shared/hooks/useDebouncedValue'
 import { SuperAdminUsersTable } from '@/features/super-admin-users/components/SuperAdminUsersTable'
 import { SuperAdminUsersPagination } from '@/features/super-admin-users/components/SuperAdminUsersPagination'
 import { PromoteToAdminPopup } from '@/features/super-admin-users/components/PromoteToAdminPopup'
+import { DemoteAdminPopup } from '@/features/super-admin-users/components/DemoteAdminPopup'
 import { AddAdminPopup } from '@/features/super-admin-users/components/AddAdminPopup'
 import { UserDetailPopup } from '@/features/super-admin-users/components/UserDetailPopup'
 import { usePagedSuperAdminUsers } from '@/features/super-admin-users/hooks/usePagedSuperAdminUsers'
@@ -30,6 +31,7 @@ export function SuperAdminUsersPage() {
   const [searchInput, setSearchInput] = useState('')
   const [pageNumber, setPageNumber] = useState(1)
   const [promoteUserId, setPromoteUserId] = useState<string | null>(null)
+  const [demoteUserId, setDemoteUserId] = useState<string | null>(null)
   const [isAddAdminOpen, setIsAddAdminOpen] = useState(false)
   const [detailUserId, setDetailUserId] = useState<string | null>(null)
 
@@ -40,10 +42,11 @@ export function SuperAdminUsersPage() {
   const { data, isLoading, isFetching, isError, error } = usePagedSuperAdminUsers(searchTerm, pageNumber)
   const items = useMemo(() => data?.items ?? [], [data])
   const promoteUser = items.find((user) => user.id === promoteUserId) ?? null
+  const demoteUser = items.find((user) => user.id === demoteUserId) ?? null
   const detailUser = items.find((user) => user.id === detailUserId) ?? null
 
   const demoteMutation = useDemoteAdmin()
-  const demotingUserId = demoteMutation.isPending ? (demoteMutation.variables ?? null) : null
+  const demotingUserId = demoteMutation.isPending ? (demoteMutation.variables?.userId ?? null) : null
 
   function handleSearchChange(value: string) {
     setSearchInput(value)
@@ -51,7 +54,7 @@ export function SuperAdminUsersPage() {
   }
 
   function handleDemote(userId: string) {
-    demoteMutation.mutate(userId)
+    setDemoteUserId(userId)
   }
 
   return (
@@ -107,6 +110,13 @@ export function SuperAdminUsersPage() {
         userName={promoteUser ? `${promoteUser.firstName} ${promoteUser.lastName}` : ''}
         locations={locations}
         onClose={() => setPromoteUserId(null)}
+      />
+      <DemoteAdminPopup
+        userId={demoteUserId}
+        userName={demoteUser ? `${demoteUser.firstName} ${demoteUser.lastName}` : ''}
+        locationIds={demoteUser?.locationRoles.filter((lr) => lr.role === 'ADMIN').map((lr) => lr.locationId) ?? []}
+        locationsById={locationsById}
+        onClose={() => setDemoteUserId(null)}
       />
       <AddAdminPopup open={isAddAdminOpen} locations={locations} onClose={() => setIsAddAdminOpen(false)} />
       <UserDetailPopup user={detailUser} locationsById={locationsById} onClose={() => setDetailUserId(null)} />

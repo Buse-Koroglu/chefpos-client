@@ -22,10 +22,12 @@ interface ProductEditFormProps {
   locations: LocationDto[]
   categories: CategoryAdminResponseDto[]
   canEditLocations: boolean
+  canEditDetails: boolean
+  visibleRecipeLocationIds?: string[]
   onClose: () => void
 }
 
-function ProductEditForm({ product, locations, categories, canEditLocations, onClose }: ProductEditFormProps) {
+function ProductEditForm({ product, locations, categories, canEditLocations, canEditDetails, visibleRecipeLocationIds, onClose }: ProductEditFormProps) {
   const updateProductMutation = useUpdateProduct()
 
   const [name, setName] = useState(product.name)
@@ -146,12 +148,16 @@ function ProductEditForm({ product, locations, categories, canEditLocations, onC
 
         <div>
           <label className="mb-1.5 block text-xs font-medium text-zinc-600">Ürün Adı</label>
-          <input
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            disabled={isSubmitting}
-            className={FIELD_CLASSNAME}
-          />
+          {canEditDetails ? (
+            <input
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              disabled={isSubmitting}
+              className={FIELD_CLASSNAME}
+            />
+          ) : (
+            <input value={name} readOnly className={cn(FIELD_CLASSNAME, 'bg-zinc-50 text-zinc-500')} />
+          )}
         </div>
 
         <div className="grid grid-cols-2 gap-3">
@@ -161,26 +167,34 @@ function ProductEditForm({ product, locations, categories, canEditLocations, onC
           </div>
           <div>
             <label className="mb-1.5 block text-xs font-medium text-zinc-600">Satış Fiyatı</label>
-            <input
-              value={price}
-              onChange={(event) => setPrice(event.target.value)}
-              type="number"
-              min="0"
-              step="0.01"
-              disabled={isSubmitting}
-              className={FIELD_CLASSNAME}
-            />
+            {canEditDetails ? (
+              <input
+                value={price}
+                onChange={(event) => setPrice(event.target.value)}
+                type="number"
+                min="0"
+                step="0.01"
+                disabled={isSubmitting}
+                className={FIELD_CLASSNAME}
+              />
+            ) : (
+              <input value={price} readOnly className={cn(FIELD_CLASSNAME, 'bg-zinc-50 text-zinc-500')} />
+            )}
           </div>
         </div>
 
         <div>
           <label className="mb-1.5 block text-xs font-medium text-zinc-600">Açıklama</label>
-          <input
-            value={description}
-            onChange={(event) => setDescription(event.target.value)}
-            disabled={isSubmitting}
-            className={FIELD_CLASSNAME}
-          />
+          {canEditDetails ? (
+            <input
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+              disabled={isSubmitting}
+              className={FIELD_CLASSNAME}
+            />
+          ) : (
+            <input value={description} readOnly className={cn(FIELD_CLASSNAME, 'bg-zinc-50 text-zinc-500')} />
+          )}
         </div>
 
         <div>
@@ -230,10 +244,10 @@ function ProductEditForm({ product, locations, categories, canEditLocations, onC
           <div className="flex border border-zinc-200">
             <button
               type="button"
-              onClick={() => setIsActiveAndResetConfirm(true)}
-              disabled={isSubmitting}
+              onClick={() => canEditDetails && setIsActiveAndResetConfirm(true)}
+              disabled={isSubmitting || !canEditDetails}
               className={cn(
-                'flex-1 border-r border-zinc-200 py-2 text-xs font-medium transition-colors',
+                'flex-1 border-r border-zinc-200 py-2 text-xs font-medium transition-colors disabled:cursor-not-allowed',
                 isActive ? 'bg-[#84994F] text-white hover:bg-[#708243]' : 'bg-white text-zinc-600 hover:bg-zinc-50',
               )}
             >
@@ -241,10 +255,10 @@ function ProductEditForm({ product, locations, categories, canEditLocations, onC
             </button>
             <button
               type="button"
-              onClick={() => setIsActiveAndResetConfirm(false)}
-              disabled={isSubmitting}
+              onClick={() => canEditDetails && setIsActiveAndResetConfirm(false)}
+              disabled={isSubmitting || !canEditDetails}
               className={cn(
-                'flex-1 py-2 text-xs font-medium transition-colors',
+                'flex-1 py-2 text-xs font-medium transition-colors disabled:cursor-not-allowed',
                 !isActive ? 'bg-destructive text-white hover:bg-destructive/90' : 'bg-white text-zinc-600 hover:bg-zinc-50',
               )}
             >
@@ -266,7 +280,9 @@ function ProductEditForm({ product, locations, categories, canEditLocations, onC
         <div>
           <label className="mb-1.5 block text-xs font-medium text-zinc-600">Reçete</label>
           <div className="space-y-2">
-            {product.locations.map((locationRecipe) => (
+            {product.locations
+              .filter((locationRecipe) => !visibleRecipeLocationIds || visibleRecipeLocationIds.includes(locationRecipe.locationId))
+              .map((locationRecipe) => (
               <ProductRecipeSection
                 key={locationRecipe.locationId}
                 productId={product.id}
@@ -325,17 +341,19 @@ interface ProductEditPopupProps {
   locations: LocationDto[]
   categories: CategoryAdminResponseDto[]
   canEditLocations?: boolean
+  canEditDetails?: boolean
+  visibleRecipeLocationIds?: string[]
   onClose: () => void
 }
 
-export function ProductEditPopup({ productId, locations, categories, canEditLocations = false, onClose }: ProductEditPopupProps) {
+export function ProductEditPopup({ productId, locations, categories, canEditLocations = false, canEditDetails = false, visibleRecipeLocationIds, onClose }: ProductEditPopupProps) {
   const { data: product, isLoading, isError } = useProductDetail(productId ?? undefined)
 
   return (
     <Dialog.Root open={Boolean(productId)} onOpenChange={(open) => !open && onClose()}>
       <Dialog.Portal>
-        <Dialog.Backdrop className="fixed inset-0 bg-zinc-900/40 backdrop-blur-sm" />
-        <Dialog.Popup className="fixed top-1/2 left-1/2 w-full max-w-xl -translate-x-1/2 -translate-y-1/2 border border-zinc-200 bg-white">
+        <Dialog.Backdrop className="fixed inset-0 z-50 bg-zinc-900/40 backdrop-blur-sm" />
+        <Dialog.Popup className="fixed top-1/2 left-1/2 z-50 w-full max-w-xl -translate-x-1/2 -translate-y-1/2 border border-zinc-200 bg-white">
           {isError ? (
             <div className="p-5">
               <div className="border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -355,6 +373,8 @@ export function ProductEditPopup({ productId, locations, categories, canEditLoca
               locations={locations}
               categories={categories}
               canEditLocations={canEditLocations}
+              canEditDetails={canEditDetails}
+              visibleRecipeLocationIds={visibleRecipeLocationIds}
               onClose={onClose}
             />
           )}

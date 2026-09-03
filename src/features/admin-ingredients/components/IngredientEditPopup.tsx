@@ -10,10 +10,11 @@ import { FIELD_CLASSNAME } from './MultiSelectDropdown'
 
 interface IngredientEditFormProps {
   ingredient: IngredientWithLocation
+  canEditPrice: boolean
   onClose: () => void
 }
 
-function IngredientEditForm({ ingredient, onClose }: IngredientEditFormProps) {
+function IngredientEditForm({ ingredient, canEditPrice, onClose }: IngredientEditFormProps) {
   const updateIngredientMutation = useUpdateIngredient()
 
   const [name, setName] = useState(ingredient.name)
@@ -25,18 +26,18 @@ function IngredientEditForm({ ingredient, onClose }: IngredientEditFormProps) {
   const [error, setError] = useState<string | null>(null)
   const isSubmitting = updateIngredientMutation.isPending
 
-  const canEditPrice = ingredient.latestUnitPrice !== null
+  const canEditPriceField = canEditPrice && ingredient.latestUnitPrice !== null
 
   const hasChanges =
     name.trim() !== ingredient.name ||
-    (canEditPrice && Number(latestUnitPrice) !== ingredient.latestUnitPrice) ||
+    (canEditPriceField && Number(latestUnitPrice) !== ingredient.latestUnitPrice) ||
     Number(minStockThreshold) !== ingredient.minStockThreshold ||
     isActive !== ingredient.isActive
 
   const isFormValid =
     name.trim() !== '' &&
     Number(minStockThreshold) >= 0 &&
-    (!canEditPrice || (latestUnitPrice.trim() !== '' && Number(latestUnitPrice) >= 0))
+    (!canEditPriceField || (latestUnitPrice.trim() !== '' && Number(latestUnitPrice) >= 0))
 
   function handleSave() {
     if (!isFormValid) {
@@ -50,7 +51,7 @@ function IngredientEditForm({ ingredient, onClose }: IngredientEditFormProps) {
       {
         ingredientId: ingredient.id,
         name: name.trim() !== ingredient.name ? name.trim() : undefined,
-        unitPrice: canEditPrice && Number(latestUnitPrice) !== ingredient.latestUnitPrice ? Number(latestUnitPrice) : undefined,
+        unitPrice: canEditPriceField && Number(latestUnitPrice) !== ingredient.latestUnitPrice ? Number(latestUnitPrice) : undefined,
         minStockThreshold:
           Number(minStockThreshold) !== ingredient.minStockThreshold ? Number(minStockThreshold) : undefined,
         isActive: isActive !== ingredient.isActive ? isActive : undefined,
@@ -108,7 +109,7 @@ function IngredientEditForm({ ingredient, onClose }: IngredientEditFormProps) {
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="mb-1.5 block text-xs font-medium text-zinc-600">Son Alış Fiyatı</label>
-            {canEditPrice ? (
+            {canEditPriceField ? (
               <input
                 value={latestUnitPrice}
                 onChange={(event) => setLatestUnitPrice(event.target.value)}
@@ -119,7 +120,7 @@ function IngredientEditForm({ ingredient, onClose }: IngredientEditFormProps) {
                 className={FIELD_CLASSNAME}
               />
             ) : (
-              <input value="—" readOnly className={cn(FIELD_CLASSNAME, 'bg-zinc-50 text-zinc-500')} />
+              <input value={latestUnitPrice || '—'} readOnly className={cn(FIELD_CLASSNAME, 'bg-zinc-50 text-zinc-500')} />
             )}
           </div>
           <div>
@@ -204,16 +205,19 @@ function IngredientEditForm({ ingredient, onClose }: IngredientEditFormProps) {
 
 interface IngredientEditPopupProps {
   ingredient: IngredientWithLocation | null
+  canEditPrice?: boolean
   onClose: () => void
 }
 
-export function IngredientEditPopup({ ingredient, onClose }: IngredientEditPopupProps) {
+export function IngredientEditPopup({ ingredient, canEditPrice = false, onClose }: IngredientEditPopupProps) {
   return (
     <Dialog.Root open={Boolean(ingredient)} onOpenChange={(open) => !open && onClose()}>
       <Dialog.Portal>
-        <Dialog.Backdrop className="fixed inset-0 bg-zinc-900/40 backdrop-blur-sm" />
-        <Dialog.Popup className="fixed top-1/2 left-1/2 w-full max-w-md -translate-x-1/2 -translate-y-1/2 border border-zinc-200 bg-white">
-          {ingredient && <IngredientEditForm key={ingredient.id} ingredient={ingredient} onClose={onClose} />}
+        <Dialog.Backdrop className="fixed inset-0 z-50 bg-zinc-900/40 backdrop-blur-sm" />
+        <Dialog.Popup className="fixed top-1/2 left-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 border border-zinc-200 bg-white">
+          {ingredient && (
+            <IngredientEditForm key={ingredient.id} ingredient={ingredient} canEditPrice={canEditPrice} onClose={onClose} />
+          )}
         </Dialog.Popup>
       </Dialog.Portal>
     </Dialog.Root>

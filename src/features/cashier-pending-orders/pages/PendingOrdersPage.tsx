@@ -47,7 +47,10 @@ export function PendingOrdersPage() {
   const [paymentOrder, setPaymentOrder] = useState<Order | null>(null)
 
   const { data, isLoading, isFetching, isError, error, refetch } = usePendingOrders(locationId, tab, pageNumber)
-  const { total: tabOrderCount } = usePendingOrdersCount(locationId, tab)
+  const { total: preparingCount } = usePendingOrdersCount(locationId, 'PREPARING')
+  const { total: awaitingPaymentCount } = usePendingOrdersCount(locationId, 'AWAITING_PAYMENT')
+  const tabOrderCount = tab === 'PREPARING' ? preparingCount : awaitingPaymentCount
+  const tabCounts: Record<PendingOrdersTab, number> = { PREPARING: preparingCount, AWAITING_PAYMENT: awaitingPaymentCount }
   const completeOrder = useCompleteOrder()
   const cancelOrder = useCancelOrder()
   const makePaidOrder = useMakePaidOrder()
@@ -56,7 +59,11 @@ export function PendingOrdersPage() {
   const normalizedQuery = query.trim().toLocaleLowerCase('tr-TR')
   const filteredOrders = normalizedQuery
     ? orders.filter(
-        (order) => String(order.orderNumber).includes(normalizedQuery) || order.customerName.toLocaleLowerCase('tr-TR').includes(normalizedQuery)
+        (order) =>
+          String(order.orderNumber).includes(normalizedQuery) ||
+          order.customerName.toLocaleLowerCase('tr-TR').includes(normalizedQuery) ||
+          (order.tableNumber != null &&
+            (String(order.tableNumber).includes(normalizedQuery) || `masa ${order.tableNumber}`.includes(normalizedQuery)))
       )
     : orders
 
@@ -139,11 +146,9 @@ export function PendingOrdersPage() {
                 )}
               >
                 {tabItem.label}
-                {tab === tabItem.value && (
-                  <span className="ml-1.5 inline-flex items-center border border-zinc-300 bg-white px-1.5 py-0.5 text-xs font-semibold text-zinc-700">
-                    {tabOrderCount}
-                  </span>
-                )}
+                <span className="ml-1.5 inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-red-500 px-2 text-base font-bold text-white">
+                  {tabCounts[tabItem.value]}
+                </span>
               </button>
             ))}
           </div>
@@ -154,7 +159,7 @@ export function PendingOrdersPage() {
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Sipariş Numarası veya Müşteri Ara..."
+                placeholder="Sipariş No, Müşteri veya Masa Ara..."
                 className={FORM_INPUT_CLASSNAME}
               />
             </div>
@@ -184,7 +189,7 @@ export function PendingOrdersPage() {
                 {tab === 'PREPARING' ? 'Hazırlanan sipariş yok' : 'Ödeme bekleyen sipariş yok'}
               </div>
             ) : (
-              <div className="grid flex-1 auto-rows-min grid-cols-[repeat(auto-fill,minmax(330px,1fr))] gap-4 overflow-y-auto p-4">
+              <div className="grid flex-1 auto-rows-min grid-cols-[repeat(auto-fill,minmax(400px,1fr))] gap-4 overflow-y-auto p-4">
                 {filteredOrders.map((order) => (
                   <OrderCard
                     key={order.id}

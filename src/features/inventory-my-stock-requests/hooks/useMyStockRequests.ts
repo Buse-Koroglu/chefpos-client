@@ -3,6 +3,7 @@ import { getStockRequestsPaged } from '@/shared/api/endpoints/stockRequests'
 import type { MyStockRequestsTab } from '../types'
 
 const PAGE_SIZE = 10
+const REFETCH_TIME = 30_000
 
 export function useMyStockRequests(
   locationId: string | undefined,
@@ -22,6 +23,7 @@ export function useMyStockRequests(
         pageSize: PAGE_SIZE,
       }),
     enabled: Boolean(locationId),
+    refetchInterval: REFETCH_TIME,
     placeholderData: keepPreviousData,
   })
 }

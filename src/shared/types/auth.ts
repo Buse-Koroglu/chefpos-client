@@ -12,6 +12,11 @@ export const ROLE_LABELS: Record<Role, string> = { // rol etiketleri
   SUPER_ADMIN: 'Süper Yönetici',
 }
 
+export interface LocationRole {
+  role: Role
+  locationId: string
+}
+
 export interface UserResponseDto {
   id: string
   personalId: string
@@ -19,6 +24,7 @@ export interface UserResponseDto {
   lastName: string
   roles: Role[]
   locationIds: string[]
+  locationRoles: LocationRole[]
   isActive: boolean
   isFirstLogin: boolean
 }
@@ -36,8 +42,14 @@ export interface LoginResponse {
 
 export type RefreshResponse = LoginResponse
 
-export interface RawUserResponseDto extends Omit<UserResponseDto, 'roles'> {
+export interface RawLocationRole {
+  role: number
+  locationId: string
+}
+
+export interface RawUserResponseDto extends Omit<UserResponseDto, 'roles' | 'locationRoles'> {
   roles: number[]
+  locationRoles: RawLocationRole[]
 }
 
 export interface RawLoginResponse extends Omit<LoginResponse, 'user'> {
@@ -45,7 +57,11 @@ export interface RawLoginResponse extends Omit<LoginResponse, 'user'> {
 }
 
 export function mapUserResponse(raw: RawUserResponseDto): UserResponseDto {
-  return { ...raw, roles: raw.roles.map((code) => ROLES[code]) }  // rol kodlarını rol isimlerine dönüştürür
+  return {
+    ...raw,
+    roles: raw.roles.map((code) => ROLES[code]), // rol kodlarını rol isimlerine dönüştürür
+    locationRoles: (raw.locationRoles ?? []).map((lr) => ({ role: ROLES[lr.role], locationId: lr.locationId })),
+  }
 }
 
 export interface ChangePasswordRequest {

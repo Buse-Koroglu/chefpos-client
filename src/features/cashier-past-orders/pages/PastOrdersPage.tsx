@@ -9,12 +9,13 @@ import { CashierSidebar } from '@/shared/components/CashierSidebar'
 import { Pagination } from '@/shared/components/Pagination'
 import { PastOrderCard } from '../components/PastOrderCard'
 import { usePastOrders, type OrderHistoryFilter } from '../hooks/usePastOrders'
+import { usePastOrdersCount } from '../hooks/usePastOrdersCount'
 
 const FORM_INPUT_CLASSNAME = 'h-14 w-full rounded-none border border-zinc-200 bg-white pl-11 pr-3 text-lg text-zinc-900 placeholder:text-zinc-400 outline-none transition-colors focus-visible:border-zinc-400'
 
 const STATUS_TABS: Array<{ value: OrderHistoryFilter; label: string }> = [
-  { value: 'PAID', label: 'Ödenen' },
-  { value: 'CANCELLED', label: 'İptal Edilen' },
+  { value: 'PAID', label: 'Ödenen Siparişler' },
+  { value: 'CANCELLED', label: 'İptal Edilen Siparişler' },
 ]
 
 function getErrorMessage(error: unknown): string {
@@ -37,6 +38,9 @@ export function PastOrdersPage() {
   const [query, setQuery] = useState('')
 
   const { data, isLoading, isFetching, isError, error, refetch } = usePastOrders(locationId, filter, pageNumber)
+  const paidCount = usePastOrdersCount(locationId, 'PAID')
+  const cancelledCount = usePastOrdersCount(locationId, 'CANCELLED')
+  const tabCounts: Record<OrderHistoryFilter, number> = { PAID: paidCount, CANCELLED: cancelledCount }
 
   const orders = data?.items ?? []
   const normalizedQuery = query.trim().toLocaleLowerCase('tr-TR')
@@ -44,7 +48,9 @@ export function PastOrdersPage() {
     ? orders.filter(
         (order) =>
           String(order.orderNumber).includes(normalizedQuery) ||
-          order.customerName.toLocaleLowerCase('tr-TR').includes(normalizedQuery),
+          order.customerName.toLocaleLowerCase('tr-TR').includes(normalizedQuery) ||
+          (order.tableNumber != null &&
+            (String(order.tableNumber).includes(normalizedQuery) || `masa ${order.tableNumber}`.includes(normalizedQuery))),
       )
     : orders
 
@@ -79,11 +85,9 @@ export function PastOrdersPage() {
                 )}
               >
                 {tab.label}
-                {filter === tab.value && data && (
-                  <span className="ml-1.5 inline-flex items-center border border-zinc-300 bg-white px-1.5 py-0.5 text-xs font-semibold text-zinc-700">
-                    {data.totalCount}
-                  </span>
-                )}
+                <span className="ml-1.5 inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-[#133458] px-2 text-base leading-none font-bold text-white">
+                  {tabCounts[tab.value]}
+                </span>
               </button>
             ))}
           </div>
@@ -94,7 +98,7 @@ export function PastOrdersPage() {
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Sipariş Numarası veya Müşteri Ara..."
+                placeholder="Sipariş No, Müşteri veya Masa Ara..."
                 className={FORM_INPUT_CLASSNAME}
               />
             </div>
@@ -124,7 +128,7 @@ export function PastOrdersPage() {
                 {filter === 'PAID' ? 'Ödenen sipariş yok' : 'İptal edilen sipariş yok'}
               </div>
             ) : (
-              <div className="grid flex-1 auto-rows-min grid-cols-[repeat(auto-fill,minmax(330px,1fr))] gap-4 overflow-y-auto p-4">
+              <div className="grid flex-1 auto-rows-min grid-cols-[repeat(auto-fill,minmax(400px,1fr))] gap-4 overflow-y-auto p-4">
                 {filteredOrders.map((order) => (
                   <PastOrderCard key={order.id} order={order} />
                 ))}
