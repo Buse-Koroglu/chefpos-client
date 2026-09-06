@@ -1,11 +1,15 @@
 import { useMemo, useState } from 'react'
 import axios from 'axios'
 import { Plus } from 'lucide-react'
+import { toast } from 'sonner'
 import { SuperAdminSidebar } from '@/shared/components/SuperAdminSidebar'
 import { AdminHeader } from '@/shared/components/AdminHeader'
 import { SearchInput } from '@/shared/components/SearchInput'
+import { ExportButton } from '@/shared/components/ExportButton'
 import { useLocations } from '@/shared/hooks/useLocations'
 import { useDebouncedValue } from '@/shared/hooks/useDebouncedValue'
+import { downloadBlob } from '@/shared/lib/downloadBlob'
+import { exportUsers } from '@/shared/api/endpoints/users'
 import { SuperAdminUsersTable } from '@/features/super-admin-users/components/SuperAdminUsersTable'
 import { SuperAdminUsersPagination } from '@/features/super-admin-users/components/SuperAdminUsersPagination'
 import { PromoteToAdminPopup } from '@/features/super-admin-users/components/PromoteToAdminPopup'
@@ -65,14 +69,26 @@ export function SuperAdminUsersPage() {
         <AdminHeader
           title="Personeller"
           actions={
-            <button
-              type="button"
-              onClick={() => setIsAddAdminOpen(true)}
-              className="flex items-center gap-1.5 bg-[#133458] px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-[#0f2843]"
-            >
-              <Plus className="size-4" />
-              Yeni Yönetici Ekle
-            </button>
+            <div className="flex items-center gap-3">
+              <ExportButton
+                onExport={async () => {
+                  if ((data?.totalCount ?? 0) === 0) {
+                    toast.error('Export edilecek kayıt bulunamadı.')
+                    return
+                  }
+                  const blob = await exportUsers({ searchTerm: searchTerm || undefined })
+                  downloadBlob(blob, `personeller_${new Date().toISOString().slice(0, 10)}.xlsx`)
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => setIsAddAdminOpen(true)}
+                className="flex items-center gap-1.5 bg-[#133458] px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-[#0f2843]"
+              >
+                <Plus className="size-4" />
+                Yeni Yönetici Ekle
+              </button>
+            </div>
           }
         />
 

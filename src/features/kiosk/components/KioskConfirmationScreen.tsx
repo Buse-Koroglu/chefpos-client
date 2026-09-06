@@ -7,7 +7,7 @@ interface KioskConfirmationScreenProps {
   onNewOrder: () => void
 }
 
-export function KioskConfirmationScreen({ orderNumber,autoResetSeconds = 10,onNewOrder,}: KioskConfirmationScreenProps) {
+export function KioskConfirmationScreen({ orderNumber,autoResetSeconds = 5,onNewOrder,}: KioskConfirmationScreenProps) {
   const [secondsLeft, setSecondsLeft] = useState(autoResetSeconds)
 
   useEffect(() => {

@@ -13,8 +13,7 @@ import { useIngredientsPaged } from '@/features/inventory-dashboard/hooks/useIng
 import { StockRequestDetailPopup } from '@/features/admin-stock-requests/components/StockRequestDetailPopup'
 import { RecordIngredientPurchasePopup } from '@/features/admin-ingredients/components/RecordIngredientPurchasePopup'
 import type { IngredientAdminResponseDto } from '@/shared/types/ingredient'
-
-import { usePendingRequestsByIngredient } from '../hooks/usePendingRequestsByIngredient'
+import { usePendingRequestsByIngredient } from '@/shared/hooks/usePendingRequestsByIngredient'
 
 export function StockManagerIngredientsPage() {
   const locationId = useLocationStore((state) => state.selectedLocationId) ?? undefined

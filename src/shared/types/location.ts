@@ -22,6 +22,11 @@ export interface GetLocationsQueryRequest {
   includeInactive?: boolean
 }
 
+export interface ExportLocationsQueryRequest {
+  searchTerm?: string
+  isActive?: boolean
+}
+
 export interface CreateLocationRequest {
   name: string
 }
