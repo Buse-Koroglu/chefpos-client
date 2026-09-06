@@ -3,16 +3,7 @@ import { AlertTriangle, Clock3 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { STOCK_UNIT_LABELS } from '@/shared/types/ingredient'
 import type { IngredientResponseDto } from '@/shared/types/ingredient'
-
-type StockHealth = 'CRITICAL' | 'WARNING' | 'NORMAL'
-
-function getStockHealth(ingredient: IngredientResponseDto): StockHealth {
-  if (ingredient.isBelowThreshold) return 'CRITICAL'
-  if (ingredient.minStockThreshold > 0 && ingredient.currentStock < ingredient.minStockThreshold * 1.5) {
-    return 'WARNING'
-  }
-  return 'NORMAL'
-}
+import { getStockHealth, type StockHealth } from '@/shared/lib/ingredientStockHealth'
 
 const HEALTH_CARD_CLASSNAME: Record<StockHealth, string> = {
   CRITICAL: 'border-red-300 bg-red-50 hover:border-red-400',

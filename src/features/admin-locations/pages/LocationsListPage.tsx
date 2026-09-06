@@ -1,9 +1,13 @@
 import { useMemo, useState } from 'react'
 import axios from 'axios'
 import { Plus } from 'lucide-react'
+import { toast } from 'sonner'
 import { useDebouncedValue } from '@/shared/hooks/useDebouncedValue'
 import { SuperAdminSidebar } from '@/shared/components/SuperAdminSidebar'
 import { AdminHeader } from '@/shared/components/AdminHeader'
+import { ExportButton } from '@/shared/components/ExportButton'
+import { downloadBlob } from '@/shared/lib/downloadBlob'
+import { exportLocations } from '@/shared/api/endpoints/locations'
 import { LocationsSearchInput } from '@/features/admin-locations/components/LocationsSearchInput'
 import { LocationsStatusFilter } from '@/features/admin-locations/components/LocationsStatusFilter'
 import { LocationsTable } from '@/features/admin-locations/components/LocationsTable'
@@ -22,6 +26,12 @@ function getLocationsErrorMessage(error: unknown): string {
     }
   }
   return 'Yerleşke listesi yüklenemedi. Lütfen tekrar deneyin.'
+}
+
+function toIsActiveParam(status: LocationStatusFilter): boolean | undefined {
+  if (status === 'ACTIVE') return true
+  if (status === 'INACTIVE') return false
+  return undefined
 }
 
 export function LocationsListPage() {
@@ -60,6 +70,19 @@ export function LocationsListPage() {
           actions={
             <div className="flex items-center gap-3">
               <LocationsStatusFilter value={status} onChange={handleStatusChange} />
+              <ExportButton
+                onExport={async () => {
+                  if ((data?.totalCount ?? 0) === 0) {
+                    toast.error('Export edilecek kayıt bulunamadı.')
+                    return
+                  }
+                  const blob = await exportLocations({
+                    searchTerm: searchTerm || undefined,
+                    isActive: toIsActiveParam(status),
+                  })
+                  downloadBlob(blob, `yerleskeler_${new Date().toISOString().slice(0, 10)}.xlsx`)
+                }}
+              />
               <button
                 type="button"
                 onClick={() => setIsAddModalOpen(true)}

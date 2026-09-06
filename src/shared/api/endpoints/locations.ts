@@ -2,6 +2,7 @@ import { apiClient } from '@/shared/api/client'
 import type { PagedResult } from '@/shared/types/pagination'
 import type {
   CreateLocationRequest,
+  ExportLocationsQueryRequest,
   GetLocationsPagedQueryRequest,
   GetLocationsQueryRequest,
   LocationDto,
@@ -33,6 +34,10 @@ export function createLocation(payload: CreateLocationRequest) {
 
 export function updateLocation(id: string, payload: UpdateLocationRequest) {
   return apiClient.put<LocationResponseDto>(`/api/locations/${id}`, payload).then((res) => res.data)
+}
+
+export function exportLocations(params: ExportLocationsQueryRequest): Promise<Blob> {
+  return apiClient.get<Blob>('/api/locations/export', { params, responseType: 'blob' }).then((res) => res.data)
 }
 
 export function activateLocation(id: string) {

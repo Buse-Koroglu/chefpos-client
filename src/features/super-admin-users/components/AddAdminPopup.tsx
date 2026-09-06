@@ -87,7 +87,7 @@ function AdminFormStep({ locations, isSubmitting, submitError, onCancel, onSubmi
 
   return (
     <>
-      <PopupHeader title="Yeni Admin Ekle" />
+      <PopupHeader title="Yeni Yönetici Ekle" />
 
       <div className="space-y-4 px-5 py-4">
         {submitError && <InlineAlert variant="error">{submitError}</InlineAlert>}
@@ -151,7 +151,7 @@ function AdminFormStep({ locations, isSubmitting, submitError, onCancel, onSubmi
           onClick={handleSubmit}
           disabled={isSubmitting}
         >
-          {isSubmitting ? 'Kaydediliyor...' : 'Admini Kaydet'}
+          {isSubmitting ? 'Kaydediliyor...' : 'Yöneticiyi Kaydet'}
         </Button>
       </div>
     </>

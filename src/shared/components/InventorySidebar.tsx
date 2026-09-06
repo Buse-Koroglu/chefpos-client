@@ -4,6 +4,8 @@ import { NavLink } from 'react-router-dom'
 
 import { cn } from '@/lib/utils'
 import { useSidebarStore } from '@/shared/stores/sidebarStore'
+import { useLocationStore } from '@/shared/stores/locationStore'
+import { useIngredientStockHealthCounts } from '@/shared/hooks/useIngredientStockHealthCounts'
 import { SidebarUserCard } from '@/shared/components/SidebarUserCard'
 
 interface SidebarItem {
@@ -22,9 +24,16 @@ const SIDEBAR_ITEMS: SidebarItem[] = [
   { label: 'Ham Maddeler', icon: Wheat, to: '/app/inventory/ingredients' },
 ]
 
+const INGREDIENTS_PATH = '/app/inventory/ingredients'
+
 export function InventorySidebar() {
   const isCollapsed = useSidebarStore((state) => state.isCollapsed)
   const toggleSidebar = useSidebarStore((state) => state.toggleSidebar)
+
+  const locationId = useLocationStore((state) => state.selectedLocationId) ?? undefined
+  const { data: stockHealthCounts } = useIngredientStockHealthCounts(locationId)
+  const warningCount = stockHealthCounts?.warningCount ?? 0
+  const criticalCount = stockHealthCounts?.criticalCount ?? 0
 
   return (
     <aside
@@ -63,7 +72,25 @@ export function InventorySidebar() {
             }
           >
             <Icon className="size-5 shrink-0" />
-            {!isCollapsed && label}
+            {!isCollapsed && (
+              <span className="flex flex-1 items-center justify-between gap-2">
+                <span>{label}</span>
+                {to === INGREDIENTS_PATH && (warningCount > 0 || criticalCount > 0) && (
+                  <span className="flex items-center gap-1">
+                    {warningCount > 0 && (
+                      <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-amber-400 text-[11px] font-bold text-white">
+                        {warningCount}
+                      </span>
+                    )}
+                    {criticalCount > 0 && (
+                      <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-red-500 text-[11px] font-bold text-white">
+                        {criticalCount}
+                      </span>
+                    )}
+                  </span>
+                )}
+              </span>
+            )}
           </NavLink>
         ))}
       </nav>

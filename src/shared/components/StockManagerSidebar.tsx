@@ -4,6 +4,8 @@ import { NavLink } from 'react-router-dom'
 
 import { cn } from '@/lib/utils'
 import { useSidebarStore } from '@/shared/stores/sidebarStore'
+import { useLocationStore } from '@/shared/stores/locationStore'
+import { usePendingRequestsByIngredient } from '@/shared/hooks/usePendingRequestsByIngredient'
 import { SidebarUserCard } from '@/shared/components/SidebarUserCard'
 
 interface SidebarItem {
@@ -22,9 +24,15 @@ const SIDEBAR_ITEMS: SidebarItem[] = [
   { label: 'Ham Maddeler', icon: Wheat, to: '/app/stock-manager/ingredients' },
 ]
 
+const INGREDIENTS_PATH = '/app/stock-manager/ingredients'
+
 export function StockManagerSidebar() {
   const isCollapsed = useSidebarStore((state) => state.isCollapsed)
   const toggleSidebar = useSidebarStore((state) => state.toggleSidebar)
+
+  const locationId = useLocationStore((state) => state.selectedLocationId) ?? undefined
+  const { byIngredientId } = usePendingRequestsByIngredient(locationId)
+  const pendingIngredientsCount = byIngredientId.size
 
   return (
     <aside
@@ -61,7 +69,16 @@ export function StockManagerSidebar() {
             }
           >
             <Icon className="size-5 shrink-0" />
-            {!isCollapsed && label}
+            {!isCollapsed && (
+              <span className="flex flex-1 items-center justify-between gap-2">
+                <span>{label}</span>
+                {to === INGREDIENTS_PATH && pendingIngredientsCount > 0 && (
+                  <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-red-500 text-[11px] font-bold text-white">
+                    {pendingIngredientsCount}
+                  </span>
+                )}
+              </span>
+            )}
           </NavLink>
         ))}
       </nav>

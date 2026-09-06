@@ -21,9 +21,9 @@ const currencyFormatter =
   })
 
 const URGENCY_ROW_CLASSNAME = {
-  normal: 'hover:bg-zinc-100',
-  warning: 'bg-amber-50 hover:bg-amber-100',
-  critical: 'bg-red-50 hover:bg-red-100',
+  normal: 'border-zinc-200 hover:bg-zinc-100',
+  warning: 'border-amber-400 bg-amber-200 hover:bg-amber-300',
+  critical: 'border-red-400 bg-red-200 hover:bg-red-300',
 }
 
 export function PreparingOrderRow({order,onClick,now,showUrgency}: PreparingOrderRowProps) {
@@ -33,7 +33,7 @@ export function PreparingOrderRow({order,onClick,now,showUrgency}: PreparingOrde
     <tr
       onClick={onClick}
       className={cn(
-        'cursor-pointer border-b border-zinc-200 transition-colors duration-300',
+        'cursor-pointer border-b-2 transition-colors duration-300',
         URGENCY_ROW_CLASSNAME[urgency],
       )}
     >

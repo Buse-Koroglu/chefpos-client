@@ -81,10 +81,16 @@ export function PreparingOrdersPage() {
   const tabOrderCount =
     tab === 'WAITER' ? waiterCount : cashierCount
 
-  const orders = (data?.items ?? []).filter(
-    (order) =>
-      tab === 'CASHIER' || order.type !== 'CASHIER',
-  )
+  const orders = (data?.items ?? [])
+    .filter(
+      (order) =>
+        tab === 'CASHIER' || order.type !== 'CASHIER',
+    )
+    .sort(
+      (a, b) =>
+        new Date(a.createdAt).getTime() -
+        new Date(b.createdAt).getTime(),
+    )
 
   function handleTabChange(nextTab: KitchenOrdersTab) {
     setTab(nextTab)
