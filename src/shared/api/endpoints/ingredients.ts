@@ -1,7 +1,7 @@
 import { apiClient } from '@/shared/api/client'
 import { STOCK_UNITS } from '@/shared/types/ingredient'
 import type { PagedResult } from '@/shared/types/pagination'
-import type { CreateIngredientRequest, GetIngredientsPagedQueryRequest,GetIngredientsQueryRequest, IngredientAdminResponseDto, IngredientResponseDto, IngredientPurchaseRequest, ManualDeductionRequest, ProductProductionRequest, UpdateIngredientPriceRequest, UpdateIngredientRequest, ExportIngredientsQueryRequest} from '@/shared/types/ingredient'
+import type { CreateIngredientRequest, GetIngredientsPagedQueryRequest,GetIngredientsQueryRequest, IngredientAdminResponseDto, IngredientResponseDto, IngredientPurchaseRequest, ManualDeductionRequest, ProductProductionRequest, UpdateIngredientRequest, ExportIngredientsQueryRequest, UpdateLatestLotPriceRequest} from '@/shared/types/ingredient'
 
 interface RawIngredientPayload {
   id: string
@@ -50,8 +50,9 @@ export function updateIngredient(id: string, payload: UpdateIngredientRequest) {
   return apiClient.patch<RawIngredientPayload>(`/api/ingredients/${id}`, payload).then((res) => normalizeIngredient(res.data))
 }
 
-export function updateIngredientPrice(id: string, payload: UpdateIngredientPriceRequest) {
-  return apiClient.patch<RawIngredientPayload>(`/api/ingredients/${id}/price`, payload).then((res) => normalizeIngredient(res.data))
+export function updateLatestLotPrice(id: string, payload: UpdateLatestLotPriceRequest) {
+  return apiClient.patch<RawIngredientPayload>(`/api/ingredients/${id}/latest-lot-price`, payload)
+    .then((res) => normalizeIngredient(res.data))
 }
 
 export function updateIngredientMinStockThreshold(id: string, minStockThreshold: number) {

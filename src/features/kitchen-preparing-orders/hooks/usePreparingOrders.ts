@@ -3,12 +3,18 @@ import {
   useQuery,
 } from '@tanstack/react-query'
 
-import { getOrders } from '@/shared/api/endpoints/orders'
+import { getKitchenOrders } from '@/shared/api/endpoints/orders'
+import type { OrderType } from '@/shared/types/order'
 
 const PAGE_SIZE = 20
 const REFETCH_TIME = 20_000
 
 export type KitchenOrdersTab = 'WAITER' | 'CASHIER'
+
+const TAB_TYPES: Record<KitchenOrdersTab, OrderType[]> = {
+  WAITER: ['WAITER', 'SELF_SERVICE'],
+  CASHIER: ['CASHIER'],
+}
 
 interface UsePreparingOrdersParams {
   locationId: string | undefined
@@ -26,7 +32,7 @@ export function usePreparingOrders({
   return useQuery({
     queryKey: [
       'orders',
-      'preparing',
+      'kitchen',
       tab,
       locationId,
       searchTerm,
@@ -34,10 +40,10 @@ export function usePreparingOrders({
     ],
 
     queryFn: () =>
-      getOrders({
+      getKitchenOrders({
         locationId: locationId!,
         status: 'PENDING',
-        ...(tab === 'CASHIER' ? { type: 'CASHIER' as const } : {}),
+        types: TAB_TYPES[tab],
         searchTerm,
         pageNumber,
         pageSize: PAGE_SIZE,

@@ -2,7 +2,25 @@ import { apiClient } from '@/shared/api/client'
 import { kioskClient } from '@/shared/api/kioskClient'
 import { ROLES } from '@/shared/types/auth'
 import type { PagedResult } from '@/shared/types/pagination'
-import type { AddOrderItemRequest, CreateKioskOrderRequest, CreateOrderRequest, DecreaseOrderItemRequest, GetOrdersQueryRequest, OrderResponse, } from '@/shared/types/order'
+import type { AddOrderItemRequest, CreateKioskOrderRequest, CreateOrderRequest, DecreaseOrderItemRequest, GetOrdersQueryRequest, OrderResponse, OrderStatus, OrderType, } from '@/shared/types/order'
+
+export interface GetKitchenOrdersRequest {
+  locationId: string
+  status?: OrderStatus
+  types?: OrderType[]
+  searchTerm?: string
+  pageNumber?: number
+  pageSize?: number
+}
+
+export function getKitchenOrders(params: GetKitchenOrdersRequest) {
+  return apiClient
+    .get<PagedResult<OrderResponse>>('/api/orders/kitchen', {
+      params,
+      paramsSerializer: { indexes: null },
+    })
+    .then((res) => res.data)
+}
 
 export function createOrder(payload: CreateOrderRequest) {
   return apiClient.post<OrderResponse>('/api/orders', { ...payload, requestedAs: ROLES.indexOf(payload.requestedAs) })

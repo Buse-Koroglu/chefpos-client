@@ -43,6 +43,7 @@ export interface OrderResponse {
   items: OrderItemResponse[];
   createdAt: string;
   completedAt: string | null;
+  paidAt: string | null;
   createdByUserId: string | null;
   tableId: string | null;
   tableNumber: number | null;

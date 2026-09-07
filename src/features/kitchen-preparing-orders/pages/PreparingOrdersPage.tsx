@@ -15,7 +15,6 @@ import { KITCHEN_URGENCY_FETCH_TIME} from '../constants'
 import { KitchenSidebar } from '../components/KitchenSidebar'
 import { OrderDetailModal } from '../components/OrderDetailModal'
 import { PreparingOrdersTable } from '../components/PreparingOrdersTable'
-import { useKitchenOrdersCount } from '../hooks/useKitchenOrdersCount'
 import { usePreparingOrders, type KitchenOrdersTab } from '../hooks/usePreparingOrders'
 import { useTickingNow } from '../hooks/useTickingNow'
 
@@ -73,24 +72,11 @@ export function PreparingOrdersPage() {
     searchTerm: debouncedSearchTerm.trim(),
   })
 
-  const { waiterCount, cashierCount } =
-    useKitchenOrdersCount(locationId)
-
   const now = useTickingNow(KITCHEN_URGENCY_FETCH_TIME)
 
-  const tabOrderCount =
-    tab === 'WAITER' ? waiterCount : cashierCount
+  const tabOrderCount = data?.totalCount ?? 0
 
-  const orders = (data?.items ?? [])
-    .filter(
-      (order) =>
-        tab === 'CASHIER' || order.type !== 'CASHIER',
-    )
-    .sort(
-      (a, b) =>
-        new Date(a.createdAt).getTime() -
-        new Date(b.createdAt).getTime(),
-    )
+  const orders = data?.items ?? []
 
   function handleTabChange(nextTab: KitchenOrdersTab) {
     setTab(nextTab)
