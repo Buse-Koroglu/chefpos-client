@@ -8,6 +8,9 @@ export function useCreateOrder() {
     mutationFn: createOrder,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+      queryClient.invalidateQueries({ queryKey: ['orders', 'kitchen'] })
+      queryClient.invalidateQueries({ queryKey: ['orders', 'pending-count'] })
+      queryClient.invalidateQueries({ queryKey: ['orders', 'pending'] })
     },
   })
 }
