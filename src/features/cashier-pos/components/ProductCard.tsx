@@ -33,8 +33,10 @@ export function ProductCard<T extends ProductCardData>({ product, onAdd, size = 
       disabled={!isAvailable}
       aria-label={`${product.name} ürününü ekle`}
       className={cn(
-        'flex flex-col overflow-hidden border border-zinc-200 bg-white text-left transition-colors',
-        isAvailable ? 'cursor-pointer hover:border-[#133458]/50' : 'cursor-not-allowed grayscale opacity-60',
+        'flex flex-col overflow-hidden border border-zinc-200 bg-white text-left transition-all duration-100',
+        isAvailable
+          ? 'cursor-pointer hover:border-[#133458]/50 active:scale-[0.97]'
+          : 'cursor-not-allowed grayscale opacity-60',
       )}
     >
       <div

@@ -36,8 +36,10 @@ export function PastOrderCard({ order }: PastOrderCardProps) {
           {order.type === 'WAITER' && order.customerName && (
             <p className="truncate text-xl font-bold text-zinc-600 uppercase">{order.customerName}</p>
           )}
-          {order.completedAt && (
-            <p className="mt-0.5 text-sm text-zinc-500">{completedAtFormatter.format(new Date(order.completedAt))}</p>
+          {order.paidAt && (
+            <p className="mt-0.5 text-sm text-zinc-500">
+              Ödeme: {completedAtFormatter.format(new Date(order.paidAt))}
+            </p>
           )}
         </div>
         <div className="flex shrink-0 flex-col items-end gap-1">

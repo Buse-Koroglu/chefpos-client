@@ -5,7 +5,7 @@ import {
   deactivateIngredient,
   updateIngredient,
   updateIngredientMinStockThreshold,
-  updateIngredientPrice,
+  updateLatestLotPrice,
 } from '@/shared/api/endpoints/ingredients'
 
 export interface UpdateIngredientVariables {
@@ -23,7 +23,7 @@ async function updateIngredientDetails(variables: UpdateIngredientVariables) {
     await updateIngredient(ingredientId, { name })
   }
   if (unitPrice !== undefined) {
-    await updateIngredientPrice(ingredientId, { unitPrice })
+    await updateLatestLotPrice(ingredientId, { unitPrice })
   }
   if (minStockThreshold !== undefined) {
     await updateIngredientMinStockThreshold(ingredientId, minStockThreshold)

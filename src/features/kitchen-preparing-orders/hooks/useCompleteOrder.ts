@@ -15,7 +15,7 @@ export function useCompleteOrder() {
 
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['orders', 'preparing'],
+        queryKey: ['orders', 'kitchen'],
       })
     },
   })

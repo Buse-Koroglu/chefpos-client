@@ -27,8 +27,10 @@ export function ProductCard({ product, onAdd }: ProductCardProps) {
       disabled={!isAvailable}
       aria-label={`${product.name} ürününü ekle`}
       className={cn(
-        'flex flex-col overflow-hidden border border-zinc-200 bg-white text-left transition-colors',
-        isAvailable ? 'cursor-pointer hover:border-[#133458]/50' : 'cursor-not-allowed grayscale opacity-60',
+        'flex flex-col overflow-hidden border border-zinc-200 bg-white text-left transition-all duration-100',
+        isAvailable
+          ? 'cursor-pointer hover:border-[#133458]/50 active:scale-[0.97]'
+          : 'cursor-not-allowed grayscale opacity-60',
       )}
     >
       <div className="flex h-32 items-center justify-center overflow-hidden bg-zinc-100 text-zinc-300">

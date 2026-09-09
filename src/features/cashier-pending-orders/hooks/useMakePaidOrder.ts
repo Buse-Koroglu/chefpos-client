@@ -10,6 +10,7 @@ export function useMakePaidOrder() {
       queryClient.invalidateQueries({ queryKey: ['orders', 'pending'] })
       queryClient.invalidateQueries({ queryKey: ['orders', 'pending-count'] })
       queryClient.invalidateQueries({ queryKey: ['orders', 'history'] })
+      queryClient.invalidateQueries({ queryKey: ['orders', 'history-count'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
     },
   })

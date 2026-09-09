@@ -47,7 +47,7 @@ export interface UpdateIngredientRequest {
   name: string
 }
 
-export interface UpdateIngredientPriceRequest {
+export interface UpdateLatestLotPriceRequest {
   unitPrice: number
 }
  

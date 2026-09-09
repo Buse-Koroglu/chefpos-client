@@ -67,15 +67,17 @@ export function OrderCard({order,isReadyForPayment,onComplete,onCancel,onOpenPay
           {currencyFormatter.format(order.totalPrice)}
         </span>
         <div className="flex gap-2">
-          <Button
-            type="button"
-            variant="destructive"
-            onClick={() => onCancel(order.id)}
-            disabled={isBusy}
-            className="h-11 flex-1 rounded-none text-base"
-          >
-            {isCancelling ? 'İptal ediliyor...' : 'İptal Et'}
-          </Button>
+          {!isReadyForPayment && (
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={() => onCancel(order.id)}
+              disabled={isBusy}
+              className="h-11 flex-1 rounded-none text-base"
+            >
+              {isCancelling ? 'İptal ediliyor...' : 'İptal Et'}
+            </Button>
+          )}
           {isReadyForPayment ? (
             <Button
               type="button"
