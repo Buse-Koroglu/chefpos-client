@@ -27,12 +27,12 @@ function niceMax(value: number) {
   return Math.max(1000, Math.ceil(value / 1000) * 1000)
 }
 
-function isSameUtcDate(isoDate: string, reference: Date) {
+function isSameLocalDate(isoDate: string, reference: Date) {
   const date = new Date(isoDate)
   return (
-    date.getUTCFullYear() === reference.getUTCFullYear() &&
-    date.getUTCMonth() === reference.getUTCMonth() &&
-    date.getUTCDate() === reference.getUTCDate()
+    date.getFullYear() === reference.getFullYear() &&
+    date.getMonth() === reference.getMonth() &&
+    date.getDate() === reference.getDate()
   )
 }
 
@@ -43,7 +43,7 @@ export function WeeklyRevenueChart({ days, isLoading, isError }: WeeklyRevenueCh
   const entries = days.map((entry) => ({
     ...entry,
     abbreviation: DAY_ABBREVIATIONS[entry.dayName] ?? entry.dayName.slice(0, 3),
-    isToday: isSameUtcDate(entry.date, today),
+    isToday: isSameLocalDate(entry.date, today),
   }))
 
   const maxRevenue = niceMax(Math.max(0, ...entries.map((entry) => entry.profit)))
